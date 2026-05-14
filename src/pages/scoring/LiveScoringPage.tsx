@@ -1,80 +1,186 @@
-import { useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  Undo2, RotateCcw, AlertTriangle, Lock,
-  Plus, Minus, ChevronUp, ChevronDown, X
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ScoreBoard } from '@/components/shared/ScoreBoard'
-import { useMatch, useScoreBall, useUndoBall, useEndInnings } from '@/hooks'
-import { useMatchStore } from '@/store'
-import { cn, formatOvers } from '@/lib/utils'
-import type { Ball } from '@/types'
+  Undo2,
+  RotateCcw,
+  AlertTriangle,
+  Lock,
+  Plus,
+  Minus,
+  ChevronUp,
+  ChevronDown,
+  X,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScoreBoard } from "@/components/shared/ScoreBoard";
+import {
+  useMatch,
+  useScoreBall,
+  useUndoBall,
+  useEndInnings,
+  useEndMatch,
+} from "@/hooks";
+import { useMatchStore } from "@/store";
+import { cn, formatOvers } from "@/lib/utils";
+import type { Ball } from "@/types";
 
-const runsButtons = [0, 1, 2, 3, 4, 6]
-const wicketTypes = ['Bowled', 'Caught', 'Run Out', 'LBW', 'Stumped', 'Hit Wicket']
+const runsButtons = [0, 1, 2, 3, 4, 6];
+const wicketTypes = [
+  "Bowled",
+  "Caught",
+  "Run Out",
+  "LBW",
+  "Stumped",
+  "Hit Wicket",
+];
 const extraTypes = [
-  { label: 'Wide', value: 'wide', runs: 1 },
-  { label: 'No Ball', value: 'noBall', runs: 1 },
-  { label: 'Bye', value: 'bye', runs: 0 },
-  { label: 'Leg Bye', value: 'legBye', runs: 0 },
-]
+  { label: "Wide", value: "wide", runs: 1 },
+  { label: "No Ball", value: "noBall", runs: 1 },
+  { label: "Bye", value: "bye", runs: 0 },
+  { label: "Leg Bye", value: "legBye", runs: 0 },
+];
 
 export default function LiveScoringPage() {
-  const { matchId } = useParams<{ matchId: string }>()
-  const { data: match } = useMatch(matchId || '')
-  const scoreBall = useScoreBall()
-  const undoBall = useUndoBall()
-  const endInnings = useEndInnings()
-  const { liveState } = useMatchStore()
+  const { matchId } = useParams<{ matchId: string }>();
+  const navigate = useNavigate();
+  const { data: match } = useMatch(matchId || "");
+  const scoreBall = useScoreBall();
+  const undoBall = useUndoBall();
+  const endInnings = useEndInnings();
+  const endMatch = useEndMatch();
+  const { liveState } = useMatchStore();
 
-  const [showWicketDialog, setShowWicketDialog] = useState(false)
-  const [showExtraDialog, setShowExtraDialog] = useState(false)
-  const [selectedExtra, setSelectedExtra] = useState('')
-  const [activeTab, setActiveTab] = useState('score')
+  const [showWicketDialog, setShowWicketDialog] = useState(false);
+  const [showExtraDialog, setShowExtraDialog] = useState(false);
+  const [selectedExtra, setSelectedExtra] = useState("");
+  const [activeTab, setActiveTab] = useState("score");
 
-  const currentInnings = match?.innings[match.currentInnings - 1]
+  // Optimistic UI States to update scoreboard instantly on button press
+  const [optimisticRuns, setOptimisticRuns] = useState(0);
+  const [optimisticBalls, setOptimisticBalls] = useState(0);
+  const [optimisticWickets, setOptimisticWickets] = useState(0);
+
+  const currentInnings = match?.innings[match.currentInnings - 1];
+
+  // Reset optimistic UI states whenever real backend data arrives
+  useEffect(() => {
+    setOptimisticRuns(0);
+    setOptimisticBalls(0);
+    setOptimisticWickets(0);
+  }, [currentInnings?.runs, currentInnings?.balls, currentInnings?.wickets]);
 
   const handleScore = (runs: number) => {
-    if (!matchId) return
-    scoreBall.mutate({
-      matchId,
-      runs,
-      isWide: selectedExtra === 'wide',
-      isNoBall: selectedExtra === 'noBall',
-      isBye: selectedExtra === 'bye',
-      isLegBye: selectedExtra === 'legBye',
-    })
-    setSelectedExtra('')
-  }
+    if (!matchId || !match || !currentInnings) return;
+
+    const isWide = selectedExtra === "wide";
+    const isNoBall = selectedExtra === "noBall";
+    const isLegal = !isWide && !isNoBall;
+
+    const extraRuns = isWide || isNoBall ? 1 : 0;
+    const totalRunsThisBall = runs + extraRuns;
+
+    // 1. Instantly update UI optimistically
+    setOptimisticRuns((prev) => prev + totalRunsThisBall);
+    if (isLegal) {
+      setOptimisticBalls((prev) => prev + 1);
+    }
+
+    // 2. Fire mutation to backend
+    scoreBall.mutate(
+      {
+        matchId,
+        runs,
+        isWide,
+        isNoBall,
+        isBye: selectedExtra === "bye",
+        isLegBye: selectedExtra === "legBye",
+      },
+      {
+        onSuccess: () => {
+          // 3. Route to Highlights page if overs are complete
+          if (isLegal) {
+            const updatedBalls = currentInnings.balls + 1;
+            const maxBalls = match.totalOvers * 6;
+
+            if (updatedBalls >= maxBalls) {
+              if (match.currentInnings >= 2) {
+                endMatch.mutate(matchId);
+              } else {
+                endInnings.mutate(matchId);
+              }
+              navigate(`/match-summary/${matchId}`);
+            }
+          }
+        },
+      },
+    );
+    setSelectedExtra("");
+  };
 
   const handleWicket = (type: string) => {
-    if (!matchId) return
-    scoreBall.mutate({
-      matchId,
-      runs: 0,
-      isWicket: true,
-      dismissalType: type.toLowerCase().replace(' ', '-'),
-    })
-    setShowWicketDialog(false)
-  }
+    if (!matchId || !match || !currentInnings) return;
+
+    // Instantly update UI optimistically
+    setOptimisticBalls((prev) => prev + 1);
+    setOptimisticWickets((prev) => prev + 1);
+
+    scoreBall.mutate(
+      {
+        matchId,
+        runs: 0,
+        isWicket: true,
+        dismissalType: type.toLowerCase().replace(" ", "-"),
+      },
+      {
+        onSuccess: () => {
+          // Route to Highlights page if overs are complete OR team is all out (10 wickets)
+          const updatedBalls = currentInnings.balls + 1;
+          const updatedWickets = currentInnings.wickets + 1;
+          const maxBalls = match.totalOvers * 6;
+
+          if (updatedBalls >= maxBalls || updatedWickets >= 10) {
+            if (match.currentInnings >= 2) {
+              endMatch.mutate(matchId);
+            } else {
+              endInnings.mutate(matchId);
+            }
+            navigate(`/match-summary/${matchId}`);
+          }
+        },
+      },
+    );
+    setShowWicketDialog(false);
+  };
 
   if (!match || !currentInnings) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="animate-spin h-8 w-8 border-2 border-blue-500 border-t-transparent rounded-full" />
       </div>
-    )
+    );
   }
+
+  // Combine real data with optimistic changes for instant UI render
+  const displayInnings = {
+    ...currentInnings,
+    runs: currentInnings.runs + optimisticRuns,
+    balls: currentInnings.balls + optimisticBalls,
+    wickets: currentInnings.wickets + optimisticWickets,
+  };
 
   return (
     <div className="space-y-4 pb-24 md:pb-0">
-      {/* Score Board */}
-      <ScoreBoard match={match} currentInnings={currentInnings} />
+      {/* Score Board with Instant Optimistic Updates */}
+      <ScoreBoard match={match} currentInnings={displayInnings} />
 
       {/* Current Players */}
       <div className="grid grid-cols-2 gap-3">
@@ -102,7 +208,7 @@ export default function LiveScoringPage() {
         {liveState.isFreeHit && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
+            animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 flex items-center gap-2"
           >
@@ -122,18 +228,27 @@ export default function LiveScoringPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               className={cn(
-                'w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold',
-                ball.isWicket ? 'bg-red-500/20 text-red-400' :
-                ball.isSix ? 'bg-purple-500/20 text-purple-400' :
-                ball.isFour ? 'bg-blue-500/20 text-blue-400' :
-                ball.isWide || ball.isNoBall ? 'bg-amber-500/20 text-amber-400' :
-                'bg-white/5 text-white'
+                "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold",
+                ball.isWicket
+                  ? "bg-red-500/20 text-red-400"
+                  : ball.isSix
+                    ? "bg-purple-500/20 text-purple-400"
+                    : ball.isFour
+                      ? "bg-blue-500/20 text-blue-400"
+                      : ball.isWide || ball.isNoBall
+                        ? "bg-amber-500/20 text-amber-400"
+                        : "bg-white/5 text-white",
               )}
             >
-              {ball.isWicket ? 'W' :
-               ball.isWide ? 'Wd' :
-               ball.isNoBall ? 'NB' :
-               ball.runs === 0 ? '•' : ball.runs}
+              {ball.isWicket
+                ? "W"
+                : ball.isWide
+                  ? "Wd"
+                  : ball.isNoBall
+                    ? "NB"
+                    : ball.runs === 0
+                      ? "•"
+                      : ball.runs}
             </motion.div>
           ))}
           {liveState.lastBalls.length === 0 && (
@@ -158,13 +273,15 @@ export default function LiveScoringPage() {
                 whileTap={{ scale: 0.9 }}
                 onClick={() => handleScore(runs)}
                 className={cn(
-                  'h-20 rounded-2xl font-bold text-2xl transition-all duration-200',
-                  runs === 4 ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30' :
-                  runs === 6 ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30 hover:bg-purple-500/30' :
-                  'bg-white/5 text-white border border-white/10 hover:bg-white/10'
+                  "h-20 rounded-2xl font-bold text-2xl transition-all duration-200",
+                  runs === 4
+                    ? "bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30"
+                    : runs === 6
+                      ? "bg-purple-500/20 text-purple-400 border border-purple-500/30 hover:bg-purple-500/30"
+                      : "bg-white/5 text-white border border-white/10 hover:bg-white/10",
                 )}
               >
-                {runs === 0 ? '•' : runs}
+                {runs === 0 ? "•" : runs}
               </motion.button>
             ))}
           </div>
@@ -194,18 +311,20 @@ export default function LiveScoringPage() {
                 key={extra.value}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => {
-                  setSelectedExtra(extra.value)
-                  setActiveTab('score')
+                  setSelectedExtra(extra.value);
+                  setActiveTab("score");
                 }}
                 className={cn(
-                  'h-16 rounded-xl font-semibold transition-all',
+                  "h-16 rounded-xl font-semibold transition-all",
                   selectedExtra === extra.value
-                    ? 'bg-amber-500/30 text-amber-400 border-2 border-amber-500'
-                    : 'bg-white/5 text-white border border-white/10 hover:bg-white/10'
+                    ? "bg-amber-500/30 text-amber-400 border-2 border-amber-500"
+                    : "bg-white/5 text-white border border-white/10 hover:bg-white/10",
                 )}
               >
                 {extra.label}
-                <span className="block text-xs text-white/50">+{extra.runs} run{extra.runs !== 1 ? 's' : ''}</span>
+                <span className="block text-xs text-white/50">
+                  +{extra.runs} run{extra.runs !== 1 ? "s" : ""}
+                </span>
               </motion.button>
             ))}
           </div>
@@ -233,7 +352,7 @@ export default function LiveScoringPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => undoBall.mutate(matchId || '')}
+            onClick={() => undoBall.mutate(matchId || "")}
             disabled={!liveState.canUndo}
             className="gap-1 text-white/60"
           >
@@ -244,18 +363,14 @@ export default function LiveScoringPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => endInnings.mutate(matchId || '')}
+            onClick={() => endInnings.mutate(matchId || "")}
             className="gap-1 text-amber-400"
           >
             <Lock className="h-4 w-4" />
             End Innings
           </Button>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-1 text-red-400"
-          >
+          <Button variant="ghost" size="sm" className="gap-1 text-red-400">
             <RotateCcw className="h-4 w-4" />
             Retire
           </Button>
@@ -283,5 +398,5 @@ export default function LiveScoringPage() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

@@ -1,18 +1,24 @@
-import { Link, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { Menu, Bell, Search, Zap } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { useAuthStore, useUIStore } from '@/store'
-import { useIsMobile } from '@/hooks'
-import { cn } from '@/lib/utils'
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Menu, Bell, Search, Zap } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { useAuthStore, useUIStore } from "@/store";
+import { useIsMobile } from "@/hooks";
+import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 
 export function Navbar() {
-  const navigate = useNavigate()
-  const isMobile = useIsMobile()
-  const { user } = useAuthStore()
-  const { sidebarOpen, setSidebarOpen } = useUIStore()
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const { user } = useAuthStore();
+  const { sidebarOpen, setSidebarOpen } = useUIStore();
 
   return (
     <motion.header
@@ -51,26 +57,43 @@ export function Navbar() {
             variant="ghost"
             size="icon"
             className="text-white/70 hover:text-white hover:bg-white/10 relative"
-            onClick={() => navigate('/history')}
+            onClick={() => navigate("/history")}
           >
             <Search className="h-5 w-5" />
           </Button>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-white/70 hover:text-white hover:bg-white/10 relative"
-          >
-            <Bell className="h-5 w-5" />
-            <Badge variant="live" className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[10px]">
-              3
-            </Badge>
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-white/70 hover:text-white hover:bg-white/10 relative"
+              >
+                <Bell className="h-5 w-5" />
+                <Badge
+                  variant="live"
+                  className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[10px]"
+                >
+                  3
+                </Badge>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64">
+              <div className="p-3 pb-2 border-b border-white/10">
+                <h4 className="font-semibold text-white">Notifications</h4>
+              </div>
+              <DropdownMenuItem>Match started: MI vs CSK</DropdownMenuItem>
+              <DropdownMenuItem>Rohit Sharma scored a fifty!</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <div className="flex items-center gap-2">
-            <Avatar className="h-8 w-8 cursor-pointer" onClick={() => navigate('/settings')}>
+            <Avatar
+              className="h-8 w-8 cursor-pointer"
+              onClick={() => navigate("/settings")}
+            >
               <AvatarImage src={user?.avatar} />
-              <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
+              <AvatarFallback>{user?.name?.charAt(0) || "U"}</AvatarFallback>
             </Avatar>
             {!isMobile && (
               <div className="hidden lg:block">
@@ -82,5 +105,5 @@ export function Navbar() {
         </div>
       </div>
     </motion.header>
-  )
+  );
 }
