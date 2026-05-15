@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useAuthStore, useUIStore } from "@/store";
 import { useIsMobile } from "@/hooks";
-import { cn } from "@/lib/utils";
+// import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuTrigger,

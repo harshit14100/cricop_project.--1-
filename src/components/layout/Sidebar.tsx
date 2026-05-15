@@ -1,5 +1,5 @@
-import { Link, useLocation } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { Link, useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
   Play,
@@ -11,71 +11,87 @@ import {
   Trophy,
   ChevronLeft,
   ChevronRight,
-} from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { useAuthStore, useUIStore } from '@/store'
-import { useIsMobile } from '@/hooks'
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useAuthStore, useUIStore } from "@/store";
+import { useIsMobile } from "@/hooks";
 
 const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
-  { icon: Play, label: 'Start Match', path: '/start-match' },
-  { icon: History, label: 'History', path: '/history' },
-  { icon: BarChart3, label: 'Statistics', path: '/statistics' },
-  { icon: Users, label: 'Players', path: '/players' },
-  { icon: Trophy, label: 'Series', path: '/history' },
-]
+  { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
+  { icon: Play, label: "Start Match", path: "/start-match" },
+  { icon: History, label: "History", path: "/history" },
+  { icon: BarChart3, label: "Statistics", path: "/statistics" },
+  { icon: Users, label: "Players", path: "/players" },
+  { icon: Trophy, label: "Series", path: "/history" },
+];
 
-const adminItems = [
-  { icon: Shield, label: 'Admin', path: '/admin' },
-]
+const adminItems = [{ icon: Shield, label: "Admin", path: "/admin" }];
 
 export function Sidebar() {
-  const location = useLocation()
-  const { sidebarOpen, setSidebarOpen } = useUIStore()
-  const { user } = useAuthStore()
-  const isMobile = useIsMobile()
+  const location = useLocation();
+  const { sidebarOpen, setSidebarOpen } = useUIStore();
+  const { user } = useAuthStore();
+  const isMobile = useIsMobile();
 
-  if (isMobile) return null
+  if (isMobile) return null;
 
-  const items = user?.role === 'admin' ? [...navItems, ...adminItems] : navItems
+  const items =
+    user?.role === "admin" ? [...navItems, ...adminItems] : navItems;
 
   return (
     <motion.aside
       initial={false}
       animate={{ width: sidebarOpen ? 256 : 80 }}
-      transition={{ duration: 0.3, ease: 'easeInOut' }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
       className="fixed left-0 top-16 bottom-0 z-40 bg-[#0d1e36]/95 backdrop-blur-xl border-r border-white/5"
     >
       <div className="flex flex-col h-full py-4">
-        <div className="flex items-center justify-end px-4 mb-4">
+        <div
+          className={cn(
+            "flex items-center mb-4",
+            sidebarOpen ? "justify-end px-4" : "justify-center",
+          )}
+        >
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="p-1.5 rounded-lg bg-white/5 text-white/50 hover:text-white hover:bg-white/10 transition-colors"
           >
-            {sidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            {sidebarOpen ? (
+              <ChevronLeft className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
           </button>
         </div>
 
         <nav className="flex-1 px-3 space-y-1">
           {items.map((item) => {
-            const isActive = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)
+            const isActive =
+              location.pathname === item.path ||
+              location.pathname.startsWith(`${item.path}/`);
             return (
               <Link
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  'flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative',
+                  "flex items-center rounded-xl transition-all duration-200 group relative",
+                  sidebarOpen ? "gap-3 px-3 py-3" : "justify-center p-3",
                   isActive
-                    ? 'bg-gradient-to-r from-blue-600/20 to-blue-500/10 text-blue-400 border border-blue-500/20'
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                    ? "bg-gradient-to-r from-blue-600/20 to-blue-500/10 text-blue-400 border border-blue-500/20"
+                    : "text-white/60 hover:text-white hover:bg-white/5",
                 )}
               >
-                <item.icon className={cn('h-5 w-5 flex-shrink-0', isActive && 'text-electric')} />
+                <item.icon
+                  className={cn(
+                    "h-5 w-5 flex-shrink-0",
+                    isActive && "text-electric",
+                  )}
+                />
                 <AnimatePresence>
                   {sidebarOpen && (
                     <motion.span
                       initial={{ opacity: 0, width: 0 }}
-                      animate={{ opacity: 1, width: 'auto' }}
+                      animate={{ opacity: 1, width: "auto" }}
                       exit={{ opacity: 0, width: 0 }}
                       transition={{ duration: 0.2 }}
                       className="text-sm font-medium whitespace-nowrap overflow-hidden"
@@ -91,7 +107,7 @@ export function Sidebar() {
                   />
                 )}
               </Link>
-            )
+            );
           })}
         </nav>
 
@@ -99,10 +115,11 @@ export function Sidebar() {
           <Link
             to="/settings"
             className={cn(
-              'flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200',
-              location.pathname === '/settings'
-                ? 'bg-white/10 text-white'
-                : 'text-white/60 hover:text-white hover:bg-white/5'
+              "flex items-center rounded-xl transition-all duration-200",
+              sidebarOpen ? "gap-3 px-3 py-3" : "justify-center p-3",
+              location.pathname === "/settings"
+                ? "bg-white/10 text-white"
+                : "text-white/60 hover:text-white hover:bg-white/5",
             )}
           >
             <Settings className="h-5 w-5 flex-shrink-0" />
@@ -110,7 +127,7 @@ export function Sidebar() {
               {sidebarOpen && (
                 <motion.span
                   initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: 'auto' }}
+                  animate={{ opacity: 1, width: "auto" }}
                   exit={{ opacity: 0, width: 0 }}
                   transition={{ duration: 0.2 }}
                   className="text-sm font-medium whitespace-nowrap overflow-hidden"
@@ -123,5 +140,5 @@ export function Sidebar() {
         </div>
       </div>
     </motion.aside>
-  )
+  );
 }
