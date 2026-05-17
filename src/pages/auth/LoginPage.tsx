@@ -1,23 +1,23 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { Eye, EyeOff, Zap, Lock, Phone, ArrowRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import { useLogin } from '@/hooks'
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Eye, EyeOff, Zap, Lock, Phone, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { useLogin } from "@/hooks";
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [rememberMe, setRememberMe] = useState(false)
-  const [formData, setFormData] = useState({ phone: '', password: '' })
-  const login = useLogin()
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [formData, setFormData] = useState({ phone: "", password: "" });
+  const login = useLogin();
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    login.mutate({ ...formData, rememberMe })
-  }
+    e.preventDefault();
+    login.mutate({ ...formData, rememberMe });
+  };
 
   return (
     <div className="w-full">
@@ -37,7 +37,9 @@ export default function LoginPage() {
         <h1 className="text-2xl font-bold text-white">
           Cric<span className="text-electric">OP</span>
         </h1>
-        <p className="text-sm text-white/50 mt-1">Score Every Ball Like a Pro</p>
+        <p className="text-sm text-white/50 mt-1">
+          Score Every Ball Like a Pro
+        </p>
       </motion.div>
 
       {/* Form Card */}
@@ -63,7 +65,9 @@ export default function LoginPage() {
                 placeholder="+91 98765 43210"
                 className="pl-10"
                 value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, phone: e.target.value })
+                }
                 required
               />
             </div>
@@ -75,11 +79,13 @@ export default function LoginPage() {
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
               <Input
                 id="password"
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
                 className="pl-10 pr-10"
                 value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
                 required
               />
               <button
@@ -87,7 +93,11 @@ export default function LoginPage() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/60"
               >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
               </button>
             </div>
           </div>
@@ -99,11 +109,17 @@ export default function LoginPage() {
                 checked={rememberMe}
                 onCheckedChange={setRememberMe}
               />
-              <Label htmlFor="remember" className="text-sm text-white/60 cursor-pointer">
+              <Label
+                htmlFor="remember"
+                className="text-sm text-white/60 cursor-pointer"
+              >
                 Remember me
               </Label>
             </div>
-            <Link to="/forgot-password" className="text-sm text-electric hover:text-electric/80 transition-colors">
+            <Link
+              to="/forgot-password"
+              className="text-sm text-electric hover:text-electric/80 transition-colors"
+            >
               Forgot password?
             </Link>
           </div>
@@ -120,8 +136,11 @@ export default function LoginPage() {
 
         <div className="mt-6 text-center">
           <p className="text-sm text-white/50">
-            Don't have an account?{' '}
-            <Link to="/signup" className="text-electric hover:text-electric/80 font-medium transition-colors">
+            Don't have an account?{" "}
+            <Link
+              to="/signup"
+              className="text-electric hover:text-electric/80 font-medium transition-colors"
+            >
               Sign up
             </Link>
           </p>
@@ -132,5 +151,5 @@ export default function LoginPage() {
       <div className="absolute top-20 left-10 w-20 h-20 bg-blue-500/10 rounded-full blur-2xl animate-pulse" />
       <div className="absolute bottom-20 right-10 w-32 h-32 bg-electric/10 rounded-full blur-3xl animate-pulse" />
     </div>
-  )
+  );
 }

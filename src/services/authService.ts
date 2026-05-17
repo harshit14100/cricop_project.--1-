@@ -1,64 +1,66 @@
-import api from './api'
-import type { User, ApiResponse } from '@/types'
+import axios from "axios";
 
-interface LoginCredentials {
-  phone: string
-  password: string
-  rememberMe?: boolean
-}
+const API = axios.create({
+  baseURL: "http://localhost:8080",
+});
 
-interface SignupData {
-  name: string
-  phone: string
-  email: string
-  password: string
-}
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
 
-interface AuthResponse {
-  user: User
-  token: string
-  refreshToken: string
-}
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+});
 
 export const authService = {
-  login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-    const { data } = await api.post<ApiResponse<AuthResponse>>('/auth/login', credentials)
-    return data.data
+  async login(data: { phone: string; password: string }) {
+    const response = await API.post("/auth/login", {
+      phone_no: data.phone,
+      password: data.password,
+    });
+
+    const responseData = response.data;
+
+    if (responseData.token) {
+      localStorage.setItem("token", responseData.token);
+    }
+
+    return responseData;
   },
 
-  signup: async (data: SignupData): Promise<AuthResponse> => {
-    const response = await api.post<ApiResponse<AuthResponse>>('/auth/register', data)
-    return response.data.data
+  async signup(data: { name: string; phone: string; password: string }) {
+    const response = await API.post("/auth/signup", {
+      name: data.name,
+      phone_no: data.phone,
+      password: data.password,
+    });
+
+    const responseData = response.data;
+
+    if (responseData.token) {
+      localStorage.setItem("token", responseData.token);
+    }
+
+    return responseData;
   },
 
-  logout: async (): Promise<void> => {
-    await api.post('/auth/logout')
+  async logout() {
+    localStorage.removeItem("token");
+
+    return true;
   },
 
-  refreshToken: async (refreshToken: string): Promise<{ token: string }> => {
-    const { data } = await api.post<ApiResponse<{ token: string }>>('/auth/refresh', { refreshToken })
-    return data.data
+  async getProfile() {
+    const response = await API.get("/users/me");
+
+    return response.data;
   },
 
-  forgotPassword: async (phone: string): Promise<void> => {
-    await api.post('/auth/forgot-password', { phone })
-  },
+  async updateProfile(data: any) {
+    const response = await API.put("/users/me", data);
 
-  verifyOTP: async (phone: string, otp: string): Promise<void> => {
-    await api.post('/auth/verify-otp', { phone, otp })
+    return response.data;
   },
-
-  resetPassword: async (phone: string, otp: string, newPassword: string): Promise<void> => {
-    await api.post('/auth/reset-password', { phone, otp, newPassword })
-  },
-
-  getProfile: async (): Promise<User> => {
-    const { data } = await api.get<ApiResponse<User>>('/auth/profile')
-    return data.data
-  },
-
-  updateProfile: async (profileData: Partial<User>): Promise<User> => {
-    const { data } = await api.put<ApiResponse<User>>('/auth/profile', profileData)
-    return data.data
-  },
-}
+};
