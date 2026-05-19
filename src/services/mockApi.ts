@@ -525,6 +525,9 @@ const mockDashboardStats: DashboardStats = {
   totalTeams: 12,
 };
 
+// Store ball history for each match to support Undo
+const mockBallHistory: Record<string, Ball[]> = {};
+
 // Simulate network delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -634,26 +637,34 @@ export function setupMockAPI() {
         }
       }
 
-      if (url.includes("/matches") && method === "post") {
+      if (url.endsWith("/matches") && method === "post") {
+        const payload =
+          typeof config.data === "string"
+            ? JSON.parse(config.data)
+            : config.data;
         const newMatch: Match = {
           id: "m" + Date.now(),
-          ...config.data,
+          ...payload,
           status: "upcoming",
           currentInnings: 1,
           innings: [],
           teamA: {
-            id: config.data.teamAId,
-            name: "Team A",
+            id: payload.teamAId,
+            name: payload.newTeamAName || "Team A",
             shortName: "TA",
             color: "#3b5bdb",
-            players: [],
+            players: mockPlayers.filter((p) =>
+              payload.teamAPlayerIds?.includes(p.id),
+            ),
           },
           teamB: {
-            id: config.data.teamBId,
-            name: "Team B",
+            id: payload.teamBId,
+            name: payload.newTeamBName || "Team B",
             shortName: "TB",
             color: "#f85c00",
-            players: [],
+            players: mockPlayers.filter((p) =>
+              payload.teamBPlayerIds?.includes(p.id),
+            ),
           },
         };
         mockMatches.push(newMatch);
@@ -666,42 +677,112 @@ export function setupMockAPI() {
         });
       }
 
-      if (url.match(/\/matches\/[^/]+\/start/) && method === "post") {
+      if (url.includes("/start") && url.includes("/matches") && method === "post") {
+        const parts = url.split("/");
+        const startIdx = parts.indexOf("matches");
+        const matchId = parts[startIdx + 1];
+        const match = mockMatches.find((m) => m.id === matchId);
+        
+        if (match && match.innings.length === 0) {
+          match.status = "live";
+          match.innings.push({
+            battingTeam:
+              match.tossChoice === "bat"
+                ? match.tossWinner === "teamA"
+                  ? match.teamA.id
+                  : match.teamB.id
+                : match.tossWinner === "teamA"
+                  ? match.teamB.id
+                  : match.teamA.id,
+            bowlingTeam:
+              match.tossChoice === "bowl"
+                ? match.tossWinner === "teamA"
+                  ? match.teamA.id
+                  : match.teamB.id
+                : match.tossWinner === "teamA"
+                  ? match.teamB.id
+                  : match.teamA.id,
+            runs: 0,
+            wickets: 0,
+            balls: 0,
+            extras: { wides: 0, noBalls: 0, byes: 0, legByes: 0, penalty: 0 },
+            batsmen: [],
+            bowlers: [],
+            partnerships: [],
+            fallOfWickets: [],
+            isCompleted: false,
+          });
+        }
         return Promise.resolve({
-          data: { success: true, data: mockMatches[0] },
+          data: { success: true, data: match || mockMatches[0] },
         });
       }
 
       if (url.match(/\/matches\/[^/]+\/live/) && method === "get") {
+        const matchId = url.split("/")[2];
+        const match = mockMatches.find((m) => m.id === matchId);
         return Promise.resolve({
-          data: { success: true, data: mockMatches[0] },
+          data: { success: true, data: match || mockMatches[0] },
         });
+      }
+
+      if (url.match(/\/matches\/[^/]+$/) && method === "get") {
+        const matchId = url.split("/").pop();
+        const match = mockMatches.find((m) => m.id === matchId);
+        if (match) {
+          return Promise.resolve({ data: { success: true, data: match } });
+        }
       }
 
       // SCORING ENDPOINTS
       if (url.includes("/scoring/ball") && method === "post") {
+        const payload =
+          typeof config.data === "string"
+            ? JSON.parse(config.data)
+            : config.data;
+        const match = mockMatches.find((m) => m.id === payload.matchId);
+        
+        if (!match) {
+          return Promise.reject({ response: { data: { message: "Match not found" } } });
+        }
+
+        const currentInnings = match.innings[match.currentInnings - 1];
+        if (!currentInnings) {
+          return Promise.reject({ response: { data: { message: "Innings not started" } } });
+        }
+
         const ball: Ball = {
           id: "b" + Date.now(),
-          inningsId: "i1",
-          overNumber: Math.floor((mockMatches[0].innings[0]?.balls || 0) / 6),
-          ballNumber: ((mockMatches[0].innings[0]?.balls || 0) % 6) + 1,
-          batsmanId: "p1",
-          bowlerId: "p3",
-          runs: config.data.runs || 0,
-          isWicket: config.data.isWicket || false,
-          isWide: config.data.isWide || false,
-          isNoBall: config.data.isNoBall || false,
-          isBye: config.data.isBye || false,
-          isLegBye: config.data.isLegBye || false,
-          isFour: config.data.runs === 4,
-          isSix: config.data.runs === 6,
-          commentary: `${config.data.runs || 0} runs`,
+          inningsId: `i${match.currentInnings}`,
+          overNumber: Math.floor((currentInnings.balls || 0) / 6),
+          ballNumber: ((currentInnings.balls || 0) % 6) + 1,
+          batsmanId: payload.batsmanId || "p1",
+          bowlerId: payload.bowlerId || "p3",
+          runs: payload.runs || 0,
+          isWicket: payload.isWicket || false,
+          isWide: payload.isWide || false,
+          isNoBall: payload.isNoBall || false,
+          isBye: payload.isBye || false,
+          isLegBye: payload.isLegBye || false,
+          isFour: payload.runs === 4,
+          isSix: payload.runs === 6,
+          commentary: `${payload.runs || 0} runs`,
           timestamp: new Date().toISOString(),
         };
-        if (mockMatches[0].innings[0]) {
-          mockMatches[0].innings[0].balls += 1;
-          mockMatches[0].innings[0].runs += config.data.runs || 0;
+
+        currentInnings.balls += (payload.isWide || payload.isNoBall) ? 0 : 1;
+        currentInnings.runs += (payload.runs || 0) + ((payload.isWide || payload.isNoBall) ? 1 : 0);
+        
+        if (payload.isWicket) {
+          currentInnings.wickets += 1;
         }
+
+        // Save ball to history
+        if (!mockBallHistory[payload.matchId]) {
+          mockBallHistory[payload.matchId] = [];
+        }
+        mockBallHistory[payload.matchId].push(ball);
+
         return Promise.resolve({ data: { success: true, data: ball } });
       }
 
@@ -710,6 +791,32 @@ export function setupMockAPI() {
         url.includes("/undo") &&
         method === "post"
       ) {
+        const matchId = url.split("/")[2];
+        const match = mockMatches.find((m) => m.id === matchId);
+        if (!match) {
+          return Promise.reject({ response: { data: { message: "Match not found" } } });
+        }
+
+        const currentInnings = match.innings[match.currentInnings - 1];
+        if (!currentInnings) {
+          return Promise.reject({ response: { data: { message: "Innings not started" } } });
+        }
+
+        const history = mockBallHistory[matchId];
+        if (!history || history.length === 0) {
+          return Promise.reject({ response: { data: { message: "No balls to undo" } } });
+        }
+
+        const lastBall = history.pop();
+        if (lastBall) {
+          const isWideOrNB = lastBall.isWide || lastBall.isNoBall;
+          currentInnings.balls -= isWideOrNB ? 0 : 1;
+          currentInnings.runs -= (lastBall.runs || 0) + (isWideOrNB ? 1 : 0);
+          if (lastBall.isWicket) {
+            currentInnings.wickets -= 1;
+          }
+        }
+
         return Promise.resolve({ data: { success: true } });
       }
 

@@ -27,6 +27,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { useCreateMatch, useTeams, usePlayers } from "@/hooks";
 import { cn } from "@/lib/utils";
+import { useUIStore } from "@/store";
 
 const steps = [
   { id: 1, title: "Match Setup", icon: Trophy },
@@ -72,6 +73,7 @@ export default function StartMatchPage() {
   const createMatch = useCreateMatch();
   const { data: teamsData } = useTeams();
   const { data: playersData } = usePlayers();
+  const { addToast } = useUIStore();
 
   // Pre-fill players when team is selected
   useEffect(() => {
@@ -93,6 +95,16 @@ export default function StartMatchPage() {
   }, [matchData.teamBId, teamsData, playersPerTeam]);
 
   const handleNext = () => {
+    if (currentStep === 3) {
+      if (teamAPlayerIds.length === 0 || teamBPlayerIds.length === 0) {
+        addToast({
+          title: "Selection Required",
+          description: "Please select at least one player for each team.",
+          variant: "warning",
+        });
+        return;
+      }
+    }
     if (currentStep < 6) setCurrentStep(currentStep + 1);
   };
 
@@ -101,6 +113,15 @@ export default function StartMatchPage() {
   };
 
   const handleCreateMatch = async () => {
+    if (teamAPlayerIds.length === 0 || teamBPlayerIds.length === 0) {
+      addToast({
+        title: "Incomplete Squads",
+        description: "Each team must have at least one player to start.",
+        variant: "error",
+      });
+      return;
+    }
+
     // Pass custom data into mutation payload.
     // Note: ensure your backend/API function also expects these new properties.
     const match = await createMatch.mutateAsync({
@@ -358,7 +379,7 @@ export default function StartMatchPage() {
                         <SelectValue placeholder="Select team" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="new">+ Create New Team</SelectItem>
+                        <SelectItem value="new">Custom Team Name</SelectItem>
                         {teamsData?.teams.map((t) => (
                           <SelectItem key={t.id} value={t.id}>
                             {t.name}
@@ -369,7 +390,7 @@ export default function StartMatchPage() {
                     {/* Fixed: Show Input when creating new Team A */}
                     {matchData.teamAId === "new" && (
                       <Input
-                        placeholder="Enter Team A Name"
+                        placeholder="Enter Custom Team A Name"
                         value={newTeamA}
                         onChange={(e) => setNewTeamA(e.target.value)}
                         className="mt-2"
@@ -389,7 +410,7 @@ export default function StartMatchPage() {
                         <SelectValue placeholder="Select team" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="new">+ Create New Team</SelectItem>
+                        <SelectItem value="new">Custom Team Name</SelectItem>
                         {teamsData?.teams.map((t) => (
                           <SelectItem key={t.id} value={t.id}>
                             {t.name}
@@ -410,7 +431,7 @@ export default function StartMatchPage() {
                     {/* Fixed: Show Input when creating new Team B */}
                     {matchData.teamBId === "new" && (
                       <Input
-                        placeholder="Enter Team B Name"
+                        placeholder="Enter Custom Team B Name"
                         value={newTeamB}
                         onChange={(e) => setNewTeamB(e.target.value)}
                         className="mt-2"
@@ -611,7 +632,7 @@ export default function StartMatchPage() {
                               scale: [1, 1.2, 1],
                             }
                           : {
-                              rotateY: coinResult === "tails" ? 180 : 0,
+                              rotateY: coinResult === "tails" ? 1980 : 1800,
                             }
                       }
                       transition={
@@ -619,17 +640,27 @@ export default function StartMatchPage() {
                           ? { duration: 2, ease: "easeInOut" }
                           : { duration: 0.5 }
                       }
-                      className="w-full h-full relative preserve-3d"
+                      style={{ transformStyle: "preserve-3d" }}
+                      className="w-full h-full relative"
                     >
                       {/* Heads Side */}
-                      <div className="absolute inset-0 w-full h-full rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 flex items-center justify-center border-4 border-amber-200/50 shadow-2xl backface-hidden">
+                      <div 
+                        className="absolute inset-0 w-full h-full rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 flex items-center justify-center border-4 border-amber-200/50 shadow-2xl"
+                        style={{ backfaceVisibility: "hidden" }}
+                      >
                         <span className="text-3xl font-black text-amber-900">
                           H
                         </span>
                         <div className="absolute inset-2 border-2 border-amber-200/20 rounded-full" />
                       </div>
                       {/* Tails Side */}
-                      <div className="absolute inset-0 w-full h-full rounded-full bg-gradient-to-br from-amber-400 via-amber-600 to-amber-800 flex items-center justify-center border-4 border-amber-200/50 shadow-2xl backface-hidden rotate-y-180">
+                      <div 
+                        className="absolute inset-0 w-full h-full rounded-full bg-gradient-to-br from-amber-400 via-amber-600 to-amber-800 flex items-center justify-center border-4 border-amber-200/50 shadow-2xl"
+                        style={{ 
+                          backfaceVisibility: "hidden",
+                          transform: "rotateY(180deg)"
+                        }}
+                      >
                         <span className="text-3xl font-black text-amber-950">
                           T
                         </span>

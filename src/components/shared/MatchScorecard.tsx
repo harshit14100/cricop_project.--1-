@@ -1,0 +1,177 @@
+import { motion } from 'framer-motion'
+import { ChevronDown, ChevronUp } from 'lucide-react'
+import { useState } from 'react'
+import { formatOvers } from '@/lib/utils'
+import type { Match, Innings } from '@/types'
+
+interface MatchScorecardProps {
+  match: Match
+}
+
+export function MatchScorecard({ match }: MatchScorecardProps) {
+  const [expandedInnings, setExpandedInnings] = useState<number>(match.currentInnings)
+
+  return (
+    <div className="space-y-4">
+      {match.innings.map((innings, idx) => (
+        <InningsCard 
+          key={idx}
+          innings={innings}
+          inningsNumber={idx + 1}
+          isExpanded={expandedInnings === idx + 1}
+          onToggle={() => setExpandedInnings(expandedInnings === idx + 1 ? 0 : idx + 1)}
+          teamA={match.teamA}
+          teamB={match.teamB}
+        />
+      ))}
+      
+      {match.innings.length === 0 && (
+        <div className="glass-card p-8 text-center">
+          <p className="text-white/40">No innings data available yet.</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+interface InningsCardProps {
+  innings: Innings
+  inningsNumber: number
+  isExpanded: boolean
+  onToggle: () => void
+  teamA: any
+  teamB: any
+}
+
+function InningsCard({ innings, inningsNumber, isExpanded, onToggle, teamA, teamB }: InningsCardProps) {
+  const battingTeam = teamA.id === innings.battingTeam ? teamA : teamB
+  
+  return (
+    <div className="glass-card overflow-hidden">
+      <button 
+        onClick={onToggle}
+        className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <div 
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white"
+            style={{ backgroundColor: battingTeam.color || '#3b5bdb' }}
+          >
+            {battingTeam.shortName?.charAt(0)}
+          </div>
+          <div className="text-left">
+            <h3 className="text-sm font-bold text-white">
+              {battingTeam.name} <span className="text-white/40 font-normal">Innings {inningsNumber}</span>
+            </h3>
+            <p className="text-xs text-white/60">
+              {innings.runs}/{innings.wickets} ({formatOvers(innings.balls)} ov)
+            </p>
+          </div>
+        </div>
+        {isExpanded ? <ChevronUp className="h-5 w-5 text-white/40" /> : <ChevronDown className="h-5 w-5 text-white/40" />}
+      </button>
+
+      {isExpanded && (
+        <motion.div 
+          initial={{ height: 0 }}
+          animate={{ height: 'auto' }}
+          className="border-t border-white/10"
+        >
+          {/* Batting Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="bg-white/5 text-white/40 border-b border-white/5">
+                  <th className="p-3 font-medium">Batter</th>
+                  <th className="p-3 font-medium text-right">R</th>
+                  <th className="p-3 font-medium text-right">B</th>
+                  <th className="p-3 font-medium text-right">4s</th>
+                  <th className="p-3 font-medium text-right">6s</th>
+                  <th className="p-3 font-medium text-right">SR</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {innings.batsmen.map((batsman) => (
+                  <tr key={batsman.playerId} className="text-white/80">
+                    <td className="p-3">
+                      <p className="font-semibold text-white">{batsman.playerName}</p>
+                      <p className="text-[10px] text-white/40 mt-0.5">
+                        {batsman.isOut ? batsman.dismissal?.type : 'not out'}
+                      </p>
+                    </td>
+                    <td className="p-3 text-right font-bold text-white">{batsman.runs}</td>
+                    <td className="p-3 text-right text-white/60">{batsman.balls}</td>
+                    <td className="p-3 text-right text-white/60">{batsman.fours}</td>
+                    <td className="p-3 text-right text-white/60">{batsman.sixes}</td>
+                    <td className="p-3 text-right text-white/60">{(batsman.strikeRate || 0).toFixed(1)}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="bg-white/5">
+                  <td className="p-3 font-bold text-white">Extras</td>
+                  <td colSpan={5} className="p-3 text-right text-white/60">
+                    {innings.extras.wides + innings.extras.noBalls + innings.extras.byes + innings.extras.legByes} 
+                    <span className="ml-2 text-[10px]">
+                      (w {innings.extras.wides}, nb {innings.extras.noBalls}, b {innings.extras.byes}, lb {innings.extras.legByes})
+                    </span>
+                  </td>
+                </tr>
+                <tr className="border-t border-white/10">
+                  <td className="p-3 font-bold text-white">Total</td>
+                  <td colSpan={5} className="p-3 text-right">
+                    <span className="text-lg font-bold text-white">{innings.runs}/{innings.wickets}</span>
+                    <span className="ml-2 text-xs text-white/40">({formatOvers(innings.balls)} overs)</span>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          {/* Bowling Table */}
+          <div className="mt-4 border-t border-white/10 overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="bg-white/5 text-white/40 border-b border-white/5">
+                  <th className="p-3 font-medium">Bowler</th>
+                  <th className="p-3 font-medium text-right">O</th>
+                  <th className="p-3 font-medium text-right">M</th>
+                  <th className="p-3 font-medium text-right">R</th>
+                  <th className="p-3 font-medium text-right">W</th>
+                  <th className="p-3 font-medium text-right">Econ</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {innings.bowlers.map((bowler) => (
+                  <tr key={bowler.playerId} className="text-white/80">
+                    <td className="p-3 font-semibold text-white">{bowler.playerName}</td>
+                    <td className="p-3 text-right text-white/60">{formatOvers(bowler.balls)}</td>
+                    <td className="p-3 text-right text-white/60">{bowler.maidens}</td>
+                    <td className="p-3 text-right text-white/60">{bowler.runs}</td>
+                    <td className="p-3 text-right font-bold text-white">{bowler.wickets}</td>
+                    <td className="p-3 text-right text-white/60">{(bowler.economy || 0).toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Fall of Wickets */}
+          {innings.fallOfWickets.length > 0 && (
+            <div className="p-3 border-t border-white/10">
+              <h4 className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-2">Fall of Wickets</h4>
+              <p className="text-[11px] text-white/60 leading-relaxed">
+                {innings.fallOfWickets.map((fow, i) => (
+                  <span key={i}>
+                    {fow.runs}-{fow.wicketNumber} ({fow.batsmanName}, {fow.overs} ov)
+                    {i < innings.fallOfWickets.length - 1 ? ', ' : ''}
+                  </span>
+                ))}
+              </p>
+            </div>
+          )}
+        </motion.div>
+      )}
+    </div>
+  )
+}
