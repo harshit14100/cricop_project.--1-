@@ -196,6 +196,20 @@ export interface LiveMatchState {
   isLoading: boolean
 }
 
+export interface ScoringState {
+  currentMatch: Match | null
+  isScoring: boolean
+  currentOver: number
+  currentBall: number
+  striker: BatsmanInnings | null
+  nonStriker: BatsmanInnings | null
+  currentBowler: BowlerInnings | null
+  isFreeHit: boolean
+  lastDelivery: Ball | null
+  canUndo: boolean
+  showTwoBounceWarning: boolean
+}
+
 export interface Statistics {
   topBatsmen: PlayerRanking[]
   topBowlers: PlayerRanking[]
@@ -221,6 +235,13 @@ export interface DashboardStats {
   completedMatches: number
   totalPlayers: number
   totalTeams: number
+}
+
+export interface PaginatedResponse<T> {
+  data: T[]
+  total: number
+  page: number
+  limit: number
 }
 
 export interface ApiResponse<T> {

@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Activity, FileText, MessageSquare, Star, BarChart3, Trophy } from 'lucide-react'

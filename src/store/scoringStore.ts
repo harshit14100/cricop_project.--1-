@@ -1,5 +1,11 @@
-import { create } from 'zustand';
-import type { Match, ScoringState, Ball, BatsmanInnings, BowlerInnings } from '@/types';
+import { create } from "zustand";
+import type {
+  Match,
+  ScoringState,
+  Ball,
+  BatsmanInnings,
+  BowlerInnings,
+} from "@/types";
 
 interface ScoringStore extends ScoringState {
   setMatch: (match: Match) => void;
@@ -35,9 +41,12 @@ export const useScoringStore = create<ScoringStore>()((set) => ({
   setMatch: (match) =>
     set({
       currentMatch: match,
-      isScoring: match.status === 'live',
+      isScoring: match.status === "live",
       currentOver: match.innings[match.currentInnings]?.overs.length || 0,
-      currentBall: match.innings[match.currentInnings]?.overs[match.innings[match.currentInnings]?.overs.length - 1]?.balls.length || 0,
+      currentBall:
+        match.innings[match.currentInnings]?.overs[
+          match.innings[match.currentInnings]?.overs.length - 1
+        ]?.balls.length || 0,
     }),
 
   updateScore: (ball) =>

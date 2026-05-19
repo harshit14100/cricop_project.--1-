@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -25,8 +25,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { useCreateMatch, useTeams, usePlayers } from "@/hooks";
+import { cn } from "@/lib/utils";
 
 const steps = [
   { id: 1, title: "Match Setup", icon: Trophy },
@@ -46,6 +46,14 @@ export default function StartMatchPage() {
   const [newTeamB, setNewTeamB] = useState("");
   const [playersPerTeam, setPlayersPerTeam] = useState(11);
   const [commonPlayerId, setCommonPlayerId] = useState("none");
+  const [teamAPlayerIds, setTeamAPlayerIds] = useState<string[]>([]);
+  const [teamBPlayerIds, setTeamBPlayerIds] = useState<string[]>([]);
+  const [playerSearchTerm, setPlayerSearchTerm] = useState("");
+
+  const [isFlipping, setIsFlipping] = useState(false);
+  const [coinResult, setCoinResult] = useState<"heads" | "tails" | null>(null);
+  const [tossCall, setTossCall] = useState<"heads" | "tails" | null>(null);
+  const [tossCaller, setTossCaller] = useState<"teamA" | "teamB">("teamA");
 
   const [matchData, setMatchData] = useState({
     matchType: "t20" as const,
@@ -64,6 +72,25 @@ export default function StartMatchPage() {
   const createMatch = useCreateMatch();
   const { data: teamsData } = useTeams();
   const { data: playersData } = usePlayers();
+
+  // Pre-fill players when team is selected
+  useEffect(() => {
+    if (matchData.teamAId && matchData.teamAId !== "new") {
+      const teamA = teamsData?.teams.find((t) => t.id === matchData.teamAId);
+      if (teamA?.players) {
+        setTeamAPlayerIds(teamA.players.map((p) => p.id).slice(0, playersPerTeam));
+      }
+    }
+  }, [matchData.teamAId, teamsData, playersPerTeam]);
+
+  useEffect(() => {
+    if (matchData.teamBId && matchData.teamBId !== "new") {
+      const teamB = teamsData?.teams.find((t) => t.id === matchData.teamBId);
+      if (teamB?.players) {
+        setTeamBPlayerIds(teamB.players.map((p) => p.id).slice(0, playersPerTeam));
+      }
+    }
+  }, [matchData.teamBId, teamsData, playersPerTeam]);
 
   const handleNext = () => {
     if (currentStep < 6) setCurrentStep(currentStep + 1);
@@ -85,6 +112,8 @@ export default function StartMatchPage() {
       newTeamBName: matchData.teamBId === "new" ? newTeamB : undefined,
       playersPerTeam: playersPerTeam,
       commonPlayerId: commonPlayerId === "none" ? undefined : commonPlayerId,
+      teamAPlayerIds,
+      teamBPlayerIds,
       venue: matchData.venue,
       umpires: matchData.umpires,
       scorers: matchData.scorers,
@@ -96,6 +125,32 @@ export default function StartMatchPage() {
       handleNext();
     }
   };
+
+  const togglePlayer = (playerId: string, team: "A" | "B") => {
+    if (team === "A") {
+      if (teamBPlayerIds.includes(playerId)) return; // Already in Team B
+      setTeamAPlayerIds((prev) =>
+        prev.includes(playerId)
+          ? prev.filter((id) => id !== playerId)
+          : prev.length < playersPerTeam
+            ? [...prev, playerId]
+            : prev,
+      );
+    } else {
+      if (teamAPlayerIds.includes(playerId)) return; // Already in Team A
+      setTeamBPlayerIds((prev) =>
+        prev.includes(playerId)
+          ? prev.filter((id) => id !== playerId)
+          : prev.length < playersPerTeam
+            ? [...prev, playerId]
+            : prev,
+      );
+    }
+  };
+
+  const filteredPlayers = playersData?.players.filter((p) =>
+    p.name.toLowerCase().includes(playerSearchTerm.toLowerCase()),
+  );
 
   const copyLink = () => {
     navigator.clipboard.writeText(
@@ -109,6 +164,37 @@ export default function StartMatchPage() {
     const text = `Join me on CricOP for live cricket scoring! https://cricop.com/match/${createMatch.data?.id}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
+
+  const handleFlipCoin = () => {
+    if (!tossCall || isFlipping) return;
+
+    setIsFlipping(true);
+    setCoinResult(null);
+
+    // Realistic coin flip animation logic
+    setTimeout(() => {
+      const result = Math.random() > 0.5 ? "heads" : "tails";
+      setCoinResult(result);
+      setIsFlipping(false);
+
+      const winner =
+        result === tossCall
+          ? tossCaller
+          : tossCaller === "teamA"
+            ? "teamB"
+            : "teamA";
+      setMatchData((prev) => ({ ...prev, tossWinner: winner }));
+    }, 2000);
+  };
+
+  const teamAName =
+    teamsData?.teams.find((t) => t.id === matchData.teamAId)?.name ||
+    newTeamA ||
+    "Team A";
+  const teamBName =
+    teamsData?.teams.find((t) => t.id === matchData.teamBId)?.name ||
+    newTeamB ||
+    "Team B";
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -337,19 +423,20 @@ export default function StartMatchPage() {
 
             {currentStep === 3 && (
               <div className="space-y-6">
-                <h2 className="text-xl font-semibold text-white">
-                  Playing Squad
-                </h2>
-                <p className="text-sm text-white/50">
-                  Select players and setup squad details
-                </p>
-
-                {/* Fixed: Custom Number of Players & Common Player */}
-                <div className="space-y-4 mb-6 p-4 rounded-xl bg-white/5 border border-white/10">
-                  <div className="space-y-2">
-                    <Label>Players per team</Label>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold text-white">
+                      Playing Squad
+                    </h2>
+                    <p className="text-sm text-white/50">
+                      Select {playersPerTeam} players for each team
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Label className="text-xs">Per Team:</Label>
                     <Input
                       type="number"
+                      className="w-16 h-8 text-center"
                       value={playersPerTeam}
                       onChange={(e) =>
                         setPlayersPerTeam(Number(e.target.value))
@@ -358,13 +445,103 @@ export default function StartMatchPage() {
                       max={11}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label>Select Common Player (Bats for both teams)</Label>
+                </div>
+
+                <div className="space-y-4">
+                  <Input
+                    placeholder="Search players..."
+                    value={playerSearchTerm}
+                    onChange={(e) => setPlayerSearchTerm(e.target.value)}
+                    className="bg-white/5 border-white/10"
+                  />
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {/* Team A Selection */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-medium text-white">
+                          Team A Squad ({teamAPlayerIds.length}/{playersPerTeam})
+                        </h3>
+                      </div>
+                      <div className="p-3 rounded-xl bg-white/5 border border-white/10 min-h-[200px] max-h-[300px] overflow-y-auto space-y-1">
+                        {filteredPlayers?.map((p) => {
+                          const isSelectedInOtherTeam = teamBPlayerIds.includes(p.id);
+                          return (
+                            <div
+                              key={p.id}
+                              className={cn(
+                                "flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors",
+                                teamAPlayerIds.includes(p.id)
+                                  ? "bg-blue-500/20 border border-blue-500/30"
+                                  : isSelectedInOtherTeam
+                                    ? "opacity-40 cursor-not-allowed"
+                                    : "hover:bg-white/5 border border-transparent",
+                              )}
+                              onClick={() => !isSelectedInOtherTeam && togglePlayer(p.id, "A")}
+                            >
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-white">
+                                  {p.name.charAt(0)}
+                                </div>
+                                <span className="text-sm text-white">{p.name}</span>
+                              </div>
+                              {teamAPlayerIds.includes(p.id) && (
+                                <CheckCircle className="h-4 w-4 text-blue-400" />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Team B Selection */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-medium text-white">
+                          Team B Squad ({teamBPlayerIds.length}/{playersPerTeam})
+                        </h3>
+                      </div>
+                      <div className="p-3 rounded-xl bg-white/5 border border-white/10 min-h-[200px] max-h-[300px] overflow-y-auto space-y-1">
+                        {filteredPlayers?.map((p) => {
+                          const isSelectedInOtherTeam = teamAPlayerIds.includes(p.id);
+                          return (
+                            <div
+                              key={p.id}
+                              className={cn(
+                                "flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors",
+                                teamBPlayerIds.includes(p.id)
+                                  ? "bg-orange-500/20 border border-orange-500/30"
+                                  : isSelectedInOtherTeam
+                                    ? "opacity-40 cursor-not-allowed"
+                                    : "hover:bg-white/5 border border-transparent",
+                              )}
+                              onClick={() => !isSelectedInOtherTeam && togglePlayer(p.id, "B")}
+                            >
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-white">
+                                  {p.name.charAt(0)}
+                                </div>
+                                <span className="text-sm text-white">{p.name}</span>
+                              </div>
+                              {teamBPlayerIds.includes(p.id) && (
+                                <CheckCircle className="h-4 w-4 text-orange-400" />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                    <Label className="text-xs text-white/50 mb-2 block">
+                      Common Player (Bats for both teams)
+                    </Label>
                     <Select
                       value={commonPlayerId}
                       onValueChange={setCommonPlayerId}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="h-9">
                         <SelectValue placeholder="None" />
                       </SelectTrigger>
                       <SelectContent>
@@ -376,36 +553,6 @@ export default function StartMatchPage() {
                         ))}
                       </SelectContent>
                     </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                    <h3 className="text-sm font-medium text-white mb-3">
-                      Team A Players ({playersPerTeam})
-                    </h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                      {playersData?.players
-                        .slice(0, playersPerTeam)
-                        .map((p) => (
-                          <Badge
-                            key={p.id}
-                            variant="secondary"
-                            className="justify-center py-2"
-                          >
-                            {p.name}
-                          </Badge>
-                        )) ||
-                        Array.from({ length: playersPerTeam }).map((_, i) => (
-                          <Badge
-                            key={i}
-                            variant="secondary"
-                            className="justify-center py-2"
-                          >
-                            Player {i + 1}
-                          </Badge>
-                        ))}
-                    </div>
                   </div>
                 </div>
               </div>
@@ -445,69 +592,185 @@ export default function StartMatchPage() {
             )}
 
             {currentStep === 5 && (
-              <div className="space-y-6">
-                <h2 className="text-xl font-semibold text-white text-center">
-                  Toss Time!
-                </h2>
+              <div className="space-y-8">
+                <div className="text-center space-y-2">
+                  <h2 className="text-2xl font-bold text-white">Toss</h2>
+                  <p className="text-sm text-white/50">
+                    Flip the coin to decide who bats first
+                  </p>
+                </div>
 
-                <motion.div
-                  animate={{ rotateY: [0, 360, 720, 1080] }}
-                  transition={{ duration: 2, ease: "easeInOut" }}
-                  className="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-2xl shadow-amber-500/30"
-                >
-                  <Coins className="h-16 w-16 text-white" />
-                </motion.div>
-
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Toss Winner</Label>
-                    <Select
-                      value={matchData.tossWinner}
-                      onValueChange={(v) =>
-                        setMatchData({ ...matchData, tossWinner: v })
+                <div className="flex flex-col items-center justify-center py-8">
+                  <div className="relative w-32 h-32 mb-8 perspective-1000">
+                    <motion.div
+                      animate={
+                        isFlipping
+                          ? {
+                              rotateY: [0, 1800],
+                              y: [0, -150, 0],
+                              scale: [1, 1.2, 1],
+                            }
+                          : {
+                              rotateY: coinResult === "tails" ? 180 : 0,
+                            }
                       }
+                      transition={
+                        isFlipping
+                          ? { duration: 2, ease: "easeInOut" }
+                          : { duration: 0.5 }
+                      }
+                      className="w-full h-full relative preserve-3d"
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select toss winner" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="teamA">Team A</SelectItem>
-                        <SelectItem value="teamB">Team B</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      {/* Heads Side */}
+                      <div className="absolute inset-0 w-full h-full rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 flex items-center justify-center border-4 border-amber-200/50 shadow-2xl backface-hidden">
+                        <span className="text-3xl font-black text-amber-900">
+                          H
+                        </span>
+                        <div className="absolute inset-2 border-2 border-amber-200/20 rounded-full" />
+                      </div>
+                      {/* Tails Side */}
+                      <div className="absolute inset-0 w-full h-full rounded-full bg-gradient-to-br from-amber-400 via-amber-600 to-amber-800 flex items-center justify-center border-4 border-amber-200/50 shadow-2xl backface-hidden rotate-y-180">
+                        <span className="text-3xl font-black text-amber-950">
+                          T
+                        </span>
+                        <div className="absolute inset-2 border-2 border-amber-200/20 rounded-full" />
+                      </div>
+                    </motion.div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label>Elected To</Label>
-                    <div className="grid grid-cols-2 gap-3">
+                  {!matchData.tossWinner ? (
+                    <div className="w-full max-w-sm space-y-6">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-xs text-white/50">
+                            Who's Calling?
+                          </Label>
+                          <Select
+                            value={tossCaller}
+                            onValueChange={(v) =>
+                              setTossCaller(v as "teamA" | "teamB")
+                            }
+                          >
+                            <SelectTrigger className="bg-white/5 border-white/10">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="teamA">{teamAName}</SelectItem>
+                              <SelectItem value="teamB">{teamBName}</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-xs text-white/50">
+                            The Call
+                          </Label>
+                          <div className="grid grid-cols-2 gap-2">
+                            <Button
+                              variant={
+                                tossCall === "heads" ? "default" : "outline"
+                              }
+                              className="h-10"
+                              onClick={() => setTossCall("heads")}
+                            >
+                              Heads
+                            </Button>
+                            <Button
+                              variant={
+                                tossCall === "tails" ? "default" : "outline"
+                              }
+                              className="h-10"
+                              onClick={() => setTossCall("tails")}
+                            >
+                              Tails
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+
                       <Button
-                        type="button"
-                        variant={
-                          matchData.tossChoice === "bat" ? "default" : "outline"
-                        }
-                        className="h-16 text-lg"
-                        onClick={() =>
-                          setMatchData({ ...matchData, tossChoice: "bat" })
-                        }
+                        className="w-full h-12 text-lg font-semibold bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20"
+                        onClick={handleFlipCoin}
+                        disabled={!tossCall || isFlipping}
                       >
-                        Bat
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={
-                          matchData.tossChoice === "bowl"
-                            ? "default"
-                            : "outline"
-                        }
-                        className="h-16 text-lg"
-                        onClick={() =>
-                          setMatchData({ ...matchData, tossChoice: "bowl" })
-                        }
-                      >
-                        Bowl
+                        {isFlipping ? "Flipping..." : "Flip Coin"}
                       </Button>
                     </div>
-                  </div>
+                  ) : (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="w-full max-w-sm text-center space-y-6"
+                    >
+                      <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
+                        <p className="text-sm text-white/50 mb-1">
+                          It's {coinResult?.toUpperCase()}!
+                        </p>
+                        <h3 className="text-xl font-bold text-white">
+                          {matchData.tossWinner === "teamA"
+                            ? teamAName
+                            : teamBName}{" "}
+                          won the toss
+                        </h3>
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label className="text-xs text-white/50 uppercase tracking-wider">
+                          Choose to
+                        </Label>
+                        <div className="grid grid-cols-2 gap-4">
+                          <Button
+                            variant={
+                              matchData.tossChoice === "bat"
+                                ? "default"
+                                : "outline"
+                            }
+                            className={cn(
+                              "h-20 text-xl font-bold rounded-2xl transition-all",
+                              matchData.tossChoice === "bat" &&
+                                "ring-4 ring-blue-500/20 scale-105",
+                            )}
+                            onClick={() =>
+                              setMatchData({ ...matchData, tossChoice: "bat" })
+                            }
+                          >
+                            BAT
+                          </Button>
+                          <Button
+                            variant={
+                              matchData.tossChoice === "bowl"
+                                ? "default"
+                                : "outline"
+                            }
+                            className={cn(
+                              "h-20 text-xl font-bold rounded-2xl transition-all",
+                              matchData.tossChoice === "bowl" &&
+                                "ring-4 ring-blue-500/20 scale-105",
+                            )}
+                            onClick={() =>
+                              setMatchData({ ...matchData, tossChoice: "bowl" })
+                            }
+                          >
+                            BOWL
+                          </Button>
+                        </div>
+                      </div>
+
+                      <Button
+                        variant="ghost"
+                        className="text-white/40 hover:text-white"
+                        onClick={() => {
+                          setMatchData({
+                            ...matchData,
+                            tossWinner: "",
+                            tossChoice: "",
+                          });
+                          setCoinResult(null);
+                        }}
+                      >
+                        Redo Toss
+                      </Button>
+                    </motion.div>
+                  )}
                 </div>
               </div>
             )}
@@ -591,6 +854,7 @@ export default function StartMatchPage() {
             <Button
               onClick={handleCreateMatch}
               isLoading={createMatch.isPending}
+              disabled={!matchData.tossWinner || !matchData.tossChoice}
               className="gap-2"
             >
               Confirm & Create
@@ -606,8 +870,4 @@ export default function StartMatchPage() {
       )}
     </div>
   );
-}
-
-function cn(...classes: (string | undefined | false)[]) {
-  return classes.filter(Boolean).join(" ");
 }

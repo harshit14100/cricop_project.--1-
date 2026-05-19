@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { matchService } from '@/services'
 import { useUIStore } from '@/store'
-import type { Match } from '@/types'
 
 export function useMatches(params?: { status?: string; series?: string; page?: number; limit?: number }) {
   return useQuery({

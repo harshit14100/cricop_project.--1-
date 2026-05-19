@@ -1,22 +1,8 @@
-import axios from "axios";
-
-const API = axios.create({
-  baseURL: "http://localhost:8080",
-});
-
-API.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
-  return config;
-});
+import api from "./api";
 
 export const authService = {
   async login(data: { phone: string; password: string }) {
-    const response = await API.post("/auth/login", {
+    const response = await api.post("/auth/login", {
       phone_no: data.phone,
       password: data.password,
     });
@@ -31,7 +17,7 @@ export const authService = {
   },
 
   async signup(data: { name: string; phone: string; password: string }) {
-    const response = await API.post("/auth/signup", {
+    const response = await api.post("/auth/signup", {
       name: data.name,
       phone_no: data.phone,
       password: data.password,
@@ -53,13 +39,13 @@ export const authService = {
   },
 
   async getProfile() {
-    const response = await API.get("/users/me");
+    const response = await api.get("/users/me");
 
     return response.data;
   },
 
   async updateProfile(data: any) {
-    const response = await API.put("/users/me", data);
+    const response = await api.put("/users/me", data);
 
     return response.data;
   },

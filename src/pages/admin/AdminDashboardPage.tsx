@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Users, Shield, BarChart3, AlertTriangle, CheckCircle, XCircle, Clock } from 'lucide-react'
+import { Users, Shield, BarChart3, AlertTriangle, CheckCircle, Clock } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { StatCard } from '@/components/shared/StatCard'

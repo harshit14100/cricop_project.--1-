@@ -1,7 +1,20 @@
 import axios from 'axios'
 import { useAuthStore } from '@/store'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.cricop.com/v1'
+const getBaseURL = () => {
+  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+  
+  const hostname = window.location.hostname;
+  // If we are on localhost or accessing via an IP address (likely local network), 
+  // default to the local backend on port 8080.
+  if (hostname === 'localhost' || /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname)) {
+    return `http://${hostname}:8080`;
+  }
+  
+  return 'https://api.cricop.com/v1';
+};
+
+const API_BASE_URL = getBaseURL();
 
 export const api = axios.create({
   baseURL: API_BASE_URL,

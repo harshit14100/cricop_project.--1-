@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import { Play, TrendingUp, Users, Trophy, Calendar, ArrowRight, Zap, Activity } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { StatCard } from '@/components/shared/StatCard'
 import { MatchCard } from '@/components/shared/MatchCard'
 import { PlayerCard } from '@/components/shared/PlayerCard'
@@ -64,7 +63,7 @@ const mockPlayers: Player[] = [
 export default function DashboardPage() {
   const { data: matchesData, isLoading: matchesLoading } = useMatches({ status: 'live', limit: 5 })
   const { data: statsData, isLoading: statsLoading } = useDashboardStats()
-  const { data: playersData } = usePlayers({ limit: 5 })
+  usePlayers({ limit: 5 })
 
   const matches = matchesData?.matches || mockMatches
   const liveMatches = matches.filter(m => m.status === 'live')

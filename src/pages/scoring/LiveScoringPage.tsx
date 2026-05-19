@@ -6,14 +6,8 @@ import {
   RotateCcw,
   AlertTriangle,
   Lock,
-  Plus,
-  Minus,
-  ChevronUp,
-  ChevronDown,
-  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -30,8 +24,7 @@ import {
   useEndMatch,
 } from "@/hooks";
 import { useMatchStore } from "@/store";
-import { cn, formatOvers } from "@/lib/utils";
-import type { Ball } from "@/types";
+import { cn } from "@/lib/utils";
 
 const runsButtons = [0, 1, 2, 3, 4, 6];
 const wicketTypes = [
@@ -60,7 +53,6 @@ export default function LiveScoringPage() {
   const { liveState } = useMatchStore();
 
   const [showWicketDialog, setShowWicketDialog] = useState(false);
-  const [showExtraDialog, setShowExtraDialog] = useState(false);
   const [selectedExtra, setSelectedExtra] = useState("");
   const [activeTab, setActiveTab] = useState("score");
 
@@ -222,7 +214,7 @@ export default function LiveScoringPage() {
       <div className="glass-card p-3">
         <p className="text-xs text-white/40 mb-2">Recent Deliveries</p>
         <div className="flex gap-2 flex-wrap">
-          {liveState.lastBalls.map((ball, i) => (
+          {liveState.lastBalls.map((ball) => (
             <motion.div
               key={ball.id}
               initial={{ scale: 0 }}
@@ -296,7 +288,7 @@ export default function LiveScoringPage() {
             </motion.button>
             <motion.button
               whileTap={{ scale: 0.9 }}
-              onClick={() => setShowExtraDialog(true)}
+              onClick={() => setActiveTab("extras")}
               className="h-14 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 font-semibold"
             >
               + Extra

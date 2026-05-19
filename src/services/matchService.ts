@@ -8,6 +8,8 @@ interface CreateMatchData {
   totalOvers: number
   teamAId: string
   teamBId: string
+  teamAPlayerIds: string[]
+  teamBPlayerIds: string[]
   venue?: string
   umpires?: string[]
   scorers?: string[]

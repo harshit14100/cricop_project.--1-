@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { useAuthStore, useUIStore } from '@/store'
+import { useAuthStore } from '@/store'
 import { useLogout } from '@/hooks'
 
 export default function SettingsPage() {
