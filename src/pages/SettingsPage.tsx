@@ -6,18 +6,50 @@ import { Card } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from '@/components/ui/dialog'
 import { useAuthStore } from '@/store'
-import { useLogout } from '@/hooks'
+import { useLogout, useUpdateProfile } from '@/hooks'
 
 export default function SettingsPage() {
   const { user } = useAuthStore()
   const logout = useLogout()
+  const updateProfile = useUpdateProfile()
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+  })
+
+  const handleOpenEditDialog = () => {
+    setFormData({
+      name: user?.name || '',
+      email: user?.email || '',
+    })
+    setIsEditDialogOpen(true)
+  }
+
   const [settings, setSettings] = useState({
     notifications: true,
     darkMode: true,
     autoRefresh: true,
     compactView: false,
   })
+
+  const handleUpdateProfile = (e: React.FormEvent) => {
+    e.preventDefault()
+    updateProfile.mutate(formData, {
+      onSuccess: () => setIsEditDialogOpen(false),
+    })
+  }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -38,7 +70,49 @@ export default function SettingsPage() {
             <p className="text-sm text-white/50">{user?.email}</p>
             <p className="text-sm text-white/50">{user?.phone}</p>
           </div>
-          <Button variant="outline" size="sm">Edit Profile</Button>
+          <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" onClick={handleOpenEditDialog}>Edit Profile</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Edit Profile</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleUpdateProfile} className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Enter your name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="Enter your email"
+                  />
+                </div>
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsEditDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" isLoading={updateProfile.isPending}>
+                    Save Changes
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       </Card>
 

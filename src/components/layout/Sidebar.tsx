@@ -10,6 +10,7 @@ import {
   Shield,
   ChevronLeft,
   ChevronRight,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore, useUIStore } from "@/store";
@@ -41,25 +42,29 @@ export function Sidebar() {
       initial={false}
       animate={{ width: sidebarOpen ? 256 : 80 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="fixed left-0 top-16 bottom-0 z-40 bg-[#0d1e36]/95 backdrop-blur-xl border-r border-white/5"
+      className="fixed left-0 top-0 bottom-0 z-50 bg-[#0d1e36]/95 backdrop-blur-xl border-r border-white/5"
     >
-      <div className="flex flex-col h-full py-4">
-        <div
-          className={cn(
-            "flex items-center mb-4",
-            sidebarOpen ? "justify-end px-4" : "justify-center",
+      <div className="flex flex-col h-full">
+        {/* Logo Area */}
+        <div className={cn(
+          "h-16 flex items-center border-b border-white/5 px-4 mb-2",
+          sidebarOpen ? "justify-between" : "justify-center"
+        )}>
+          {sidebarOpen && (
+            <Link to="/dashboard" className="flex items-center gap-2 overflow-hidden">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-electric flex items-center justify-center flex-shrink-0">
+                <Zap className="h-4 w-4 text-white" />
+              </div>
+              <span className="text-xl font-bold text-white tracking-tight">
+                Cric<span className="text-electric">OP</span>
+              </span>
+            </Link>
           )}
-        >
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-1.5 rounded-lg bg-white/5 text-white/50 hover:text-white hover:bg-white/10 transition-colors"
-          >
-            {sidebarOpen ? (
-              <ChevronLeft className="h-4 w-4" />
-            ) : (
-              <ChevronRight className="h-4 w-4" />
-            )}
-          </button>
+          {!sidebarOpen && (
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-electric flex items-center justify-center">
+              <Zap className="h-4 w-4 text-white" />
+            </div>
+          )}
         </div>
 
         <nav className="flex-1 px-3 space-y-1">
@@ -109,7 +114,7 @@ export function Sidebar() {
           })}
         </nav>
 
-        <div className="px-3 mt-auto">
+        <div className="px-3 mt-auto mb-4 space-y-2">
           <Link
             to="/settings"
             className={cn(
@@ -121,22 +126,30 @@ export function Sidebar() {
             )}
           >
             <Settings className="h-5 w-5 flex-shrink-0" />
-            <AnimatePresence>
-              {sidebarOpen && (
-                <motion.span
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: "auto" }}
-                  exit={{ opacity: 0, width: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="text-sm font-medium whitespace-nowrap overflow-hidden"
-                >
-                  Settings
-                </motion.span>
-              )}
-            </AnimatePresence>
+            {sidebarOpen && (
+              <span className="text-sm font-medium">Settings</span>
+            )}
           </Link>
+
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className={cn(
+              "w-full flex items-center rounded-xl p-3 text-white/50 hover:text-white hover:bg-white/5 transition-all",
+              sidebarOpen ? "gap-3" : "justify-center"
+            )}
+          >
+            {sidebarOpen ? (
+              <>
+                <ChevronLeft className="h-5 w-5" />
+                <span className="text-sm font-medium">Collapse</span>
+              </>
+            ) : (
+              <ChevronRight className="h-5 w-5" />
+            )}
+          </button>
         </div>
       </div>
     </motion.aside>
   );
 }
+

@@ -72,11 +72,13 @@ export function useProfile() {
 
 export function useUpdateProfile() {
   const queryClient = useQueryClient()
+  const { setUser } = useAuthStore()
   const { addToast } = useUIStore()
 
   return useMutation({
     mutationFn: authService.updateProfile,
-    onSuccess: () => {
+    onSuccess: (data) => {
+      setUser(data)
       queryClient.invalidateQueries({ queryKey: ['profile'] })
       addToast({ title: 'Profile updated', variant: 'success' })
     },

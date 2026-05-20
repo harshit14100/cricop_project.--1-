@@ -9,18 +9,43 @@ import type {
   Ball,
 } from "@/types";
 
-// Mock data store
-const mockUsers: User[] = [
-  {
-    id: "u1",
-    name: "Virat Kohli",
-    email: "virat@cricket.com",
-    phone: "+919876543210",
-    role: "admin",
-    createdAt: "2024-01-01",
-    isActive: true,
-  },
-];
+// Mock data store with persistence
+const getInitialUsers = (): User[] => {
+  const saved = localStorage.getItem("cricop_mock_users");
+  if (saved) {
+    try {
+      return JSON.parse(saved);
+    } catch (e) {
+      console.error("Failed to parse mock users", e);
+    }
+  }
+  return [
+    {
+      id: "u1",
+      name: "Virat Kohli",
+      email: "virat@cricket.com",
+      phone: "+919876543210",
+      role: "admin",
+      createdAt: "2024-01-01",
+      isActive: true,
+    },
+    {
+      id: "u2",
+      name: "harshit arora",
+      email: "harshit@cricop.com",
+      phone: "8700866165",
+      role: "admin",
+      createdAt: "2024-01-01",
+      isActive: true,
+    },
+  ];
+};
+
+let mockUsers: User[] = getInitialUsers();
+
+const saveUsers = () => {
+  localStorage.setItem("cricop_mock_users", JSON.stringify(mockUsers));
+};
 
 const mockMatches: Match[] = [
   {
@@ -583,46 +608,73 @@ export function setupMockAPI() {
 
       // AUTH ENDPOINTS
       if (url.includes("/auth/login") && method === "post") {
-        const { phone, password } = config.data;
-        const user = mockUsers.find((u) => u.phone === phone);
-        if (user && password.length >= 6) {
-          ensurePlayerExists(user);
-          return Promise.resolve({
-            data: {
-              success: true,
+        const payload =
+          typeof config.data === "string"
+            ? JSON.parse(config.data)
+            : config.data;
+        const { phone_no, password } = payload;
+        const phone = phone_no;
+        let user = mockUsers.find((u) => u.phone === phone);
+        
+        if (user) {
+          // Password check: Enforce specific password for Harshit (Admin), 
+          // allow any password >= 6 for others.
+          const isValid = phone === "8700866165" 
+            ? password === "8700866165h" 
+            : password.length >= 6;
+
+          if (isValid) {
+            ensurePlayerExists(user);
+            return Promise.resolve({
               data: {
-                user,
-                token: "mock-jwt-token-" + Date.now(),
-                refreshToken: "mock-refresh-token",
+                success: true,
+                data: {
+                  user,
+                  token: "mock-jwt-token-" + user.id,
+                  refreshToken: "mock-refresh-token",
+                },
               },
-            },
-          });
+            });
+          } else {
+            return Promise.reject({ 
+              response: { 
+                status: 401, 
+                data: { message: "Invalid credentials" } 
+              } 
+            });
+          }
         }
-        const newUser: User = {
+        user = {
           id: "u" + Date.now(),
           name: "User " + phone.slice(-4),
-          email: phone + "@cricop.com",
+          email: (phone || "") + "@cricop.com",
           phone,
           role: "host",
           createdAt: new Date().toISOString(),
           isActive: true,
         };
-        mockUsers.push(newUser);
-        ensurePlayerExists(newUser);
+        mockUsers.push(user);
+        saveUsers();
+        ensurePlayerExists(user);
         return Promise.resolve({
           data: {
             success: true,
             data: {
-              user: newUser,
-              token: "mock-jwt-token-" + Date.now(),
+              user,
+              token: "mock-jwt-token-" + user.id,
               refreshToken: "mock-refresh-token",
             },
           },
         });
       }
 
-      if (url.includes("/auth/register") && method === "post") {
-        const { name, phone, email } = config.data;
+      if (url.includes("/auth/signup") && method === "post") {
+        const payload =
+          typeof config.data === "string"
+            ? JSON.parse(config.data)
+            : config.data;
+        const { name, phone_no, email } = payload;
+        const phone = phone_no;
         const newUser: User = {
           id: "u" + Date.now(),
           name,
@@ -633,23 +685,50 @@ export function setupMockAPI() {
           isActive: true,
         };
         mockUsers.push(newUser);
+        saveUsers();
         ensurePlayerExists(newUser);
         return Promise.resolve({
           data: {
             success: true,
             data: {
               user: newUser,
-              token: "mock-jwt-token-" + Date.now(),
+              token: "mock-jwt-token-" + newUser.id,
               refreshToken: "mock-refresh-token",
             },
           },
         });
       }
 
-      if (url.includes("/auth/profile") && method === "get") {
+      const getMe = () => {
+        const authHeader = config.headers?.Authorization;
+        if (typeof authHeader === 'string' && authHeader.startsWith("Bearer mock-jwt-token-")) {
+          const userId = authHeader.replace("Bearer mock-jwt-token-", "");
+          return mockUsers.find(u => u.id === userId);
+        }
+        return mockUsers[0];
+      };
+
+      if (url.includes("/users/me") && method === "get") {
+        const me = getMe();
         return Promise.resolve({
-          data: { success: true, data: mockUsers[0] },
+          data: { success: true, data: me },
         });
+      }
+
+      if (url.includes("/users/me") && method === "put") {
+        const payload =
+          typeof config.data === "string"
+            ? JSON.parse(config.data)
+            : config.data;
+        const me = getMe();
+        if (me) {
+          Object.assign(me, payload);
+          saveUsers();
+          return Promise.resolve({
+            data: { success: true, data: me },
+          });
+        }
+        return Promise.reject({ response: { status: 401, data: { message: "Unauthorized" } } });
       }
 
       if (url.includes("/auth/logout") && method === "post") {

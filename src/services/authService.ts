@@ -7,7 +7,8 @@ export const authService = {
       password: data.password,
     });
 
-    const responseData = response.data;
+    // Support both { data: { ... } } and direct response
+    const responseData = response.data.data || response.data;
 
     if (responseData.token) {
       localStorage.setItem("token", responseData.token);
@@ -23,7 +24,7 @@ export const authService = {
       password: data.password,
     });
 
-    const responseData = response.data;
+    const responseData = response.data.data || response.data;
 
     if (responseData.token) {
       localStorage.setItem("token", responseData.token);
@@ -41,12 +42,12 @@ export const authService = {
   async getProfile() {
     const response = await api.get("/users/me");
 
-    return response.data;
+    return response.data.data || response.data;
   },
 
   async updateProfile(data: any) {
     const response = await api.put("/users/me", data);
 
-    return response.data;
+    return response.data.data || response.data;
   },
 };

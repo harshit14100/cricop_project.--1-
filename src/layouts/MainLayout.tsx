@@ -20,7 +20,7 @@ export function MainLayout() {
 
         <main
           className={cn(
-            "flex-1 transition-all duration-300",
+            "flex-1 transition-all duration-300 pt-16",
             !isMobile && sidebarOpen ? "ml-64" : !isMobile ? "ml-20" : "ml-0",
             "pb-20 md:pb-0"
           )}
