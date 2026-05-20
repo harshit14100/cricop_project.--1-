@@ -1,9 +1,7 @@
 import api from './api'
-import type { Match, Series, ApiResponse } from '@/types'
+import type { Match, ApiResponse } from '@/types'
 
 interface CreateMatchData {
-  seriesId?: string
-  seriesName?: string
   matchType: 't20' | 'odi' | 'test' | 'custom'
   totalOvers: number
   teamAId: string
@@ -22,7 +20,7 @@ interface TossData {
 }
 
 export const matchService = {
-  getMatches: async (params?: { status?: string; series?: string; page?: number; limit?: number }): Promise<{ matches: Match[]; total: number }> => {
+  getMatches: async (params?: { status?: string; page?: number; limit?: number }): Promise<{ matches: Match[]; total: number }> => {
     const { data } = await api.get<ApiResponse<{ matches: Match[]; total: number }>>('/matches', { params })
     return data.data
   },
@@ -58,16 +56,6 @@ export const matchService = {
 
   getLiveMatch: async (matchId: string): Promise<Match> => {
     const { data } = await api.get<ApiResponse<Match>>(`/matches/${matchId}/live`)
-    return data.data
-  },
-
-  getSeries: async (): Promise<Series[]> => {
-    const { data } = await api.get<ApiResponse<Series[]>>('/series')
-    return data.data
-  },
-
-  createSeries: async (seriesData: Omit<Series, 'id' | 'matches'>): Promise<Series> => {
-    const { data } = await api.post<ApiResponse<Series>>('/series', seriesData)
     return data.data
   },
 

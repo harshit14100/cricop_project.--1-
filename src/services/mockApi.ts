@@ -528,6 +528,40 @@ const mockDashboardStats: DashboardStats = {
 // Store ball history for each match to support Undo
 const mockBallHistory: Record<string, Ball[]> = {};
 
+// Helper to ensure a user exists as a player
+const ensurePlayerExists = (user: User) => {
+  const existingPlayer = mockPlayers.find(p => p.id === user.id || p.name === user.name);
+  if (!existingPlayer) {
+    mockPlayers.push({
+      id: user.id,
+      name: user.name,
+      battingStyle: "right-handed",
+      stats: {
+        matches: 0,
+        runs: 0,
+        ballsFaced: 0,
+        wickets: 0,
+        ballsBowled: 0,
+        runsConceded: 0,
+        catches: 0,
+        stumpings: 0,
+        highestScore: 0,
+        bestBowling: "-",
+        strikeRate: 0,
+        economy: 0,
+        average: 0,
+        fifties: 0,
+        hundreds: 0,
+        sixes: 0,
+        fours: 0,
+      },
+    });
+  }
+};
+
+// Synchronize pre-defined mock users
+mockUsers.forEach(ensurePlayerExists);
+
 // Simulate network delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -552,6 +586,7 @@ export function setupMockAPI() {
         const { phone, password } = config.data;
         const user = mockUsers.find((u) => u.phone === phone);
         if (user && password.length >= 6) {
+          ensurePlayerExists(user);
           return Promise.resolve({
             data: {
               success: true,
@@ -573,6 +608,7 @@ export function setupMockAPI() {
           isActive: true,
         };
         mockUsers.push(newUser);
+        ensurePlayerExists(newUser);
         return Promise.resolve({
           data: {
             success: true,
@@ -597,6 +633,7 @@ export function setupMockAPI() {
           isActive: true,
         };
         mockUsers.push(newUser);
+        ensurePlayerExists(newUser);
         return Promise.resolve({
           data: {
             success: true,

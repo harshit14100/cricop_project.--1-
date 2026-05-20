@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { statisticsService } from '@/services'
 
-export function useStatistics(params?: { series?: string; timeRange?: string }) {
+export function useStatistics(params?: { timeRange?: string }) {
   return useQuery({
     queryKey: ['statistics', params],
     queryFn: () => statisticsService.getStatistics(params),

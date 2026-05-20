@@ -2,7 +2,7 @@ import api from './api'
 import type { Statistics, PlayerStats, ApiResponse, DashboardStats } from '@/types'
 
 export const statisticsService = {
-  getStatistics: async (params?: { series?: string; timeRange?: string }): Promise<Statistics> => {
+  getStatistics: async (params?: { timeRange?: string }): Promise<Statistics> => {
     const { data } = await api.get<ApiResponse<Statistics>>('/statistics', { params })
     return data.data
   },

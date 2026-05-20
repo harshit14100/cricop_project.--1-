@@ -61,8 +61,6 @@ export interface PlayerStats {
 
 export interface Match {
   id: string
-  seriesId?: string
-  seriesName?: string
   matchType: 't20' | 'odi' | 'test' | 'custom'
   totalOvers: number
   teamA: Team
@@ -172,17 +170,6 @@ export interface Ball {
   dismissal?: Dismissal
   commentary: string
   timestamp: string
-}
-
-export interface Series {
-  id: string
-  name: string
-  type: 't20' | 'odi' | 'test' | 'mixed'
-  startDate: string
-  endDate?: string
-  teams: string[]
-  matches: string[]
-  status: 'upcoming' | 'ongoing' | 'completed'
 }
 
 export interface LiveMatchState {

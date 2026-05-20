@@ -8,7 +8,6 @@ import {
   Users,
   Settings,
   Shield,
-  Trophy,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -22,7 +21,6 @@ const navItems = [
   { icon: History, label: "History", path: "/history" },
   { icon: BarChart3, label: "Statistics", path: "/statistics" },
   { icon: Users, label: "Players", path: "/players" },
-  { icon: Trophy, label: "Series", path: "/history" },
 ];
 
 const adminItems = [{ icon: Shield, label: "Admin", path: "/admin" }];
