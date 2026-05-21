@@ -80,7 +80,9 @@ export default function StartMatchPage() {
     if (matchData.teamAId && matchData.teamAId !== "new") {
       const teamA = teamsData?.teams.find((t) => t.id === matchData.teamAId);
       if (teamA?.players) {
-        setTeamAPlayerIds(teamA.players.map((p) => p.id).slice(0, playersPerTeam));
+        setTeamAPlayerIds(
+          teamA.players.map((p) => p.id).slice(0, playersPerTeam),
+        );
       }
     }
   }, [matchData.teamAId, teamsData, playersPerTeam]);
@@ -89,7 +91,9 @@ export default function StartMatchPage() {
     if (matchData.teamBId && matchData.teamBId !== "new") {
       const teamB = teamsData?.teams.find((t) => t.id === matchData.teamBId);
       if (teamB?.players) {
-        setTeamBPlayerIds(teamB.players.map((p) => p.id).slice(0, playersPerTeam));
+        setTeamBPlayerIds(
+          teamB.players.map((p) => p.id).slice(0, playersPerTeam),
+        );
       }
     }
   }, [matchData.teamBId, teamsData, playersPerTeam]);
@@ -481,12 +485,15 @@ export default function StartMatchPage() {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <h3 className="text-sm font-medium text-white">
-                          Team A Squad ({teamAPlayerIds.length}/{playersPerTeam})
+                          Team A Squad ({teamAPlayerIds.length}/{playersPerTeam}
+                          )
                         </h3>
                       </div>
                       <div className="p-3 rounded-xl bg-white/5 border border-white/10 min-h-[200px] max-h-[300px] overflow-y-auto space-y-1">
                         {filteredPlayers?.map((p) => {
-                          const isSelectedInOtherTeam = teamBPlayerIds.includes(p.id);
+                          const isSelectedInOtherTeam = teamBPlayerIds.includes(
+                            p.id,
+                          );
                           return (
                             <div
                               key={p.id}
@@ -498,13 +505,18 @@ export default function StartMatchPage() {
                                     ? "opacity-40 cursor-not-allowed"
                                     : "hover:bg-white/5 border border-transparent",
                               )}
-                              onClick={() => !isSelectedInOtherTeam && togglePlayer(p.id, "A")}
+                              onClick={() =>
+                                !isSelectedInOtherTeam &&
+                                togglePlayer(p.id, "A")
+                              }
                             >
                               <div className="flex items-center gap-2">
                                 <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-white">
                                   {p.name.charAt(0)}
                                 </div>
-                                <span className="text-sm text-white">{p.name}</span>
+                                <span className="text-sm text-white">
+                                  {p.name}
+                                </span>
                               </div>
                               {teamAPlayerIds.includes(p.id) && (
                                 <CheckCircle className="h-4 w-4 text-blue-400" />
@@ -519,12 +531,15 @@ export default function StartMatchPage() {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <h3 className="text-sm font-medium text-white">
-                          Team B Squad ({teamBPlayerIds.length}/{playersPerTeam})
+                          Team B Squad ({teamBPlayerIds.length}/{playersPerTeam}
+                          )
                         </h3>
                       </div>
                       <div className="p-3 rounded-xl bg-white/5 border border-white/10 min-h-[200px] max-h-[300px] overflow-y-auto space-y-1">
                         {filteredPlayers?.map((p) => {
-                          const isSelectedInOtherTeam = teamAPlayerIds.includes(p.id);
+                          const isSelectedInOtherTeam = teamAPlayerIds.includes(
+                            p.id,
+                          );
                           return (
                             <div
                               key={p.id}
@@ -536,13 +551,18 @@ export default function StartMatchPage() {
                                     ? "opacity-40 cursor-not-allowed"
                                     : "hover:bg-white/5 border border-transparent",
                               )}
-                              onClick={() => !isSelectedInOtherTeam && togglePlayer(p.id, "B")}
+                              onClick={() =>
+                                !isSelectedInOtherTeam &&
+                                togglePlayer(p.id, "B")
+                              }
                             >
                               <div className="flex items-center gap-2">
                                 <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-white">
                                   {p.name.charAt(0)}
                                 </div>
-                                <span className="text-sm text-white">{p.name}</span>
+                                <span className="text-sm text-white">
+                                  {p.name}
+                                </span>
                               </div>
                               {teamBPlayerIds.includes(p.id) && (
                                 <CheckCircle className="h-4 w-4 text-orange-400" />
@@ -644,7 +664,7 @@ export default function StartMatchPage() {
                       className="w-full h-full relative"
                     >
                       {/* Heads Side */}
-                      <div 
+                      <div
                         className="absolute inset-0 w-full h-full rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 flex items-center justify-center border-4 border-amber-200/50 shadow-2xl"
                         style={{ backfaceVisibility: "hidden" }}
                       >
@@ -654,11 +674,11 @@ export default function StartMatchPage() {
                         <div className="absolute inset-2 border-2 border-amber-200/20 rounded-full" />
                       </div>
                       {/* Tails Side */}
-                      <div 
+                      <div
                         className="absolute inset-0 w-full h-full rounded-full bg-gradient-to-br from-amber-400 via-amber-600 to-amber-800 flex items-center justify-center border-4 border-amber-200/50 shadow-2xl"
-                        style={{ 
+                        style={{
                           backfaceVisibility: "hidden",
-                          transform: "rotateY(180deg)"
+                          transform: "rotateY(180deg)",
                         }}
                       >
                         <span className="text-3xl font-black text-amber-950">

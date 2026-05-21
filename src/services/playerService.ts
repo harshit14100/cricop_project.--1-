@@ -1,9 +1,21 @@
-import api from './api';
-import type { ApiResponse, Player, PaginatedResponse, PlayerStats } from '@/types';
+import api from "./api";
+import type {
+  ApiResponse,
+  Player,
+  PaginatedResponse,
+  PlayerStats,
+} from "@/types";
 
 export const playerService = {
-  getPlayers: async (search?: string, teamId?: string, page = 1, limit = 20): Promise<ApiResponse<PaginatedResponse<Player>>> => {
-    const response = await api.get('/players', { params: { search, teamId, page, limit } });
+  getPlayers: async (
+    search?: string,
+    teamId?: string,
+    page = 1,
+    limit = 20,
+  ): Promise<ApiResponse<PaginatedResponse<Player>>> => {
+    const response = await api.get("/players", {
+      params: { search, teamId, page, limit },
+    });
     return response.data;
   },
 
@@ -13,11 +25,14 @@ export const playerService = {
   },
 
   createPlayer: async (data: Partial<Player>): Promise<ApiResponse<Player>> => {
-    const response = await api.post('/players', data);
+    const response = await api.post("/players", data);
     return response.data;
   },
 
-  updatePlayer: async (id: string, data: Partial<Player>): Promise<ApiResponse<Player>> => {
+  updatePlayer: async (
+    id: string,
+    data: Partial<Player>,
+  ): Promise<ApiResponse<Player>> => {
     const response = await api.patch(`/players/${id}`, data);
     return response.data;
   },
@@ -32,11 +47,14 @@ export const playerService = {
     return response.data;
   },
 
-  uploadAvatar: async (id: string, file: File): Promise<ApiResponse<{ avatar: string }>> => {
+  uploadAvatar: async (
+    id: string,
+    file: File,
+  ): Promise<ApiResponse<{ avatar: string }>> => {
     const formData = new FormData();
-    formData.append('avatar', file);
+    formData.append("avatar", file);
     const response = await api.post(`/players/${id}/avatar`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+      headers: { "Content-Type": "multipart/form-data" },
     });
     return response.data;
   },

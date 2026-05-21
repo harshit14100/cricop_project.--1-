@@ -1,10 +1,15 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { playerService } from '@/services/playerService';
-import type { Player } from '@/types';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { playerService } from "@/services/playerService";
+import type { Player } from "@/types";
 
-export function usePlayers(search?: string, teamId?: string, page = 1, limit = 20) {
+export function usePlayers(
+  search?: string,
+  teamId?: string,
+  page = 1,
+  limit = 20,
+) {
   return useQuery({
-    queryKey: ['players', search, teamId, page, limit],
+    queryKey: ["players", search, teamId, page, limit],
     queryFn: () => playerService.getPlayers(search, teamId, page, limit),
     staleTime: 60000,
   });
@@ -12,7 +17,7 @@ export function usePlayers(search?: string, teamId?: string, page = 1, limit = 2
 
 export function usePlayer(id: string) {
   return useQuery({
-    queryKey: ['player', id],
+    queryKey: ["player", id],
     queryFn: () => playerService.getPlayer(id),
     enabled: !!id,
   });
@@ -20,7 +25,7 @@ export function usePlayer(id: string) {
 
 export function usePlayerStats(id: string) {
   return useQuery({
-    queryKey: ['player-stats', id],
+    queryKey: ["player-stats", id],
     queryFn: () => playerService.getStats(id),
     enabled: !!id,
   });
@@ -32,7 +37,7 @@ export function useCreatePlayer() {
   return useMutation({
     mutationFn: (data: Partial<Player>) => playerService.createPlayer(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['players'] });
+      queryClient.invalidateQueries({ queryKey: ["players"] });
     },
   });
 }

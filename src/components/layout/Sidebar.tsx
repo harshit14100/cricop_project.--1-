@@ -42,30 +42,9 @@ export function Sidebar() {
       initial={false}
       animate={{ width: sidebarOpen ? 256 : 80 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="fixed left-0 top-0 bottom-0 z-50 bg-[#0d1e36]/95 backdrop-blur-xl border-r border-white/5"
+      className="fixed left-0 top-16 bottom-0 z-40 bg-[#0d1e36]/95 backdrop-blur-xl border-r border-white/5"
     >
-      <div className="flex flex-col h-full">
-        {/* Logo Area */}
-        <div className={cn(
-          "h-16 flex items-center border-b border-white/5 px-4 mb-2",
-          sidebarOpen ? "justify-between" : "justify-center"
-        )}>
-          {sidebarOpen && (
-            <Link to="/dashboard" className="flex items-center gap-2 overflow-hidden">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-electric flex items-center justify-center flex-shrink-0">
-                <Zap className="h-4 w-4 text-white" />
-              </div>
-              <span className="text-xl font-bold text-white tracking-tight">
-                Cric<span className="text-electric">OP</span>
-              </span>
-            </Link>
-          )}
-          {!sidebarOpen && (
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-electric flex items-center justify-center">
-              <Zap className="h-4 w-4 text-white" />
-            </div>
-          )}
-        </div>
+      <div className="flex flex-col h-full pt-4">
 
         <nav className="flex-1 px-3 space-y-1">
           {items.map((item) => {

@@ -6,7 +6,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useAuthStore, useUIStore } from "@/store";
 import { useIsMobile } from "@/hooks";
-import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -24,40 +23,37 @@ export function Navbar() {
     <motion.header
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className={cn(
-        "fixed top-0 right-0 z-40 h-16 bg-[#0a1628]/80 backdrop-blur-xl border-b border-white/5 transition-all duration-300",
-        !isMobile && sidebarOpen ? "left-64" : !isMobile ? "left-20" : "left-0"
-      )}
+      className="fixed top-0 left-0 right-0 z-50 h-16 bg-[#0a1628]/80 backdrop-blur-xl border-b border-white/5 transition-all duration-300"
     >
-      <div className="flex items-center justify-between h-full px-4 md:px-6 max-w-7xl mx-auto">
+      <div className="flex items-center justify-between h-full px-4 md:px-6 w-full">
         <div className="flex items-center gap-4">
+          <Link to="/dashboard" className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-electric flex items-center justify-center">
+              <Zap className="h-4 w-4 text-white" />
+            </div>
+            <span className="text-xl font-bold text-white tracking-tight">
+              Cric<span className="text-electric">OP</span>
+            </span>
+          </Link>
+
           {isMobile && (
-            <>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="text-white/70"
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-              <Link to="/dashboard" className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-electric flex items-center justify-center">
-                  <Zap className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-xl font-bold text-white tracking-tight">
-                  Cric<span className="text-electric">OP</span>
-                </span>
-              </Link>
-            </>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="text-white/70"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
           )}
 
           {!isMobile && (
-            <div className="flex items-center gap-2 text-white/40">
-              <span className="text-sm font-medium">Dashboard</span>
+            <div className="flex items-center gap-2 text-white/40 ml-4 border-l border-white/10 pl-4">
+              <span className="text-sm font-medium">Home</span>
               <span className="text-xs">/</span>
               <span className="text-sm font-medium text-white capitalize">
-                {window.location.pathname.split("/").pop()?.replace("-", " ") || "Home"}
+                {window.location.pathname.split("/").pop()?.replace("-", " ") ||
+                  "Home"}
               </span>
             </div>
           )}
@@ -117,8 +113,12 @@ export function Navbar() {
             </Avatar>
             {!isMobile && (
               <div className="hidden lg:block">
-                <p className="text-sm font-medium text-white line-clamp-1">{user?.name}</p>
-                <p className="text-[10px] text-white/50 uppercase tracking-wider">{user?.role}</p>
+                <p className="text-sm font-medium text-white line-clamp-1">
+                  {user?.name}
+                </p>
+                <p className="text-[10px] text-white/50 uppercase tracking-wider">
+                  {user?.role}
+                </p>
               </div>
             )}
           </div>
@@ -127,4 +127,3 @@ export function Navbar() {
     </motion.header>
   );
 }
-

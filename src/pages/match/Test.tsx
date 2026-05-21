@@ -139,9 +139,10 @@ export default function StartMatchPage() {
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 
-  const filteredPlayers = playersData?.players.filter((p) =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  ) || [];
+  const filteredPlayers =
+    playersData?.players.filter((p) =>
+      p.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    ) || [];
 
   const getTeamName = (teamId: string, defaultName: string) => {
     if (teamId === "new") return defaultName || "New Team";
@@ -284,7 +285,9 @@ export default function StartMatchPage() {
                     <SelectContent>
                       <SelectItem value="new">+ Create New Series</SelectItem>
                       {teamsData?.teams.length === 0 ? (
-                         <SelectItem value="none" disabled>No series available</SelectItem>
+                        <SelectItem value="none" disabled>
+                          No series available
+                        </SelectItem>
                       ) : (
                         <>
                           <SelectItem value="ipl">IPL 2026</SelectItem>
@@ -421,8 +424,12 @@ export default function StartMatchPage() {
                           </thead>
                           <tbody className="divide-y divide-white/5">
                             {filteredPlayers.map((player) => {
-                              const inTeamA = teamAPlayerIds.includes(player.id);
-                              const inTeamB = teamBPlayerIds.includes(player.id);
+                              const inTeamA = teamAPlayerIds.includes(
+                                player.id,
+                              );
+                              const inTeamB = teamBPlayerIds.includes(
+                                player.id,
+                              );
                               const isCommon = commonPlayerId === player.id;
 
                               return (
@@ -439,7 +446,10 @@ export default function StartMatchPage() {
                                         <div className="text-sm font-medium text-white">
                                           {player.name}
                                           {isCommon && (
-                                            <Badge variant="outline" className="ml-2 text-[10px] py-0 border-amber-500/50 text-amber-500">
+                                            <Badge
+                                              variant="outline"
+                                              className="ml-2 text-[10px] py-0 border-amber-500/50 text-amber-500"
+                                            >
                                               Common
                                             </Badge>
                                           )}
@@ -454,29 +464,59 @@ export default function StartMatchPage() {
                                     <div className="flex justify-end gap-2">
                                       <Button
                                         size="sm"
-                                        variant={inTeamA ? "default" : "outline"}
+                                        variant={
+                                          inTeamA ? "default" : "outline"
+                                        }
                                         className={cn(
                                           "h-8 px-2 text-xs",
-                                          inTeamA ? "bg-blue-600 hover:bg-blue-700" : "hover:bg-blue-500/10 hover:text-blue-400"
+                                          inTeamA
+                                            ? "bg-blue-600 hover:bg-blue-700"
+                                            : "hover:bg-blue-500/10 hover:text-blue-400",
                                         )}
-                                        onClick={() => togglePlayer(player.id, "A")}
+                                        onClick={() =>
+                                          togglePlayer(player.id, "A")
+                                        }
                                         disabled={isCommon}
                                       >
-                                        {inTeamA ? <Minus className="h-3 w-3 mr-1" /> : <Plus className="h-3 w-3 mr-1" />}
-                                        {getTeamName(matchData.teamAId, newTeamA).split(" ")[0]}
+                                        {inTeamA ? (
+                                          <Minus className="h-3 w-3 mr-1" />
+                                        ) : (
+                                          <Plus className="h-3 w-3 mr-1" />
+                                        )}
+                                        {
+                                          getTeamName(
+                                            matchData.teamAId,
+                                            newTeamA,
+                                          ).split(" ")[0]
+                                        }
                                       </Button>
                                       <Button
                                         size="sm"
-                                        variant={inTeamB ? "default" : "outline"}
+                                        variant={
+                                          inTeamB ? "default" : "outline"
+                                        }
                                         className={cn(
                                           "h-8 px-2 text-xs",
-                                          inTeamB ? "bg-orange-600 hover:bg-orange-700" : "hover:bg-orange-500/10 hover:text-orange-400"
+                                          inTeamB
+                                            ? "bg-orange-600 hover:bg-orange-700"
+                                            : "hover:bg-orange-500/10 hover:text-orange-400",
                                         )}
-                                        onClick={() => togglePlayer(player.id, "B")}
+                                        onClick={() =>
+                                          togglePlayer(player.id, "B")
+                                        }
                                         disabled={isCommon}
                                       >
-                                        {inTeamB ? <Minus className="h-3 w-3 mr-1" /> : <Plus className="h-3 w-3 mr-1" />}
-                                        {getTeamName(matchData.teamBId, newTeamB).split(" ")[0]}
+                                        {inTeamB ? (
+                                          <Minus className="h-3 w-3 mr-1" />
+                                        ) : (
+                                          <Plus className="h-3 w-3 mr-1" />
+                                        )}
+                                        {
+                                          getTeamName(
+                                            matchData.teamBId,
+                                            newTeamB,
+                                          ).split(" ")[0]
+                                        }
                                       </Button>
                                     </div>
                                   </td>
@@ -494,21 +534,35 @@ export default function StartMatchPage() {
                     <div className="p-4 rounded-xl bg-white/5 border border-white/10">
                       <h3 className="text-sm font-medium text-white mb-3 flex justify-between">
                         <span>{getTeamName(matchData.teamAId, newTeamA)}</span>
-                        <span className={cn(teamAPlayerIds.length === playersPerTeam ? "text-emerald-400" : "text-amber-400")}>
+                        <span
+                          className={cn(
+                            teamAPlayerIds.length === playersPerTeam
+                              ? "text-emerald-400"
+                              : "text-amber-400",
+                          )}
+                        >
                           {teamAPlayerIds.length}/{playersPerTeam}
                         </span>
                       </h3>
                       <div className="flex flex-wrap gap-1">
-                        {teamAPlayerIds.map(id => {
-                          const p = playersData?.players.find(pl => pl.id === id);
+                        {teamAPlayerIds.map((id) => {
+                          const p = playersData?.players.find(
+                            (pl) => pl.id === id,
+                          );
                           return (
-                            <Badge key={id} variant="secondary" className="text-[10px]">
+                            <Badge
+                              key={id}
+                              variant="secondary"
+                              className="text-[10px]"
+                            >
                               {p?.name}
                             </Badge>
                           );
                         })}
                         {teamAPlayerIds.length === 0 && (
-                          <span className="text-xs text-white/20 italic">No players selected</span>
+                          <span className="text-xs text-white/20 italic">
+                            No players selected
+                          </span>
                         )}
                       </div>
                     </div>
@@ -516,35 +570,55 @@ export default function StartMatchPage() {
                     <div className="p-4 rounded-xl bg-white/5 border border-white/10">
                       <h3 className="text-sm font-medium text-white mb-3 flex justify-between">
                         <span>{getTeamName(matchData.teamBId, newTeamB)}</span>
-                        <span className={cn(teamBPlayerIds.length === playersPerTeam ? "text-emerald-400" : "text-amber-400")}>
+                        <span
+                          className={cn(
+                            teamBPlayerIds.length === playersPerTeam
+                              ? "text-emerald-400"
+                              : "text-amber-400",
+                          )}
+                        >
                           {teamBPlayerIds.length}/{playersPerTeam}
                         </span>
                       </h3>
                       <div className="flex flex-wrap gap-1">
-                        {teamBPlayerIds.map(id => {
-                          const p = playersData?.players.find(pl => pl.id === id);
+                        {teamBPlayerIds.map((id) => {
+                          const p = playersData?.players.find(
+                            (pl) => pl.id === id,
+                          );
                           return (
-                            <Badge key={id} variant="secondary" className="text-[10px]">
+                            <Badge
+                              key={id}
+                              variant="secondary"
+                              className="text-[10px]"
+                            >
                               {p?.name}
                             </Badge>
                           );
                         })}
                         {teamBPlayerIds.length === 0 && (
-                          <span className="text-xs text-white/20 italic">No players selected</span>
+                          <span className="text-xs text-white/20 italic">
+                            No players selected
+                          </span>
                         )}
                       </div>
                     </div>
 
                     <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                      <Label className="text-xs text-amber-500 mb-2 block">Common Player (Both Teams)</Label>
+                      <Label className="text-xs text-amber-500 mb-2 block">
+                        Common Player (Both Teams)
+                      </Label>
                       <Select
                         value={commonPlayerId}
                         onValueChange={(v) => {
                           setCommonPlayerId(v);
                           if (v !== "none") {
                             // Remove from individual teams if selected as common
-                            setTeamAPlayerIds(prev => prev.filter(id => id !== v));
-                            setTeamBPlayerIds(prev => prev.filter(id => id !== v));
+                            setTeamAPlayerIds((prev) =>
+                              prev.filter((id) => id !== v),
+                            );
+                            setTeamBPlayerIds((prev) =>
+                              prev.filter((id) => id !== v),
+                            );
                           }
                         }}
                       >
@@ -626,8 +700,12 @@ export default function StartMatchPage() {
                         <SelectValue placeholder="Select toss winner" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="teamA">{getTeamName(matchData.teamAId, newTeamA)}</SelectItem>
-                        <SelectItem value="teamB">{getTeamName(matchData.teamBId, newTeamB)}</SelectItem>
+                        <SelectItem value="teamA">
+                          {getTeamName(matchData.teamAId, newTeamA)}
+                        </SelectItem>
+                        <SelectItem value="teamB">
+                          {getTeamName(matchData.teamBId, newTeamB)}
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -747,7 +825,9 @@ export default function StartMatchPage() {
               onClick={handleCreateMatch}
               isLoading={createMatch.isPending}
               className="gap-2"
-              disabled={teamAPlayerIds.length === 0 || teamBPlayerIds.length === 0}
+              disabled={
+                teamAPlayerIds.length === 0 || teamBPlayerIds.length === 0
+              }
             >
               Confirm & Create
               <CheckCircle className="h-4 w-4" />

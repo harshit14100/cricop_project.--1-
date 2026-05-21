@@ -1,55 +1,147 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Trophy, TrendingUp, Target, Zap, ArrowUpRight, ArrowDownRight } from 'lucide-react'
-import { Card } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Badge } from '@/components/ui/badge'
-import { PlayerCard } from '@/components/shared/PlayerCard'
-import { SkeletonCard } from '@/components/shared/SkeletonCard'
-import { useStatistics } from '@/hooks'
-import type { PlayerRanking } from '@/types'
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Trophy,
+  TrendingUp,
+  Target,
+  Zap,
+  ArrowUpRight,
+  ArrowDownRight,
+} from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { PlayerCard } from "@/components/shared/PlayerCard";
+import { SkeletonCard } from "@/components/shared/SkeletonCard";
+import { useStatistics } from "@/hooks";
+import type { PlayerRanking } from "@/types";
 
 const mockRankings: PlayerRanking[] = [
-  { playerId: '1', playerName: 'Virat Kohli', teamName: 'RCB', value: 4500, matches: 120 },
-  { playerId: '2', playerName: 'Rohit Sharma', teamName: 'MI', value: 3800, matches: 115 },
-  { playerId: '3', playerName: 'KL Rahul', teamName: 'LSG', value: 3200, matches: 98 },
-  { playerId: '4', playerName: 'Shikhar Dhawan', teamName: 'PBKS', value: 2900, matches: 105 },
-  { playerId: '5', playerName: 'Faf du Plessis', teamName: 'RCB', value: 2700, matches: 95 },
-]
+  {
+    playerId: "1",
+    playerName: "Virat Kohli",
+    teamName: "RCB",
+    value: 4500,
+    matches: 120,
+  },
+  {
+    playerId: "2",
+    playerName: "Rohit Sharma",
+    teamName: "MI",
+    value: 3800,
+    matches: 115,
+  },
+  {
+    playerId: "3",
+    playerName: "KL Rahul",
+    teamName: "LSG",
+    value: 3200,
+    matches: 98,
+  },
+  {
+    playerId: "4",
+    playerName: "Shikhar Dhawan",
+    teamName: "PBKS",
+    value: 2900,
+    matches: 105,
+  },
+  {
+    playerId: "5",
+    playerName: "Faf du Plessis",
+    teamName: "RCB",
+    value: 2700,
+    matches: 95,
+  },
+];
 
 export default function StatisticsPage() {
-  const [timeRange, setTimeRange] = useState('all-time')
-  const { data, isLoading } = useStatistics({ timeRange })
+  const [timeRange, setTimeRange] = useState("all-time");
+  const { data, isLoading } = useStatistics({ timeRange });
 
   const rankings = {
     topBatsmen: data?.topBatsmen || mockRankings,
-    topBowlers: data?.topBowlers || mockRankings.map(r => ({ ...r, value: Math.floor(r.value / 30) })),
-    mostSixes: data?.mostSixes || mockRankings.map(r => ({ ...r, value: Math.floor(r.value / 40) })),
-    highestStrikeRates: data?.highestStrikeRates || mockRankings.map(r => ({ ...r, value: 140 + Math.random() * 20 })),
-    economyLeaders: data?.economyLeaders || mockRankings.map(r => ({ ...r, value: 6 + Math.random() * 4 })),
+    topBowlers:
+      data?.topBowlers ||
+      mockRankings.map((r) => ({ ...r, value: Math.floor(r.value / 30) })),
+    mostSixes:
+      data?.mostSixes ||
+      mockRankings.map((r) => ({ ...r, value: Math.floor(r.value / 40) })),
+    highestStrikeRates:
+      data?.highestStrikeRates ||
+      mockRankings.map((r) => ({ ...r, value: 140 + Math.random() * 20 })),
+    economyLeaders:
+      data?.economyLeaders ||
+      mockRankings.map((r) => ({ ...r, value: 6 + Math.random() * 4 })),
     mvpRankings: data?.mvpRankings || mockRankings,
-  }
+  };
 
   const tabs = [
-    { id: 'batting', label: 'Top Batsmen', icon: Target, data: rankings.topBatsmen, unit: 'runs' },
-    { id: 'bowling', label: 'Top Bowlers', icon: Zap, data: rankings.topBowlers, unit: 'wickets' },
-    { id: 'sixes', label: 'Most Sixes', icon: Trophy, data: rankings.mostSixes, unit: 'sixes' },
-    { id: 'strike-rate', label: 'Strike Rate', icon: TrendingUp, data: rankings.highestStrikeRates, unit: 'SR' },
-    { id: 'economy', label: 'Economy', icon: ArrowDownRight, data: rankings.economyLeaders, unit: 'econ' },
-    { id: 'mvp', label: 'MVP Rankings', icon: ArrowUpRight, data: rankings.mvpRankings, unit: 'pts' },
-  ]
+    {
+      id: "batting",
+      label: "Top Batsmen",
+      icon: Target,
+      data: rankings.topBatsmen,
+      unit: "runs",
+    },
+    {
+      id: "bowling",
+      label: "Top Bowlers",
+      icon: Zap,
+      data: rankings.topBowlers,
+      unit: "wickets",
+    },
+    {
+      id: "sixes",
+      label: "Most Sixes",
+      icon: Trophy,
+      data: rankings.mostSixes,
+      unit: "sixes",
+    },
+    {
+      id: "strike-rate",
+      label: "Strike Rate",
+      icon: TrendingUp,
+      data: rankings.highestStrikeRates,
+      unit: "SR",
+    },
+    {
+      id: "economy",
+      label: "Economy",
+      icon: ArrowDownRight,
+      data: rankings.economyLeaders,
+      unit: "econ",
+    },
+    {
+      id: "mvp",
+      label: "MVP Rankings",
+      icon: ArrowUpRight,
+      data: rankings.mvpRankings,
+      unit: "pts",
+    },
+  ];
 
   return (
     <div className="space-y-6">
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-2xl md:text-3xl font-bold text-white">Statistics</h1>
-        <p className="text-sm text-white/50 mt-1">Leaderboards and player analytics</p>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <h1 className="text-2xl md:text-3xl font-bold text-white">
+          Statistics
+        </h1>
+        <p className="text-sm text-white/50 mt-1">
+          Leaderboards and player analytics
+        </p>
       </motion.div>
 
       <Tabs defaultValue="batting">
         <TabsList className="w-full grid grid-cols-3 md:grid-cols-6 h-auto">
           {tabs.map((tab) => (
-            <TabsTrigger key={tab.id} value={tab.id} className="flex flex-col items-center gap-1 py-3">
+            <TabsTrigger
+              key={tab.id}
+              value={tab.id}
+              className="flex flex-col items-center gap-1 py-3"
+            >
               <tab.icon className="h-4 w-4" />
               <span className="text-xs">{tab.label}</span>
             </TabsTrigger>
@@ -72,12 +164,18 @@ export default function StatisticsPage() {
                     player={{
                       id: player.playerId,
                       name: player.playerName,
-                      battingStyle: 'right-handed',
+                      battingStyle: "right-handed",
                     }}
                     rank={i + 1}
-                    statValue={typeof player.value === 'number' ? player.value.toFixed(tab.unit === 'SR' || tab.unit === 'econ' ? 1 : 0) : player.value}
+                    statValue={
+                      typeof player.value === "number"
+                        ? player.value.toFixed(
+                            tab.unit === "SR" || tab.unit === "econ" ? 1 : 0,
+                          )
+                        : player.value
+                    }
                     statLabel={tab.unit}
-                    trend={i < 3 ? 'up' : undefined}
+                    trend={i < 3 ? "up" : undefined}
                     index={i}
                   />
                 ))}
@@ -87,5 +185,5 @@ export default function StatisticsPage() {
         ))}
       </Tabs>
     </div>
-  )
+  );
 }

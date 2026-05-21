@@ -9,43 +9,18 @@ import type {
   Ball,
 } from "@/types";
 
-// Mock data store with persistence
-const getInitialUsers = (): User[] => {
-  const saved = localStorage.getItem("cricop_mock_users");
-  if (saved) {
-    try {
-      return JSON.parse(saved);
-    } catch (e) {
-      console.error("Failed to parse mock users", e);
-    }
-  }
-  return [
-    {
-      id: "u1",
-      name: "Virat Kohli",
-      email: "virat@cricket.com",
-      phone: "+919876543210",
-      role: "admin",
-      createdAt: "2024-01-01",
-      isActive: true,
-    },
-    {
-      id: "u2",
-      name: "harshit arora",
-      email: "harshit@cricop.com",
-      phone: "8700866165",
-      role: "admin",
-      createdAt: "2024-01-01",
-      isActive: true,
-    },
-  ];
-};
-
-let mockUsers: User[] = getInitialUsers();
-
-const saveUsers = () => {
-  localStorage.setItem("cricop_mock_users", JSON.stringify(mockUsers));
-};
+// Mock data store
+const mockUsers: User[] = [
+  {
+    id: "u1",
+    name: "Virat Kohli",
+    email: "virat@cricket.com",
+    phone: "+919876543210",
+    role: "admin",
+    createdAt: "2024-01-01",
+    isActive: true,
+  },
+];
 
 const mockMatches: Match[] = [
   {
@@ -553,40 +528,6 @@ const mockDashboardStats: DashboardStats = {
 // Store ball history for each match to support Undo
 const mockBallHistory: Record<string, Ball[]> = {};
 
-// Helper to ensure a user exists as a player
-const ensurePlayerExists = (user: User) => {
-  const existingPlayer = mockPlayers.find(p => p.id === user.id || p.name === user.name);
-  if (!existingPlayer) {
-    mockPlayers.push({
-      id: user.id,
-      name: user.name,
-      battingStyle: "right-handed",
-      stats: {
-        matches: 0,
-        runs: 0,
-        ballsFaced: 0,
-        wickets: 0,
-        ballsBowled: 0,
-        runsConceded: 0,
-        catches: 0,
-        stumpings: 0,
-        highestScore: 0,
-        bestBowling: "-",
-        strikeRate: 0,
-        economy: 0,
-        average: 0,
-        fifties: 0,
-        hundreds: 0,
-        sixes: 0,
-        fours: 0,
-      },
-    });
-  }
-};
-
-// Synchronize pre-defined mock users
-mockUsers.forEach(ensurePlayerExists);
-
 // Simulate network delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -608,73 +549,44 @@ export function setupMockAPI() {
 
       // AUTH ENDPOINTS
       if (url.includes("/auth/login") && method === "post") {
-        const payload =
-          typeof config.data === "string"
-            ? JSON.parse(config.data)
-            : config.data;
-        const { phone_no, password } = payload;
-        const phone = phone_no;
-        let user = mockUsers.find((u) => u.phone === phone);
-        
-        if (user) {
-          // Password check: Enforce specific password for Harshit (Admin), 
-          // allow any password >= 6 for others.
-          const isValid = phone === "8700866165" 
-            ? password === "8700866165h" 
-            : password.length >= 6;
-
-          if (isValid) {
-            ensurePlayerExists(user);
-            return Promise.resolve({
+        const { phone, password } = config.data;
+        const user = mockUsers.find((u) => u.phone === phone);
+        if (user && password.length >= 6) {
+          return Promise.resolve({
+            data: {
+              success: true,
               data: {
-                success: true,
-                data: {
-                  user,
-                  token: "mock-jwt-token-" + user.id,
-                  refreshToken: "mock-refresh-token",
-                },
+                user,
+                token: "mock-jwt-token-" + Date.now(),
+                refreshToken: "mock-refresh-token",
               },
-            });
-          } else {
-            return Promise.reject({ 
-              response: { 
-                status: 401, 
-                data: { message: "Invalid credentials" } 
-              } 
-            });
-          }
+            },
+          });
         }
-        user = {
+        const newUser: User = {
           id: "u" + Date.now(),
           name: "User " + phone.slice(-4),
-          email: (phone || "") + "@cricop.com",
+          email: phone + "@cricop.com",
           phone,
           role: "host",
           createdAt: new Date().toISOString(),
           isActive: true,
         };
-        mockUsers.push(user);
-        saveUsers();
-        ensurePlayerExists(user);
+        mockUsers.push(newUser);
         return Promise.resolve({
           data: {
             success: true,
             data: {
-              user,
-              token: "mock-jwt-token-" + user.id,
+              user: newUser,
+              token: "mock-jwt-token-" + Date.now(),
               refreshToken: "mock-refresh-token",
             },
           },
         });
       }
 
-      if (url.includes("/auth/signup") && method === "post") {
-        const payload =
-          typeof config.data === "string"
-            ? JSON.parse(config.data)
-            : config.data;
-        const { name, phone_no, email } = payload;
-        const phone = phone_no;
+      if (url.includes("/auth/register") && method === "post") {
+        const { name, phone, email } = config.data;
         const newUser: User = {
           id: "u" + Date.now(),
           name,
@@ -685,50 +597,22 @@ export function setupMockAPI() {
           isActive: true,
         };
         mockUsers.push(newUser);
-        saveUsers();
-        ensurePlayerExists(newUser);
         return Promise.resolve({
           data: {
             success: true,
             data: {
               user: newUser,
-              token: "mock-jwt-token-" + newUser.id,
+              token: "mock-jwt-token-" + Date.now(),
               refreshToken: "mock-refresh-token",
             },
           },
         });
       }
 
-      const getMe = () => {
-        const authHeader = config.headers?.Authorization;
-        if (typeof authHeader === 'string' && authHeader.startsWith("Bearer mock-jwt-token-")) {
-          const userId = authHeader.replace("Bearer mock-jwt-token-", "");
-          return mockUsers.find(u => u.id === userId);
-        }
-        return mockUsers[0];
-      };
-
-      if (url.includes("/users/me") && method === "get") {
-        const me = getMe();
+      if (url.includes("/auth/profile") && method === "get") {
         return Promise.resolve({
-          data: { success: true, data: me },
+          data: { success: true, data: mockUsers[0] },
         });
-      }
-
-      if (url.includes("/users/me") && method === "put") {
-        const payload =
-          typeof config.data === "string"
-            ? JSON.parse(config.data)
-            : config.data;
-        const me = getMe();
-        if (me) {
-          Object.assign(me, payload);
-          saveUsers();
-          return Promise.resolve({
-            data: { success: true, data: me },
-          });
-        }
-        return Promise.reject({ response: { status: 401, data: { message: "Unauthorized" } } });
       }
 
       if (url.includes("/auth/logout") && method === "post") {
@@ -793,12 +677,16 @@ export function setupMockAPI() {
         });
       }
 
-      if (url.includes("/start") && url.includes("/matches") && method === "post") {
+      if (
+        url.includes("/start") &&
+        url.includes("/matches") &&
+        method === "post"
+      ) {
         const parts = url.split("/");
         const startIdx = parts.indexOf("matches");
         const matchId = parts[startIdx + 1];
         const match = mockMatches.find((m) => m.id === matchId);
-        
+
         if (match && match.innings.length === 0) {
           match.status = "live";
           match.innings.push({
@@ -857,14 +745,18 @@ export function setupMockAPI() {
             ? JSON.parse(config.data)
             : config.data;
         const match = mockMatches.find((m) => m.id === payload.matchId);
-        
+
         if (!match) {
-          return Promise.reject({ response: { data: { message: "Match not found" } } });
+          return Promise.reject({
+            response: { data: { message: "Match not found" } },
+          });
         }
 
         const currentInnings = match.innings[match.currentInnings - 1];
         if (!currentInnings) {
-          return Promise.reject({ response: { data: { message: "Innings not started" } } });
+          return Promise.reject({
+            response: { data: { message: "Innings not started" } },
+          });
         }
 
         const ball: Ball = {
@@ -886,9 +778,10 @@ export function setupMockAPI() {
           timestamp: new Date().toISOString(),
         };
 
-        currentInnings.balls += (payload.isWide || payload.isNoBall) ? 0 : 1;
-        currentInnings.runs += (payload.runs || 0) + ((payload.isWide || payload.isNoBall) ? 1 : 0);
-        
+        currentInnings.balls += payload.isWide || payload.isNoBall ? 0 : 1;
+        currentInnings.runs +=
+          (payload.runs || 0) + (payload.isWide || payload.isNoBall ? 1 : 0);
+
         if (payload.isWicket) {
           currentInnings.wickets += 1;
         }
@@ -910,17 +803,23 @@ export function setupMockAPI() {
         const matchId = url.split("/")[2];
         const match = mockMatches.find((m) => m.id === matchId);
         if (!match) {
-          return Promise.reject({ response: { data: { message: "Match not found" } } });
+          return Promise.reject({
+            response: { data: { message: "Match not found" } },
+          });
         }
 
         const currentInnings = match.innings[match.currentInnings - 1];
         if (!currentInnings) {
-          return Promise.reject({ response: { data: { message: "Innings not started" } } });
+          return Promise.reject({
+            response: { data: { message: "Innings not started" } },
+          });
         }
 
         const history = mockBallHistory[matchId];
         if (!history || history.length === 0) {
-          return Promise.reject({ response: { data: { message: "No balls to undo" } } });
+          return Promise.reject({
+            response: { data: { message: "No balls to undo" } },
+          });
         }
 
         const lastBall = history.pop();
