@@ -1,4 +1,4 @@
-import api from './api'
+import client from './client'
 import type { Ball, ApiResponse } from '@/types'
 
 interface ScoreBallData {
@@ -11,42 +11,44 @@ interface ScoreBallData {
   isLegBye?: boolean
   dismissalType?: string
   fielderId?: string
+  batsmanId?: string
+  bowlerId?: string
   newBatsmanId?: string
   newBowlerId?: string
 }
 
-export const scoringService = {
+export const scoringApi = {
   scoreBall: async (ballData: ScoreBallData): Promise<Ball> => {
-    const { data } = await api.post<ApiResponse<Ball>>('/scoring/ball', ballData)
+    const { data } = await client.post<ApiResponse<Ball>>('/scoring/ball', ballData)
     return data.data
   },
 
   undoLastBall: async (matchId: string): Promise<void> => {
-    await api.post(`/scoring/${matchId}/undo`)
+    await client.post(`/scoring/${matchId}/undo`)
   },
 
   retirePlayer: async (matchId: string, playerId: string, newPlayerId: string): Promise<void> => {
-    await api.post(`/scoring/${matchId}/retire`, { playerId, newPlayerId })
+    await client.post(`/scoring/${matchId}/retire`, { playerId, newPlayerId })
   },
 
   changeBowler: async (matchId: string, bowlerId: string): Promise<void> => {
-    await api.post(`/scoring/${matchId}/change-bowler`, { bowlerId })
+    await client.post(`/scoring/${matchId}/change-bowler`, { bowlerId })
   },
 
   changeBatsman: async (matchId: string, batsmanId: string, position: 'striker' | 'non-striker'): Promise<void> => {
-    await api.post(`/scoring/${matchId}/change-batsman`, { batsmanId, position })
+    await client.post(`/scoring/${matchId}/change-batsman`, { batsmanId, position })
   },
 
   endInnings: async (matchId: string): Promise<void> => {
-    await api.post(`/scoring/${matchId}/end-innings`)
+    await client.post(`/scoring/${matchId}/end-innings`)
   },
 
   endMatch: async (matchId: string): Promise<void> => {
-    await api.post(`/scoring/${matchId}/end`)
+    await client.post(`/scoring/${matchId}/end`)
   },
 
   getCommentary: async (matchId: string, page?: number): Promise<{ commentary: Ball[]; total: number }> => {
-    const { data } = await api.get<ApiResponse<{ commentary: Ball[]; total: number }>>(`/scoring/${matchId}/commentary`, {
+    const { data } = await client.get<ApiResponse<{ commentary: Ball[]; total: number }>>(`/scoring/${matchId}/commentary`, {
       params: { page },
     })
     return data.data

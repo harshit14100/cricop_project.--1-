@@ -9,7 +9,7 @@ import './index.css'
 
 // Enable mock API for development/demo
 // Remove this when connecting to a real backend
-setupMockAPI()
+// setupMockAPI()
 
 const queryClient = new QueryClient({
   defaultOptions: {

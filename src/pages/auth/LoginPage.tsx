@@ -17,7 +17,7 @@ export default function LoginPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    login.mutate({ ...formData, rememberMe });
+    login.mutate(formData);
   };
 
   return (

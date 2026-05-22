@@ -1,12 +1,12 @@
-import api from "./api";
+import client from "./client";
 import type { ApiResponse, User, Match, PaginatedResponse } from "@/types";
 
-export const adminService = {
+export const adminApi = {
   getUsers: async (
     page = 1,
     limit = 50,
   ): Promise<ApiResponse<PaginatedResponse<User>>> => {
-    const response = await api.get("/admin/users", { params: { page, limit } });
+    const response = await client.get("/admin/users", { params: { page, limit } });
     return response.data;
   },
 
@@ -14,12 +14,12 @@ export const adminService = {
     userId: string,
     role: string,
   ): Promise<ApiResponse<User>> => {
-    const response = await api.patch(`/admin/users/${userId}/role`, { role });
+    const response = await client.patch(`/admin/users/${userId}/role`, { role });
     return response.data;
   },
 
   getReportedMatches: async (): Promise<ApiResponse<Match[]>> => {
-    const response = await api.get("/admin/matches/reported");
+    const response = await client.get("/admin/matches/reported");
     return response.data;
   },
 
@@ -32,17 +32,17 @@ export const adminService = {
       activeToday: number;
     }>
   > => {
-    const response = await api.get("/admin/stats");
+    const response = await client.get("/admin/stats");
     return response.data;
   },
 
   featureMatch: async (matchId: string): Promise<ApiResponse<Match>> => {
-    const response = await api.post(`/admin/matches/${matchId}/feature`);
+    const response = await client.post(`/admin/matches/${matchId}/feature`);
     return response.data;
   },
 
   deleteMatch: async (matchId: string): Promise<ApiResponse<void>> => {
-    const response = await api.delete(`/admin/matches/${matchId}`);
+    const response = await client.delete(`/admin/matches/${matchId}`);
     return response.data;
   },
 };

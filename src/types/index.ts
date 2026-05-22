@@ -33,34 +33,47 @@ export interface Player {
   phone?: string
   avatar?: string
   battingStyle: 'right-handed' | 'left-handed'
-  bowlingStyle?: 'right-arm-fast' | 'right-arm-medium' | 'right-arm-spin' | 'left-arm-fast' | 'left-arm-spin'
+  bowlingStyle?: 'right-arm-fast' | 'right-arm-medium' | 'right-arm-spin' | 'left-arm-fast' | 'left-arm-spin' | 'right-arm-offbreak' | 'right-arm-legbreak' | 'left-arm-orthodox' | 'left-arm-chinaman'
   isCaptain?: boolean
   isWicketKeeper?: boolean
   stats?: PlayerStats
 }
 
+export interface Series {
+  id: string
+  name: string
+  description?: string
+  type?: string
+  teams?: string[]
+  matches?: string[]
+  status?: string
+  startDate?: string
+  endDate?: string
+}
+
 export interface PlayerStats {
-  matches: number
-  runs: number
-  ballsFaced: number
-  wickets: number
-  ballsBowled: number
-  runsConceded: number
-  catches: number
-  stumpings: number
-  highestScore: number
-  bestBowling: string
-  strikeRate: number
-  economy: number
-  average: number
-  fifties: number
-  hundreds: number
-  sixes: number
-  fours: number
+  matches?: number
+  runs?: number
+  ballsFaced?: number
+  wickets?: number
+  ballsBowled?: number
+  runsConceded?: number
+  catches?: number
+  stumpings?: number
+  highestScore?: number
+  bestBowling?: string
+  strikeRate?: number
+  economy?: number
+  average?: number
+  fifties?: number
+  hundreds?: number
+  sixes?: number
+  fours?: number
 }
 
 export interface Match {
   id: string
+  seriesName?: string
   matchType: 't20' | 'odi' | 'test' | 'custom'
   totalOvers: number
   teamA: Team

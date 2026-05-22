@@ -38,19 +38,18 @@ const initialState: ScoringState = {
 export const useScoringStore = create<ScoringStore>()((set) => ({
   ...initialState,
 
-  setMatch: (match) =>
+  setMatch: (match) => {
+    const innings = match.innings[match.currentInnings - 1];
     set({
       currentMatch: match,
       isScoring: match.status === "live",
-      currentOver: match.innings[match.currentInnings]?.overs.length || 0,
-      currentBall:
-        match.innings[match.currentInnings]?.overs[
-          match.innings[match.currentInnings]?.overs.length - 1
-        ]?.balls.length || 0,
-    }),
+      currentOver: innings ? Math.floor(innings.balls / 6) : 0,
+      currentBall: innings ? innings.balls % 6 : 0,
+    });
+  },
 
   updateScore: (ball) =>
-    set((state) => ({
+    set((_state) => ({
       lastDelivery: ball,
       canUndo: true,
       currentBall: ball.ballNumber,
@@ -58,7 +57,7 @@ export const useScoringStore = create<ScoringStore>()((set) => ({
     })),
 
   undoLastDelivery: () =>
-    set((state) => ({
+    set((_state) => ({
       lastDelivery: null,
       canUndo: false,
     })),

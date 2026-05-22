@@ -58,7 +58,7 @@ export default function StartMatchPage() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const [matchData, setMatchData] = useState({
-    matchType: "t20" as const,
+    matchType: "t20" as "t20" | "odi" | "test" | "custom",
     totalOvers: 20,
     teamAId: "",
     teamBId: "",

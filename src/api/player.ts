@@ -1,4 +1,4 @@
-import api from "./api";
+import client from "./client";
 import type {
   ApiResponse,
   Player,
@@ -6,26 +6,26 @@ import type {
   PlayerStats,
 } from "@/types";
 
-export const playerService = {
+export const playerApi = {
   getPlayers: async (
     search?: string,
     teamId?: string,
     page = 1,
     limit = 20,
   ): Promise<ApiResponse<PaginatedResponse<Player>>> => {
-    const response = await api.get("/players", {
+    const response = await client.get("/players", {
       params: { search, teamId, page, limit },
     });
     return response.data;
   },
 
   getPlayer: async (id: string): Promise<ApiResponse<Player>> => {
-    const response = await api.get(`/players/${id}`);
+    const response = await client.get(`/players/${id}`);
     return response.data;
   },
 
   createPlayer: async (data: Partial<Player>): Promise<ApiResponse<Player>> => {
-    const response = await api.post("/players", data);
+    const response = await client.post("/players", data);
     return response.data;
   },
 
@@ -33,17 +33,17 @@ export const playerService = {
     id: string,
     data: Partial<Player>,
   ): Promise<ApiResponse<Player>> => {
-    const response = await api.patch(`/players/${id}`, data);
+    const response = await client.patch(`/players/${id}`, data);
     return response.data;
   },
 
   deletePlayer: async (id: string): Promise<ApiResponse<void>> => {
-    const response = await api.delete(`/players/${id}`);
+    const response = await client.delete(`/players/${id}`);
     return response.data;
   },
 
   getStats: async (id: string): Promise<ApiResponse<PlayerStats>> => {
-    const response = await api.get(`/players/${id}/stats`);
+    const response = await client.get(`/players/${id}/stats`);
     return response.data;
   },
 
@@ -53,7 +53,7 @@ export const playerService = {
   ): Promise<ApiResponse<{ avatar: string }>> => {
     const formData = new FormData();
     formData.append("avatar", file);
-    const response = await api.post(`/players/${id}/avatar`, formData, {
+    const response = await client.post(`/players/${id}/avatar`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return response.data;

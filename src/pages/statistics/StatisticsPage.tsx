@@ -8,9 +8,7 @@ import {
   ArrowUpRight,
   ArrowDownRight,
 } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { PlayerCard } from "@/components/shared/PlayerCard";
 import { SkeletonCard } from "@/components/shared/SkeletonCard";
 import { useStatistics } from "@/hooks";
@@ -55,7 +53,7 @@ const mockRankings: PlayerRanking[] = [
 ];
 
 export default function StatisticsPage() {
-  const [timeRange, setTimeRange] = useState("all-time");
+  const [timeRange] = useState("all-time");
   const { data, isLoading } = useStatistics({ timeRange });
 
   const rankings = {

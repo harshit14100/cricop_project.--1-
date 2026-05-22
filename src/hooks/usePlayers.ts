@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { playerService } from "@/services/playerService";
+import { playerService } from "@/services";
 import type { Player } from "@/types";
+
 
 export function usePlayers(
   search?: string,

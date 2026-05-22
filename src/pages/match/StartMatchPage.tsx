@@ -57,7 +57,7 @@ export default function StartMatchPage() {
   const [tossCaller, setTossCaller] = useState<"teamA" | "teamB">("teamA");
 
   const [matchData, setMatchData] = useState({
-    matchType: "t20" as const,
+    matchType: "t20" as "t20" | "odi" | "test" | "custom",
     totalOvers: 20,
     teamAId: "",
     teamBId: "",

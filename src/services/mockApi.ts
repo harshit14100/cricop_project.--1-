@@ -1,4 +1,4 @@
-import { api } from "./api";
+import { client } from "../api";
 import type {
   User,
   Match,
@@ -9,6 +9,8 @@ import type {
   DashboardStats,
   Ball,
 } from "@/types";
+
+// ... (mock data remains same)
 
 // Mock data store
 const mockUsers: User[] = [
@@ -565,12 +567,12 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Setup mock interceptors
 export function setupMockAPI() {
-  api.interceptors.request.use(async (config) => {
+  client.interceptors.request.use(async (config) => {
     await delay(300);
     return config;
   });
 
-  api.interceptors.response.use(
+  client.interceptors.response.use(
     (response) => response,
     async (error) => {
       const { config } = error;
@@ -580,10 +582,17 @@ export function setupMockAPI() {
       const method = config.method?.toLowerCase();
 
       // AUTH ENDPOINTS
-      if (url.includes("/auth/login") && method === "post") {
-        const { phone, password } = config.data;
+      if ((url.includes("/auth/login") || url.includes("/login")) && method === "post") {
+        const payload = typeof config.data === "string" ? JSON.parse(config.data) : config.data;
+        const phone = payload.phone || payload.phone_no;
+        const password = payload.password;
+
+        if (!phone) {
+          return Promise.reject({ response: { data: { message: "Phone number is required" } } });
+        }
+
         const user = mockUsers.find((u) => u.phone === phone);
-        if (user && password.length >= 6) {
+        if (user && password && password.length >= 6) {
           return Promise.resolve({
             data: {
               success: true,
@@ -595,11 +604,12 @@ export function setupMockAPI() {
             },
           });
         }
+
         const newUser: User = {
           id: "u" + Date.now(),
-          name: "User " + phone.slice(-4),
+          name: "User " + String(phone).slice(-4),
           email: phone + "@cricop.com",
-          phone,
+          phone: String(phone),
           role: "host",
           createdAt: new Date().toISOString(),
           isActive: true,
@@ -617,13 +627,15 @@ export function setupMockAPI() {
         });
       }
 
-      if (url.includes("/auth/register") && method === "post") {
-        const { name, phone, email } = config.data;
+      if ((url.includes("/auth/signup") || url.includes("/auth/register")) && method === "post") {
+        const payload = typeof config.data === "string" ? JSON.parse(config.data) : config.data;
+        const phone = payload.phone || payload.phone_no;
+        
         const newUser: User = {
           id: "u" + Date.now(),
-          name,
-          email,
-          phone,
+          name: payload.name || "New User",
+          email: payload.email || (phone + "@cricop.com"),
+          phone: String(phone),
           role: "host",
           createdAt: new Date().toISOString(),
           isActive: true,
@@ -791,6 +803,12 @@ export function setupMockAPI() {
           });
         }
 
+        const isWide = payload.isWide || false;
+        const isNoBall = payload.isNoBall || false;
+        const isBye = payload.isBye || false;
+        const isLegBye = payload.isLegBye || false;
+        const isLegal = !isWide && !isNoBall;
+
         const ball: Ball = {
           id: "b" + Date.now(),
           inningsId: `i${match.currentInnings}`,
@@ -800,22 +818,118 @@ export function setupMockAPI() {
           bowlerId: payload.bowlerId || "p3",
           runs: payload.runs || 0,
           isWicket: payload.isWicket || false,
-          isWide: payload.isWide || false,
-          isNoBall: payload.isNoBall || false,
-          isBye: payload.isBye || false,
-          isLegBye: payload.isLegBye || false,
+          isWide,
+          isNoBall,
+          isBye,
+          isLegBye,
           isFour: payload.runs === 4,
           isSix: payload.runs === 6,
-          commentary: `${payload.runs || 0} runs`,
+          commentary: `${payload.runs || 0} runs${!isLegal ? " (Extra)" : ""}`,
           timestamp: new Date().toISOString(),
         };
 
-        currentInnings.balls += payload.isWide || payload.isNoBall ? 0 : 1;
-        currentInnings.runs +=
-          (payload.runs || 0) + (payload.isWide || payload.isNoBall ? 1 : 0);
+        // Update Total Score and Balls
+        const penaltyRuns = isWide || isNoBall ? 1 : 0;
+        const totalRunsThisBall = (payload.runs || 0) + penaltyRuns;
+        
+        currentInnings.runs += totalRunsThisBall;
+        if (isLegal) {
+          currentInnings.balls += 1;
+        }
+
+        // Update Extras Object
+        if (isWide) currentInnings.extras.wides += (1 + (payload.runs || 0));
+        else if (isNoBall) currentInnings.extras.noBalls += (1 + (payload.runs || 0));
+        else if (isBye) currentInnings.extras.byes += (payload.runs || 0);
+        else if (isLegBye) currentInnings.extras.legByes += (payload.runs || 0);
 
         if (payload.isWicket) {
           currentInnings.wickets += 1;
+        }
+
+        // Auto-end innings if all players are out
+        const totalPlayers = match.innings[match.currentInnings - 1].battingTeam === match.teamA.id 
+          ? match.teamA.players.length 
+          : match.teamB.players.length;
+
+        if (currentInnings.wickets >= totalPlayers) {
+          currentInnings.isCompleted = true;
+          if (match.currentInnings >= 2) {
+            match.status = "completed";
+          }
+        }
+
+        // Update Batsman Stats
+        if (payload.batsmanId) {
+          let batsman = currentInnings.batsmen.find(b => b.playerId === payload.batsmanId);
+          if (!batsman) {
+            const player = mockPlayers.find(p => p.id === payload.batsmanId);
+            batsman = {
+              playerId: payload.batsmanId,
+              playerName: player?.name || "Unknown",
+              runs: 0,
+              balls: 0,
+              fours: 0,
+              sixes: 0,
+              isOut: false,
+              strikeRate: 0
+            };
+            currentInnings.batsmen.push(batsman);
+          }
+          
+          if (!payload.isWide) {
+            batsman.balls += 1;
+            batsman.runs += payload.runs || 0;
+            if (payload.runs === 4) batsman.fours += 1;
+            if (payload.runs === 6) batsman.sixes += 1;
+            batsman.strikeRate = parseFloat(((batsman.runs / batsman.balls) * 100).toFixed(2));
+          }
+          
+          if (payload.isWicket && !payload.dismissalType?.includes("run-out")) {
+            batsman.isOut = true;
+          }
+        }
+
+        // Update Bowler Stats
+        if (payload.bowlerId) {
+          let bowler = currentInnings.bowlers.find(b => b.playerId === payload.bowlerId);
+          if (!bowler) {
+            const player = mockPlayers.find(p => p.id === payload.bowlerId);
+            bowler = {
+              playerId: payload.bowlerId,
+              playerName: player?.name || "Unknown",
+              overs: 0,
+              balls: 0,
+              maidens: 0,
+              runs: 0,
+              wickets: 0,
+              wides: 0,
+              noBalls: 0,
+              economy: 0
+            };
+            currentInnings.bowlers.push(bowler);
+          }
+
+          const isLegal = !payload.isWide && !payload.isNoBall;
+          const runsConceded = (payload.runs || 0) + (payload.isWide || payload.isNoBall ? 1 : 0);
+          
+          bowler.runs += runsConceded;
+          if (payload.isWide) bowler.wides += 1;
+          if (payload.isNoBall) bowler.noBalls += 1;
+          if (payload.isWicket) bowler.wickets += 1;
+          
+          if (isLegal) {
+            bowler.balls += 1;
+            if (bowler.balls === 6) {
+              bowler.overs += 1;
+              bowler.balls = 0;
+            }
+          }
+          
+          const totalOverBalls = (bowler.overs * 6) + bowler.balls;
+          if (totalOverBalls > 0) {
+            bowler.economy = parseFloat(((bowler.runs / totalOverBalls) * 6).toFixed(2));
+          }
         }
 
         // Save ball to history
@@ -856,11 +970,25 @@ export function setupMockAPI() {
 
         const lastBall = history.pop();
         if (lastBall) {
-          const isWideOrNB = lastBall.isWide || lastBall.isNoBall;
-          currentInnings.balls -= isWideOrNB ? 0 : 1;
-          currentInnings.runs -= (lastBall.runs || 0) + (isWideOrNB ? 1 : 0);
+          const isWide = lastBall.isWide || false;
+          const isNoBall = lastBall.isNoBall || false;
+          const isBye = lastBall.isBye || false;
+          const isLegBye = lastBall.isLegBye || false;
+          const isLegal = !isWide && !isNoBall;
+
+          currentInnings.balls -= isLegal ? 1 : 0;
+          const penalty = isWide || isNoBall ? 1 : 0;
+          currentInnings.runs -= ((lastBall.runs || 0) + penalty);
+
+          if (isWide) currentInnings.extras.wides -= (1 + (lastBall.runs || 0));
+          else if (isNoBall) currentInnings.extras.noBalls -= (1 + (lastBall.runs || 0));
+          else if (isBye) currentInnings.extras.byes -= (lastBall.runs || 0);
+          else if (isLegBye) currentInnings.extras.legByes -= (lastBall.runs || 0);
+
           if (lastBall.isWicket) {
             currentInnings.wickets -= 1;
+            currentInnings.isCompleted = false;
+            match.status = "live";
           }
         }
 
@@ -872,10 +1000,37 @@ export function setupMockAPI() {
         url.includes("/end-innings") &&
         method === "post"
       ) {
+        const matchId = url.split("/")[2];
+        const match = mockMatches.find((m) => m.id === matchId);
+        if (match) {
+          const currentInnings = match.innings[match.currentInnings - 1];
+          if (currentInnings) currentInnings.isCompleted = true;
+          
+          if (match.currentInnings === 1) {
+            match.currentInnings = 2;
+            // Create second innings
+            match.innings.push({
+              battingTeam: currentInnings.bowlingTeam,
+              bowlingTeam: currentInnings.battingTeam,
+              runs: 0,
+              wickets: 0,
+              balls: 0,
+              extras: { wides: 0, noBalls: 0, byes: 0, legByes: 0, penalty: 0 },
+              batsmen: [],
+              bowlers: [],
+              partnerships: [],
+              fallOfWickets: [],
+              isCompleted: false,
+              target: currentInnings.runs + 1
+            });
+          } else {
+            match.status = "completed";
+          }
+        }
         return Promise.resolve({ data: { success: true } });
       }
 
-      // ---> NEW: Match End Mock Endpoint <---
+      // MATCH End Mock Endpoint
       if (
         url.includes("/scoring/") &&
         url.endsWith("/end") &&
@@ -885,6 +1040,8 @@ export function setupMockAPI() {
         const match = mockMatches.find((m) => m.id === matchId);
         if (match) {
           match.status = "completed";
+          const currentInnings = match.innings[match.currentInnings - 1];
+          if (currentInnings) currentInnings.isCompleted = true;
         }
         return Promise.resolve({ data: { success: true } });
       }

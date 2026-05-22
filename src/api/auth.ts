@@ -1,13 +1,13 @@
-import api from "./api";
+import client from "./client";
 
-export const authService = {
+export const authApi = {
   async login(data: { phone: string; password: string }) {
-    const response = await api.post("/auth/login", {
-      phone_no: data.phone,
+    const response = await client.post("/auth/login", {
+      phone: data.phone,
+      phone_no: data.phone, // Supporting both conventions
       password: data.password,
     });
 
-    // Support both { data: { ... } } and direct response
     const responseData = response.data.data || response.data;
 
     if (responseData.token) {
@@ -17,10 +17,12 @@ export const authService = {
     return responseData;
   },
 
-  async signup(data: { name: string; phone: string; password: string }) {
-    const response = await api.post("/auth/signup", {
+  async signup(data: { name: string; phone: string; email?: string; password: string }) {
+    const response = await client.post("/auth/signup", {
       name: data.name,
-      phone_no: data.phone,
+      phone: data.phone,
+      phone_no: data.phone, // Supporting both conventions
+      email: data.email,
       password: data.password,
     });
 
@@ -35,28 +37,22 @@ export const authService = {
 
   async logout() {
     localStorage.removeItem("token");
-
     return true;
   },
 
   async getProfile() {
-    const response = await api.get("/users/me");
-
+    const response = await client.get("/users/me");
     return response.data.data || response.data;
   },
 
   async updateProfile(data: any) {
-    const response = await api.put("/users/me", data);
-
+    const response = await client.put("/users/me", data);
     return response.data.data || response.data;
   },
 
   async mockOtpLogin(phone: string) {
-    // Simulate finding a registered user or creating a new one if not found
-    // This matches the behavior in mockApi.ts
     return new Promise((resolve) => {
       setTimeout(() => {
-        // Try to normalize phone for comparison
         const normalizedPhone = phone.replace(/\s+/g, "");
 
         const mockData = {
@@ -70,7 +66,6 @@ export const authService = {
           token: "mock-jwt-token-" + Date.now(),
         };
 
-        // If it's the admin phone from mockApi
         if (
           normalizedPhone === "+919876543210" ||
           normalizedPhone === "9876543210"

@@ -26,7 +26,7 @@ import {
   useEndMatch,
   useStartMatch,
 } from "@/hooks";
-import { useMatchStore } from "@/store";
+import { useMatchStore, useUIStore } from "@/store";
 import { cn } from "@/lib/utils";
 
 const runsButtons = [0, 1, 2, 3, 4, 6];
@@ -55,6 +55,7 @@ export default function LiveScoringPage() {
   const endMatch = useEndMatch();
   const startMatch = useStartMatch();
   const { liveState } = useMatchStore();
+  const { addToast } = useUIStore();
 
   const [showWicketDialog, setShowWicketDialog] = useState(false);
   const [showOpenerDialog, setShowOpenerDialog] = useState(false);
@@ -65,6 +66,7 @@ export default function LiveScoringPage() {
   const [strikerId, setStrikerId] = useState("");
   const [nonStrikerId, setNonStrikerId] = useState("");
   const [bowlerId, setBowlerId] = useState("");
+  const [lastProcessedOver, setLastProcessedOver] = useState(0);
 
   // Optimistic UI States
   const [optimisticRuns, setOptimisticRuns] = useState(0);
@@ -73,11 +75,69 @@ export default function LiveScoringPage() {
 
   const currentInnings = match?.innings[match.currentInnings - 1];
 
+  // Reset players when innings changes
+  useEffect(() => {
+    setStrikerId("");
+    setNonStrikerId("");
+    setBowlerId("");
+    setLastProcessedOver(0);
+    setShowOpenerDialog(true);
+  }, [match?.currentInnings]);
+
   useEffect(() => {
     setOptimisticRuns(0);
     setOptimisticBalls(0);
     setOptimisticWickets(0);
   }, [currentInnings?.runs, currentInnings?.balls, currentInnings?.wickets]);
+
+  const battingTeam = match?.teamA.id === currentInnings?.battingTeam ? match?.teamA : match?.teamB;
+  const bowlingTeam = match?.teamA.id === currentInnings?.bowlingTeam ? match?.teamA : match?.teamB;
+
+  const dismissedPlayerIds = currentInnings?.batsmen?.filter(b => b.isOut).map(b => b.playerId) || [];
+  const availablePlayers = battingTeam?.players?.filter(p => !dismissedPlayerIds.includes(p.id)) || [];
+  const canProceedWithOne = availablePlayers.length === 1 && strikerId;
+  const isSelectionValid = bowlerId && (strikerId && (nonStrikerId || availablePlayers.length === 1));
+
+  const striker = strikerId ? battingTeam?.players?.find(p => p.id === strikerId) : null;
+  const nonStriker = nonStrikerId ? battingTeam?.players?.find(p => p.id === nonStrikerId) : null;
+  const currentBowler = bowlerId ? bowlingTeam?.players?.find(p => p.id === bowlerId) : null;
+
+  const strikerStats = currentInnings?.batsmen?.find(b => b.playerId === strikerId);
+  const nonStrikerStats = currentInnings?.batsmen?.find(b => b.playerId === nonStrikerId);
+  const bowlerStats = currentInnings?.bowlers?.find(b => b.playerId === bowlerId);
+
+  const displayInnings = {
+    ...currentInnings,
+    runs: (currentInnings?.runs || 0) + optimisticRuns,
+    balls: (currentInnings?.balls || 0) + optimisticBalls,
+    wickets: (currentInnings?.wickets || 0) + optimisticWickets,
+  } as any;
+
+  // Over completion detection
+  useEffect(() => {
+    if (!currentInnings || currentInnings.balls === 0) return;
+    
+    const totalBalls = currentInnings.balls;
+    const overNum = Math.floor(totalBalls / 6);
+    
+    if (totalBalls % 6 === 0 && overNum > lastProcessedOver) {
+      setLastProcessedOver(overNum);
+      
+      const s = strikerId;
+      const ns = nonStrikerId;
+      setStrikerId(ns);
+      setNonStrikerId(s);
+      
+      setBowlerId("");
+      setShowOpenerDialog(true);
+      
+      addToast({ 
+        title: "Over Complete", 
+        description: `Over ${overNum} finished. Select next bowler.`, 
+        variant: "success" 
+      });
+    }
+  }, [currentInnings?.balls, lastProcessedOver, strikerId, nonStrikerId, addToast]);
 
   const handleScore = (runs: number) => {
     if (!matchId || !match || !currentInnings) return;
@@ -92,7 +152,13 @@ export default function LiveScoringPage() {
     setOptimisticRuns((prev) => prev + totalRunsThisBall);
     if (isLegal) setOptimisticBalls((prev) => prev + 1);
 
-    // Trigger celebration
+    if (runs % 2 !== 0 && !isWide && !isNoBall) {
+      const s = strikerId;
+      const ns = nonStrikerId;
+      setStrikerId(ns);
+      setNonStrikerId(s);
+    }
+
     if (runs === 4) {
       setCelebration("four");
       setTimeout(() => setCelebration(null), 2500);
@@ -138,8 +204,6 @@ export default function LiveScoringPage() {
 
     setOptimisticBalls((prev) => prev + 1);
     setOptimisticWickets((prev) => prev + 1);
-
-    // Trigger celebration
     setCelebration("wicket");
     setTimeout(() => setCelebration(null), 2500);
 
@@ -157,8 +221,9 @@ export default function LiveScoringPage() {
           const updatedBalls = currentInnings.balls + 1;
           const updatedWickets = currentInnings.wickets + 1;
           const maxBalls = match.totalOvers * 6;
+          const totalPlayers = battingTeam?.players?.length || 11;
 
-          if (updatedBalls >= maxBalls || updatedWickets >= 10) {
+          if (updatedBalls >= maxBalls || updatedWickets >= totalPlayers) {
             if (match.currentInnings >= 2) {
               endMatch.mutate(matchId);
             } else {
@@ -166,7 +231,9 @@ export default function LiveScoringPage() {
             }
             navigate(`/match-summary/${matchId}`);
           } else {
-            // Logic to select next batsman would go here
+            setStrikerId("");
+            setShowOpenerDialog(true);
+            addToast({ title: "Wicket!", description: "Select next batsman.", variant: "warning" });
           }
         },
       },
@@ -212,20 +279,6 @@ export default function LiveScoringPage() {
     );
   }
 
-  const battingTeam = match.teamA.id === currentInnings.battingTeam ? match.teamA : match.teamB;
-  const bowlingTeam = match.teamA.id === currentInnings.bowlingTeam ? match.teamA : match.teamB;
-
-  const striker = strikerId ? battingTeam.players.find(p => p.id === strikerId) : null;
-  const nonStriker = nonStrikerId ? battingTeam.players.find(p => p.id === nonStrikerId) : null;
-  const currentBowler = bowlerId ? bowlingTeam.players.find(p => p.id === bowlerId) : null;
-
-  const displayInnings = {
-    ...currentInnings,
-    runs: currentInnings.runs + optimisticRuns,
-    balls: currentInnings.balls + optimisticBalls,
-    wickets: currentInnings.wickets + optimisticWickets,
-  };
-
   return (
     <div className="space-y-4 pb-24 md:pb-0">
       <AnimatePresence>
@@ -245,7 +298,6 @@ export default function LiveScoringPage() {
         </TabsList>
 
         <TabsContent value="score" className="mt-4 space-y-4">
-          {/* Active Player Selection / Display */}
           <div className="grid grid-cols-2 gap-3">
             <button 
               onClick={() => setShowOpenerDialog(true)}
@@ -257,7 +309,9 @@ export default function LiveScoringPage() {
               <p className="text-sm font-semibold text-white truncate">
                 {striker?.name || "Select Striker"}
               </p>
-              <p className="text-xs text-electric">0 (0)</p>
+              <p className="text-xs text-electric">
+                {strikerStats ? `${strikerStats.runs} (${strikerStats.balls})` : "0 (0)"}
+              </p>
             </button>
             <button 
               onClick={() => setShowOpenerDialog(true)}
@@ -269,7 +323,9 @@ export default function LiveScoringPage() {
               <p className="text-sm font-semibold text-white truncate">
                 {nonStriker?.name || "Select Non-Striker"}
               </p>
-              <p className="text-xs text-white/60">0 (0)</p>
+              <p className="text-xs text-white/60">
+                {nonStrikerStats ? `${nonStrikerStats.runs} (${nonStrikerStats.balls})` : "0 (0)"}
+              </p>
             </button>
             <button 
               onClick={() => setShowOpenerDialog(true)}
@@ -282,7 +338,9 @@ export default function LiveScoringPage() {
                 <p className="text-sm font-semibold text-white">
                   {currentBowler?.name || "Select Bowler"}
                 </p>
-                <p className="text-xs text-white/60">0.0-0-0-0</p>
+                <p className="text-xs text-white/60">
+                  {bowlerStats ? `${bowlerStats.overs}.${bowlerStats.balls}-${bowlerStats.maidens}-${bowlerStats.runs}-${bowlerStats.wickets}` : "0.0-0-0-0"}
+                </p>
               </div>
             </button>
           </div>
@@ -380,7 +438,6 @@ export default function LiveScoringPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Action Bar */}
       <div className="fixed bottom-16 md:bottom-4 left-0 right-0 md:relative md:bottom-auto px-4 md:px-0">
         <div className="glass-card p-3 flex items-center justify-between gap-2">
           <Button
@@ -411,7 +468,6 @@ export default function LiveScoringPage() {
         </div>
       </div>
 
-      {/* Opener Selection Dialog */}
       <Dialog open={showOpenerDialog} onOpenChange={setShowOpenerDialog}>
         <DialogContent className="max-w-md bg-[#0a1628] border-white/10">
           <DialogHeader>
@@ -421,41 +477,48 @@ export default function LiveScoringPage() {
             <div className="space-y-3">
               <label className="text-xs font-bold text-white/40 uppercase">Striker</label>
               <div className="grid grid-cols-2 gap-2">
-                {battingTeam.players.map(p => (
-                  <Button
-                    key={p.id}
-                    variant={strikerId === p.id ? "default" : "outline"}
-                    className="justify-start truncate"
-                    onClick={() => setStrikerId(p.id)}
-                    disabled={nonStrikerId === p.id}
-                  >
-                    {p.name}
-                  </Button>
-                ))}
+                {battingTeam?.players?.map(p => {
+                  const isOut = currentInnings?.batsmen?.find(b => b.playerId === p.id)?.isOut;
+                  return (
+                    <Button
+                      key={p.id}
+                      variant={strikerId === p.id ? "default" : "outline"}
+                      className={cn("justify-start truncate", isOut && "opacity-50 line-through")}
+                      onClick={() => setStrikerId(p.id)}
+                      disabled={nonStrikerId === p.id || isOut}
+                    >
+                      {p.name}
+                      {isOut && " (Out)"}
+                    </Button>
+                  );
+                })}
               </div>
             </div>
 
             <div className="space-y-3">
               <label className="text-xs font-bold text-white/40 uppercase">Non-Striker</label>
               <div className="grid grid-cols-2 gap-2">
-                {battingTeam.players.map(p => (
-                  <Button
-                    key={p.id}
-                    variant={nonStrikerId === p.id ? "default" : "outline"}
-                    className="justify-start truncate"
-                    onClick={() => setNonStrikerId(p.id)}
-                    disabled={strikerId === p.id}
-                  >
-                    {p.name}
-                  </Button>
-                ))}
+                {battingTeam?.players?.map(p => {
+                  const isOut = currentInnings?.batsmen?.find(b => b.playerId === p.id)?.isOut;
+                  return (
+                    <Button
+                      key={p.id}
+                      variant={nonStrikerId === p.id ? "default" : "outline"}
+                      className={cn("justify-start truncate", isOut && "opacity-50 line-through")}
+                      onClick={() => setNonStrikerId(p.id)}
+                      disabled={strikerId === p.id || isOut}
+                    >
+                      {p.name}
+                      {isOut && " (Out)"}
+                    </Button>
+                  );
+                })}
               </div>
             </div>
-
             <div className="space-y-3">
               <label className="text-xs font-bold text-white/40 uppercase">Bowler</label>
               <div className="grid grid-cols-2 gap-2">
-                {bowlingTeam.players.map(p => (
+                {bowlingTeam?.players?.map(p => (
                   <Button
                     key={p.id}
                     variant={bowlerId === p.id ? "default" : "outline"}
@@ -471,7 +534,7 @@ export default function LiveScoringPage() {
             <Button 
               className="w-full mt-4 bg-blue-600 hover:bg-blue-700" 
               onClick={() => setShowOpenerDialog(false)}
-              disabled={!strikerId || !nonStrikerId || !bowlerId}
+              disabled={!isSelectionValid}
             >
               Confirm Selection
             </Button>
@@ -479,7 +542,6 @@ export default function LiveScoringPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Wicket Dialog */}
       <Dialog open={showWicketDialog} onOpenChange={setShowWicketDialog}>
         <DialogContent>
           <DialogHeader>
@@ -547,7 +609,6 @@ function CelebrationOverlay({ type }: { type: "four" | "six" | "wicket" }) {
           config.shadow,
         )}
       >
-        {/* Animated Background Elements */}
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
@@ -571,7 +632,6 @@ function CelebrationOverlay({ type }: { type: "four" | "six" | "wicket" }) {
           />
         </div>
 
-        {/* Particle Effects (Simplified) */}
         {Array.from({ length: 12 }).map((_, i) => (
           <motion.div
             key={i}

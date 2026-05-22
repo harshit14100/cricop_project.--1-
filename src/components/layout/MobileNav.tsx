@@ -4,7 +4,6 @@ import {
   LayoutDashboard,
   Play,
   History,
-  BarChart3,
   Users,
   Trophy,
 } from 'lucide-react'

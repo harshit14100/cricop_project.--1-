@@ -41,7 +41,7 @@ export function useOtpLogin() {
       })
       navigate('/dashboard')
     },
-    onError: (error: any) => {
+    onError: (_error: any) => {
       addToast({
         title: 'Login failed',
         description: 'Something went wrong',

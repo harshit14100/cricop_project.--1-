@@ -1,4 +1,4 @@
-import api from './api'
+import client from './client'
 import type { Match, ApiResponse } from '@/types'
 
 interface CreateMatchData {
@@ -19,48 +19,48 @@ interface TossData {
   choice: 'bat' | 'bowl'
 }
 
-export const matchService = {
+export const matchApi = {
   getMatches: async (params?: { status?: string; page?: number; limit?: number }): Promise<{ matches: Match[]; total: number }> => {
-    const { data } = await api.get<ApiResponse<{ matches: Match[]; total: number }>>('/matches', { params })
+    const { data } = await client.get<ApiResponse<{ matches: Match[]; total: number }>>('/matches', { params })
     return data.data
   },
 
   getMatch: async (id: string): Promise<Match> => {
-    const { data } = await api.get<ApiResponse<Match>>(`/matches/${id}`)
+    const { data } = await client.get<ApiResponse<Match>>(`/matches/${id}`)
     return data.data
   },
 
   createMatch: async (matchData: CreateMatchData): Promise<Match> => {
-    const { data } = await api.post<ApiResponse<Match>>('/matches', matchData)
+    const { data } = await client.post<ApiResponse<Match>>('/matches', matchData)
     return data.data
   },
 
   updateMatch: async (id: string, matchData: Partial<Match>): Promise<Match> => {
-    const { data } = await api.put<ApiResponse<Match>>(`/matches/${id}`, matchData)
+    const { data } = await client.put<ApiResponse<Match>>(`/matches/${id}`, matchData)
     return data.data
   },
 
   deleteMatch: async (id: string): Promise<void> => {
-    await api.delete(`/matches/${id}`)
+    await client.delete(`/matches/${id}`)
   },
 
   setToss: async (tossData: TossData): Promise<Match> => {
-    const { data } = await api.post<ApiResponse<Match>>('/matches/toss', tossData)
+    const { data } = await client.post<ApiResponse<Match>>('/matches/toss', tossData)
     return data.data
   },
 
   startMatch: async (matchId: string): Promise<Match> => {
-    const { data } = await api.post<ApiResponse<Match>>(`/matches/${matchId}/start`)
+    const { data } = await client.post<ApiResponse<Match>>(`/matches/${matchId}/start`)
     return data.data
   },
 
   getLiveMatch: async (matchId: string): Promise<Match> => {
-    const { data } = await api.get<ApiResponse<Match>>(`/matches/${matchId}/live`)
+    const { data } = await client.get<ApiResponse<Match>>(`/matches/${matchId}/live`)
     return data.data
   },
 
   getShareableLink: async (matchId: string): Promise<string> => {
-    const { data } = await api.get<ApiResponse<{ link: string }>>(`/matches/${matchId}/share`)
+    const { data } = await client.get<ApiResponse<{ link: string }>>(`/matches/${matchId}/share`)
     return data.data.link
   },
 }

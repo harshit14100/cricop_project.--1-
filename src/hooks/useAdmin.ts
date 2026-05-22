@@ -1,6 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { adminService } from '@/services/adminService';
-import { useUIStore } from '@/store';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { adminService } from '@/services'
+import { useUIStore } from '@/store'
+
 
 export function useAdminUsers(page = 1, limit = 50) {
   return useQuery({

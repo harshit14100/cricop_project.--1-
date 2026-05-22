@@ -332,7 +332,7 @@ export default function DashboardPage() {
                 key={player.id}
                 player={player}
                 rank={i + 1}
-                statValue={player.stats?.runs.toString()}
+                statValue={(player.stats?.runs || 0).toString()}
                 statLabel="runs"
                 trend="up"
                 index={i}
