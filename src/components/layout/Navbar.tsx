@@ -1,10 +1,10 @@
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Bell, Search, Zap, Menu } from "lucide-react";
+import { Bell, Search, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { useAuthStore, useUIStore } from "@/store";
+import { useAuthStore } from "@/store";
 import { useIsMobile } from "@/hooks";
 import {
   DropdownMenu,
@@ -17,7 +17,6 @@ export function Navbar() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { user } = useAuthStore();
-  const { sidebarOpen, setSidebarOpen } = useUIStore();
 
   return (
     <motion.header
@@ -35,17 +34,6 @@ export function Navbar() {
               Cric<span className="text-electric">OP</span>
             </span>
           </Link>
-
-          {isMobile && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="text-white/70"
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-          )}
 
           {!isMobile && (
             <div className="flex items-center gap-2 text-white/40 ml-4 border-l border-white/10 pl-4">

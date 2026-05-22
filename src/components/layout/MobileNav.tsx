@@ -6,14 +6,15 @@ import {
   History,
   BarChart3,
   Users,
+  Trophy,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const mobileItems = [
   { icon: LayoutDashboard, label: 'Home', path: '/dashboard' },
   { icon: Play, label: 'Match', path: '/start-match' },
+  { icon: Trophy, label: 'Team', path: '/create-team' },
   { icon: History, label: 'History', path: '/history' },
-  { icon: BarChart3, label: 'Stats', path: '/statistics' },
   { icon: Users, label: 'Players', path: '/players' },
 ]
 
