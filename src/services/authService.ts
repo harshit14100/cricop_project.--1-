@@ -50,4 +50,43 @@ export const authService = {
 
     return response.data.data || response.data;
   },
+
+  async mockOtpLogin(phone: string) {
+    // Simulate finding a registered user or creating a new one if not found
+    // This matches the behavior in mockApi.ts
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        // Try to normalize phone for comparison
+        const normalizedPhone = phone.replace(/\s+/g, "");
+
+        const mockData = {
+          user: {
+            id: "u" + Date.now(),
+            name: "User " + normalizedPhone.slice(-4),
+            phone_no: phone,
+            email: normalizedPhone + "@cricop.com",
+            role: "user",
+          },
+          token: "mock-jwt-token-" + Date.now(),
+        };
+
+        // If it's the admin phone from mockApi
+        if (
+          normalizedPhone === "+919876543210" ||
+          normalizedPhone === "9876543210"
+        ) {
+          mockData.user = {
+            id: "u1",
+            name: "Virat Kohli",
+            phone_no: "+919876543210",
+            email: "virat@cricket.com",
+            role: "admin",
+          } as any;
+        }
+
+        localStorage.setItem("token", mockData.token);
+        resolve(mockData);
+      }, 1000);
+    });
+  },
 };

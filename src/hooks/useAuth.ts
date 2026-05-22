@@ -23,6 +23,34 @@ export function useLogin() {
   })
 }
 
+export function useOtpLogin() {
+  const navigate = useNavigate()
+  const { setUser, setToken, setAuthenticated } = useAuthStore()
+  const { addToast } = useUIStore()
+
+  return useMutation({
+    mutationFn: (phone: string) => authService.mockOtpLogin(phone),
+    onSuccess: (data: any) => {
+      setUser(data.user)
+      setToken(data.token)
+      setAuthenticated(true)
+      addToast({
+        title: 'Logged in successfully',
+        description: 'Welcome to CricOP',
+        variant: 'success',
+      })
+      navigate('/dashboard')
+    },
+    onError: (error: any) => {
+      addToast({
+        title: 'Login failed',
+        description: 'Something went wrong',
+        variant: 'error',
+      })
+    },
+  })
+}
+
 export function useSignup() {
   const navigate = useNavigate()
   const { setUser, setToken, setAuthenticated } = useAuthStore()

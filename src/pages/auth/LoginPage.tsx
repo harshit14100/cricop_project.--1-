@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Zap, Lock, Phone, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [formData, setFormData] = useState({ phone: "", password: "" });
   const login = useLogin();
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +21,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full relative">
       {/* Logo */}
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
@@ -47,7 +48,7 @@ export default function LoginPage() {
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className="glass-card p-6 md:p-8"
+        className="glass-card p-6 md:p-8 relative z-10"
       >
         <div className="text-center mb-6">
           <h2 className="text-xl font-semibold text-white">Welcome Back</h2>
@@ -91,7 +92,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/60"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/60 z-20"
               >
                 {showPassword ? (
                   <EyeOff className="h-4 w-4" />
@@ -116,12 +117,13 @@ export default function LoginPage() {
                 Remember me
               </Label>
             </div>
-            <Link
-              to="/forgot-password"
-              className="text-sm text-electric hover:text-electric/80 transition-colors"
+            <button
+              type="button"
+              onClick={() => navigate("/forgot-password")}
+              className="text-sm text-electric hover:text-electric/80 transition-colors cursor-pointer relative z-20 font-medium"
             >
               Forgot password?
-            </Link>
+            </button>
           </div>
 
           <Button
@@ -148,8 +150,8 @@ export default function LoginPage() {
       </motion.div>
 
       {/* Decorative elements */}
-      <div className="absolute top-20 left-10 w-20 h-20 bg-blue-500/10 rounded-full blur-2xl animate-pulse" />
-      <div className="absolute bottom-20 right-10 w-32 h-32 bg-electric/10 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute top-20 left-10 w-20 h-20 bg-blue-500/10 rounded-full blur-2xl animate-pulse pointer-events-none" />
+      <div className="absolute bottom-20 right-10 w-32 h-32 bg-electric/10 rounded-full blur-3xl animate-pulse pointer-events-none" />
     </div>
   );
 }
