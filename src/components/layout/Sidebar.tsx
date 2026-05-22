@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Zap,
+  Trophy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore, useUIStore } from "@/store";
@@ -19,6 +20,7 @@ import { useIsMobile } from "@/hooks";
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
   { icon: Play, label: "Start Match", path: "/start-match" },
+  { icon: Trophy, label: "Create Team", path: "/create-team" },
   { icon: History, label: "History", path: "/history" },
   { icon: BarChart3, label: "Statistics", path: "/statistics" },
   { icon: Users, label: "Players", path: "/players" },

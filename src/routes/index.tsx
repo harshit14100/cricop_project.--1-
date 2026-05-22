@@ -21,6 +21,7 @@ const PlayerProfilePage = lazy(
   () => import("@/pages/players/PlayerProfilePage"),
 );
 const PlayersListPage = lazy(() => import("@/pages/players/PlayersListPage"));
+const CreateTeamPage = lazy(() => import("@/pages/teams/CreateTeamPage"));
 const AdminDashboardPage = lazy(
   () => import("@/pages/admin/AdminDashboardPage"),
 );
@@ -133,6 +134,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingScreen />}>
             <PlayersListPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "create-team",
+        element: (
+          <Suspense fallback={<LoadingScreen />}>
+            <CreateTeamPage />
           </Suspense>
         ),
       },

@@ -2,6 +2,7 @@ import { api } from "./api";
 import type {
   User,
   Match,
+  Team,
   Player,
   Series,
   Statistics,
@@ -19,6 +20,37 @@ const mockUsers: User[] = [
     role: "admin",
     createdAt: "2024-01-01",
     isActive: true,
+  },
+];
+
+const mockTeams: Team[] = [
+  {
+    id: "t1",
+    name: "Mumbai Indians",
+    shortName: "MI",
+    color: "#004ba0",
+    players: [],
+  },
+  {
+    id: "t2",
+    name: "Chennai Super Kings",
+    shortName: "CSK",
+    color: "#f85c00",
+    players: [],
+  },
+  {
+    id: "t3",
+    name: "Royal Challengers",
+    shortName: "RCB",
+    color: "#ec1c24",
+    players: [],
+  },
+  {
+    id: "t4",
+    name: "Kolkata Knight Riders",
+    shortName: "KKR",
+    color: "#3a225d",
+    players: [],
   },
 ];
 
@@ -863,13 +895,91 @@ export function setupMockAPI() {
           data: {
             success: true,
             data: {
-              teams: mockMatches
-                .map((m) => m.teamA)
-                .concat(mockMatches.map((m) => m.teamB)),
-              total: 4,
+              teams: mockTeams,
+              total: mockTeams.length,
             },
           },
         });
+      }
+
+      if (url === "/teams" && method === "post") {
+        const payload =
+          typeof config.data === "string"
+            ? JSON.parse(config.data)
+            : config.data;
+        
+        const newTeam: Team = {
+          id: "t" + Date.now(),
+          name: payload.name,
+          shortName: payload.shortName,
+          color: payload.color,
+          players: payload.players || [],
+        };
+
+        // If players were sent, add them to global mockPlayers if they don't exist
+        if (payload.players && Array.isArray(payload.players)) {
+          payload.players.forEach((p: Player) => {
+            if (!mockPlayers.find(mp => mp.id === p.id)) {
+              mockPlayers.push({
+                ...p,
+                stats: p.stats || {
+                  matches: 0,
+                  runs: 0,
+                  ballsFaced: 0,
+                  wickets: 0,
+                  ballsBowled: 0,
+                  runsConceded: 0,
+                  catches: 0,
+                  stumpings: 0,
+                  highestScore: 0,
+                  bestBowling: "-",
+                  strikeRate: 0,
+                  economy: 0,
+                  average: 0,
+                  fifties: 0,
+                  hundreds: 0,
+                  sixes: 0,
+                  fours: 0,
+                }
+              });
+            }
+          });
+        }
+
+        mockTeams.push(newTeam);
+        return Promise.resolve({ data: { success: true, data: newTeam } });
+      }
+
+      if (url.match(/\/teams\/[^/]+$/) && method === "get") {
+        const teamId = url.split("/").pop();
+        const team = mockTeams.find((t) => t.id === teamId);
+        if (team) {
+          return Promise.resolve({ data: { success: true, data: team } });
+        }
+      }
+
+      if (url.match(/\/teams\/[^/]+$/) && method === "put") {
+        const teamId = url.split("/").pop();
+        const teamIdx = mockTeams.findIndex((t) => t.id === teamId);
+        if (teamIdx !== -1) {
+          const payload =
+            typeof config.data === "string"
+              ? JSON.parse(config.data)
+              : config.data;
+          mockTeams[teamIdx] = { ...mockTeams[teamIdx], ...payload };
+          return Promise.resolve({
+            data: { success: true, data: mockTeams[teamIdx] },
+          });
+        }
+      }
+
+      if (url.match(/\/teams\/[^/]+$/) && method === "delete") {
+        const teamId = url.split("/").pop();
+        const teamIdx = mockTeams.findIndex((t) => t.id === teamId);
+        if (teamIdx !== -1) {
+          mockTeams.splice(teamIdx, 1);
+          return Promise.resolve({ data: { success: true } });
+        }
       }
 
       if (url === "/players" && method === "get") {
