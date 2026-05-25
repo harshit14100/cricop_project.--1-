@@ -29,7 +29,9 @@ export default function DashboardPage() {
   const matches = matchesData?.matches || [];
   const liveMatches = matches.filter((m) => m.status === "live");
   const upcomingMatches = matches.filter((m) => m.status === "upcoming");
-  const topPlayers = playersData?.players || [];
+  
+  const players = Array.isArray(playersData) ? playersData : playersData?.players || [];
+  const topPlayers = players.slice(0, 5);
 
   return (
     <div className="space-y-8">

@@ -60,7 +60,7 @@ export default function PlayersListPage() {
     limit: 100,
   });
 
-  const players = data?.players || [];
+  const players = Array.isArray(data) ? data : data?.players || [];
   const filteredPlayers = players.filter((p: any) => 
     p?.name?.toLowerCase().includes(search.toLowerCase())
   );
@@ -99,13 +99,13 @@ export default function PlayersListPage() {
       </div>
 
       {isLoading ? (
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <SkeletonCard key={i} className="h-24" />
           ))}
         </div>
       ) : filteredPlayers.length > 0 ? (
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredPlayers.map((player: any, index: number) => (
             <PlayerCard
               key={player.id || `player-${index}`}

@@ -173,8 +173,9 @@ export default function StartMatchPage() {
     }
   };
 
-  const filteredPlayers = playersData?.players.filter((p) =>
-    p.name.toLowerCase().includes(playerSearchTerm.toLowerCase()),
+  const players = Array.isArray(playersData) ? playersData : playersData?.players || [];
+  const filteredPlayers = players.filter((p) =>
+    p?.name?.toLowerCase().includes(playerSearchTerm.toLowerCase()),
   );
 
   const copyLink = () => {
@@ -480,7 +481,7 @@ export default function StartMatchPage() {
                     className="bg-white/5 border-white/10"
                   />
 
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Team A Selection */}
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
@@ -512,10 +513,10 @@ export default function StartMatchPage() {
                             >
                               <div className="flex items-center gap-2">
                                 <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-white">
-                                  {p.name.charAt(0)}
+                                  {p?.name?.charAt(0) || "?"}
                                 </div>
                                 <span className="text-sm text-white">
-                                  {p.name}
+                                  {p?.name || "Unknown"}
                                 </span>
                               </div>
                               {teamAPlayerIds.includes(p.id) && (
@@ -558,10 +559,10 @@ export default function StartMatchPage() {
                             >
                               <div className="flex items-center gap-2">
                                 <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-white">
-                                  {p.name.charAt(0)}
+                                  {p?.name?.charAt(0) || "?"}
                                 </div>
                                 <span className="text-sm text-white">
-                                  {p.name}
+                                  {p?.name || "Unknown"}
                                 </span>
                               </div>
                               {teamBPlayerIds.includes(p.id) && (
@@ -587,9 +588,9 @@ export default function StartMatchPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">None</SelectItem>
-                        {playersData?.players.map((p) => (
+                        {players.map((p) => (
                           <SelectItem key={p.id} value={p.id}>
-                            {p.name}
+                            {p?.name || "Unknown Player"}
                           </SelectItem>
                         ))}
                       </SelectContent>

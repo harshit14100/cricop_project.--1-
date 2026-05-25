@@ -139,10 +139,10 @@ export default function StartMatchPage() {
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 
-  const filteredPlayers =
-    playersData?.players.filter((p) =>
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()),
-    ) || [];
+  const players = Array.isArray(playersData) ? playersData : playersData?.players || [];
+  const filteredPlayers = players.filter((p) =>
+    p.name.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
   const getTeamName = (teamId: string, defaultName: string) => {
     if (teamId === "new") return defaultName || "New Team";
@@ -398,7 +398,7 @@ export default function StartMatchPage() {
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Players Table/List */}
                   <div className="md:col-span-2 space-y-4">
                     <div className="relative">
