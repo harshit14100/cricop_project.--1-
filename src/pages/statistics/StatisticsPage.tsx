@@ -12,65 +12,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlayerCard } from "@/components/shared/PlayerCard";
 import { SkeletonCard } from "@/components/shared/SkeletonCard";
 import { useStatistics } from "@/hooks";
-import type { PlayerRanking } from "@/types";
-
-const mockRankings: PlayerRanking[] = [
-  {
-    playerId: "1",
-    playerName: "Virat Kohli",
-    teamName: "RCB",
-    value: 4500,
-    matches: 120,
-  },
-  {
-    playerId: "2",
-    playerName: "Rohit Sharma",
-    teamName: "MI",
-    value: 3800,
-    matches: 115,
-  },
-  {
-    playerId: "3",
-    playerName: "KL Rahul",
-    teamName: "LSG",
-    value: 3200,
-    matches: 98,
-  },
-  {
-    playerId: "4",
-    playerName: "Shikhar Dhawan",
-    teamName: "PBKS",
-    value: 2900,
-    matches: 105,
-  },
-  {
-    playerId: "5",
-    playerName: "Faf du Plessis",
-    teamName: "RCB",
-    value: 2700,
-    matches: 95,
-  },
-];
 
 export default function StatisticsPage() {
   const [timeRange] = useState("all-time");
   const { data, isLoading } = useStatistics({ timeRange });
 
   const rankings = {
-    topBatsmen: data?.topBatsmen || mockRankings,
-    topBowlers:
-      data?.topBowlers ||
-      mockRankings.map((r) => ({ ...r, value: Math.floor(r.value / 30) })),
-    mostSixes:
-      data?.mostSixes ||
-      mockRankings.map((r) => ({ ...r, value: Math.floor(r.value / 40) })),
-    highestStrikeRates:
-      data?.highestStrikeRates ||
-      mockRankings.map((r) => ({ ...r, value: 140 + Math.random() * 20 })),
-    economyLeaders:
-      data?.economyLeaders ||
-      mockRankings.map((r) => ({ ...r, value: 6 + Math.random() * 4 })),
-    mvpRankings: data?.mvpRankings || mockRankings,
+    topBatsmen: data?.topBatsmen || [],
+    topBowlers: data?.topBowlers || [],
+    mostSixes: data?.mostSixes || [],
+    highestStrikeRates: data?.highestStrikeRates || [],
+    economyLeaders: data?.economyLeaders || [],
+    mvpRankings: data?.mvpRankings || [],
   };
 
   const tabs = [

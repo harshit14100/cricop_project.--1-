@@ -1,17 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { playerService } from "@/services";
+import { useUIStore } from "@/store";
 import type { Player } from "@/types";
 
-
-export function usePlayers(
-  search?: string,
-  teamId?: string,
-  page = 1,
-  limit = 20,
-) {
+export function usePlayers(_params?: any) {
   return useQuery({
-    queryKey: ["players", search, teamId, page, limit],
-    queryFn: () => playerService.getPlayers(search, teamId, page, limit),
+    queryKey: ["players"],
+    queryFn: async () => {
+      const response = await playerService.getPlayers();
+      // Return normalized data structure
+      if (Array.isArray(response)) return { players: response, total: response.length };
+      if ((response as any)?.data && Array.isArray((response as any).data)) {
+        return { players: (response as any).data, total: (response as any).total || (response as any).data.length };
+      }
+      return response as any;
+    },
     staleTime: 60000,
   });
 }
@@ -34,11 +37,20 @@ export function usePlayerStats(id: string) {
 
 export function useCreatePlayer() {
   const queryClient = useQueryClient();
+  const { addToast } = useUIStore();
 
   return useMutation({
     mutationFn: (data: Partial<Player>) => playerService.createPlayer(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["players"] });
+      addToast({ title: "Player added!", variant: "success" });
+    },
+    onError: (error: any) => {
+      addToast({
+        title: "Failed to add player",
+        description: error.response?.data?.message || "Check your backend connection",
+        variant: "error",
+      });
     },
   });
 }

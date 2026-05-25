@@ -7,25 +7,18 @@ import type {
 } from "@/types";
 
 export const playerApi = {
-  getPlayers: async (
-    search?: string,
-    teamId?: string,
-    page = 1,
-    limit = 20,
-  ): Promise<ApiResponse<PaginatedResponse<Player>>> => {
-    const response = await client.get("/players", {
-      params: { search, teamId, page, limit },
-    });
+  getPlayers: async () => {
+    const response = await client.get("/users/players");
     return response.data;
   },
 
   getPlayer: async (id: string): Promise<ApiResponse<Player>> => {
-    const response = await client.get(`/players/${id}`);
+    const response = await client.get(`/users/players/${id}`);
     return response.data;
   },
 
   createPlayer: async (data: Partial<Player>): Promise<ApiResponse<Player>> => {
-    const response = await client.post("/players", data);
+    const response = await client.post("/users/players", data);
     return response.data;
   },
 
@@ -33,12 +26,12 @@ export const playerApi = {
     id: string,
     data: Partial<Player>,
   ): Promise<ApiResponse<Player>> => {
-    const response = await client.patch(`/players/${id}`, data);
+    const response = await client.patch(`/users/players/${id}`, data);
     return response.data;
   },
 
   deletePlayer: async (id: string): Promise<ApiResponse<void>> => {
-    const response = await client.delete(`/players/${id}`);
+    const response = await client.delete(`/users/players/${id}`);
     return response.data;
   },
 

@@ -50,22 +50,22 @@ export function PlayerCard({
             )}
 
             <Avatar className="h-12 w-12 flex-shrink-0">
-              <AvatarImage src={player.avatar} />
-              <AvatarFallback>{player.name.charAt(0)}</AvatarFallback>
+              <AvatarImage src={player?.avatar} />
+              <AvatarFallback>{player?.name?.charAt(0) || "?"}</AvatarFallback>
             </Avatar>
 
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <h4 className="text-sm font-semibold text-white truncate">
-                  {player.name}
+                  {player?.name || "Unknown Player"}
                 </h4>
-                {player.isCaptain && (
+                {player?.isCaptain && (
                   <Award className="h-3.5 w-3.5 text-amber-400" />
                 )}
               </div>
               <p className="text-xs text-white/50 capitalize">
-                {player.battingStyle}{" "}
-                {player.bowlingStyle
+                {player?.battingStyle || "Unknown Batting"}{" "}
+                {player?.bowlingStyle
                   ? `• ${player.bowlingStyle.replace(/-/g, " ")}`
                   : ""}
               </p>

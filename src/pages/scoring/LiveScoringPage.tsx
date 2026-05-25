@@ -95,7 +95,6 @@ export default function LiveScoringPage() {
 
   const dismissedPlayerIds = currentInnings?.batsmen?.filter(b => b.isOut).map(b => b.playerId) || [];
   const availablePlayers = battingTeam?.players?.filter(p => !dismissedPlayerIds.includes(p.id)) || [];
-  const canProceedWithOne = availablePlayers.length === 1 && strikerId;
   const isSelectionValid = bowlerId && (strikerId && (nonStrikerId || availablePlayers.length === 1));
 
   const striker = strikerId ? battingTeam?.players?.find(p => p.id === strikerId) : null;

@@ -3,12 +3,12 @@ import ReactDOM from 'react-dom/client'
 import { RouterProvider } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AnimatePresence } from 'framer-motion'
-import { setupMockAPI } from '@/services/mockApi'
 import router from '@/routes'
 import './index.css'
 
 // Enable mock API for development/demo
 // Remove this when connecting to a real backend
+// import { setupMockAPI } from '@/services/mockApi'
 // setupMockAPI()
 
 const queryClient = new QueryClient({

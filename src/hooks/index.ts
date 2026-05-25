@@ -24,10 +24,13 @@ export {
   useTeams,
   useTeam,
   useCreateTeam,
+} from "./useTeams";
+export {
   usePlayers,
   usePlayer,
+  usePlayerStats,
   useCreatePlayer,
-} from "./useTeams";
+} from "./usePlayers";
 export {
   useStatistics,
   usePlayerStatistics,

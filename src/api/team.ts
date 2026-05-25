@@ -27,26 +27,26 @@ export const teamApi = {
   },
 
   getPlayers: async (params?: { search?: string; teamId?: string; page?: number; limit?: number }): Promise<{ players: Player[]; total: number }> => {
-    const { data } = await client.get<ApiResponse<{ players: Player[]; total: number }>>('/players', { params })
+    const { data } = await client.get<ApiResponse<{ players: Player[]; total: number }>>('/users/players', { params })
     return data.data
   },
 
   getPlayer: async (id: string): Promise<Player> => {
-    const { data } = await client.get<ApiResponse<Player>>(`/players/${id}`)
+    const { data } = await client.get<ApiResponse<Player>>(`/users/players/${id}`)
     return data.data
   },
 
   createPlayer: async (playerData: Omit<Player, 'id'>): Promise<Player> => {
-    const { data } = await client.post<ApiResponse<Player>>('/players', playerData)
+    const { data } = await client.post<ApiResponse<Player>>('/users/players', playerData)
     return data.data
   },
 
   updatePlayer: async (id: string, playerData: Partial<Player>): Promise<Player> => {
-    const { data } = await client.put<ApiResponse<Player>>(`/players/${id}`, playerData)
+    const { data } = await client.put<ApiResponse<Player>>(`/users/players/${id}`, playerData)
     return data.data
   },
 
   deletePlayer: async (id: string): Promise<void> => {
-    await client.delete(`/players/${id}`)
+    await client.delete(`/users/players/${id}`)
   },
 }

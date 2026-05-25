@@ -32,6 +32,7 @@ export default function PlayersListPage() {
   const [search, setSearch] = useState("");
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState("");
+  const [newPlayerPhone, setNewPlayerPhone] = useState("");
   const [battingStyle, setBattingStyle] = useState("right-handed");
 
   const createPlayer = useCreatePlayer();
@@ -39,93 +40,29 @@ export default function PlayersListPage() {
   const handleAddPlayer = () => {
     if (!newPlayerName.trim()) return;
     createPlayer.mutate(
-      { name: newPlayerName, battingStyle: battingStyle as any },
+      { 
+        name: newPlayerName, 
+        phone: newPlayerPhone,
+        battingStyle: battingStyle as any 
+      },
       {
         onSuccess: () => {
           setIsAddOpen(false);
           setNewPlayerName("");
+          setNewPlayerPhone("");
         },
       },
     );
   };
 
-  const { data, isLoading } = usePlayers({
+  const { data, isLoading, error: fetchError } = usePlayers({
     search,
-    limit: 20,
+    limit: 100,
   });
 
-  const allPlayers = data?.players || [
-    {
-      id: "1",
-      name: "Virat Kohli",
-      battingStyle: "right-handed",
-      bowlingStyle: "right-arm-medium",
-      isCaptain: true,
-      stats: {
-        matches: 120,
-        runs: 4500,
-        strikeRate: 140.6,
-        economy: 0,
-        wickets: 0,
-      },
-    },
-    {
-      id: "2",
-      name: "Rohit Sharma",
-      battingStyle: "right-handed",
-      bowlingStyle: "right-arm-offbreak",
-      stats: {
-        matches: 115,
-        runs: 3800,
-        strikeRate: 145.2,
-        economy: 0,
-        wickets: 0,
-      },
-    },
-    {
-      id: "3",
-      name: "Jasprit Bumrah",
-      battingStyle: "right-handed",
-      bowlingStyle: "right-arm-fast",
-      stats: {
-        matches: 98,
-        runs: 120,
-        strikeRate: 150,
-        economy: 7.6,
-        wickets: 145,
-      },
-    },
-    {
-      id: "4",
-      name: "Ravindra Jadeja",
-      battingStyle: "left-handed",
-      bowlingStyle: "left-arm-spin",
-      stats: {
-        matches: 105,
-        runs: 2100,
-        strikeRate: 125.4,
-        economy: 7.2,
-        wickets: 89,
-      },
-    },
-    {
-      id: "5",
-      name: "MS Dhoni",
-      battingStyle: "right-handed",
-      bowlingStyle: "right-arm-medium",
-      isWicketKeeper: true,
-      stats: {
-        matches: 130,
-        runs: 3200,
-        strikeRate: 138.9,
-        economy: 0,
-        wickets: 0,
-      },
-    },
-  ];
-
-  const players = allPlayers.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase()),
+  const players = data?.players || [];
+  const filteredPlayers = players.filter((p: any) => 
+    p?.name?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -167,11 +104,11 @@ export default function PlayersListPage() {
             <SkeletonCard key={i} className="h-24" />
           ))}
         </div>
-      ) : players.length > 0 ? (
+      ) : filteredPlayers.length > 0 ? (
         <div className="grid md:grid-cols-2 gap-4">
-          {players.map((player, index) => (
+          {filteredPlayers.map((player: any, index: number) => (
             <PlayerCard
-              key={player.id}
+              key={player.id || `player-${index}`}
               player={player}
               statValue={player.stats?.runs?.toString() || "0"}
               statLabel="Runs"
@@ -183,10 +120,10 @@ export default function PlayersListPage() {
       ) : (
         <EmptyState
           icon={User}
-          title="No players found"
-          description="Add your first player to get started."
+          title={fetchError ? "Error Loading Players" : "No players found"}
+          description={fetchError ? "Could not connect to the backend server." : "Add your first player to get started."}
           actionLabel="Add Player"
-          onAction={() => navigate("/players/new")}
+          onAction={() => setIsAddOpen(true)}
         />
       )}
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
@@ -201,6 +138,15 @@ export default function PlayersListPage() {
                 placeholder="Enter player name"
                 value={newPlayerName}
                 onChange={(e) => setNewPlayerName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Phone Number</Label>
+              <Input
+                placeholder="+91 98765 43210"
+                type="tel"
+                value={newPlayerPhone}
+                onChange={(e) => setNewPlayerPhone(e.target.value)}
               />
             </div>
             <div className="space-y-2">

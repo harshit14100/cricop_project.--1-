@@ -1,4 +1,5 @@
 import client from "./client";
+import { useAuthStore } from "@/store";
 
 export const authApi = {
   async login(data: { phone: string; password: string }) {
@@ -11,13 +12,23 @@ export const authApi = {
     const responseData = response.data.data || response.data;
 
     if (responseData.token) {
-      localStorage.setItem("token", responseData.token);
+      useAuthStore.getState().setToken(responseData.token);
+      useAuthStore.getState().setAuthenticated(true);
+
+      if (responseData.user) {
+        useAuthStore.getState().setUser(responseData.user);
+      }
     }
 
     return responseData;
   },
 
-  async signup(data: { name: string; phone: string; email?: string; password: string }) {
+  async signup(data: {
+    name: string;
+    phone: string;
+    email?: string;
+    password: string;
+  }) {
     const response = await client.post("/auth/signup", {
       name: data.name,
       phone: data.phone,
@@ -29,14 +40,19 @@ export const authApi = {
     const responseData = response.data.data || response.data;
 
     if (responseData.token) {
-      localStorage.setItem("token", responseData.token);
+      useAuthStore.getState().setToken(responseData.token);
+      useAuthStore.getState().setAuthenticated(true);
+
+      if (responseData.user) {
+        useAuthStore.getState().setUser(responseData.user);
+      }
     }
 
     return responseData;
   },
 
   async logout() {
-    localStorage.removeItem("token");
+    useAuthStore.getState().logout();
     return true;
   },
 
