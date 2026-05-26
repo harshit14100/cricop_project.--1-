@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   Play,
   TrendingUp,
@@ -18,8 +18,20 @@ import { PlayerCard } from "@/components/shared/PlayerCard";
 import { SkeletonCard } from "@/components/shared/SkeletonCard";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { useMatches, useDashboardStats, usePlayers } from "@/hooks";
+import { useAuthStore } from "@/store";
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
+
+  const handleStartMatchClick = () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    navigate("/start-match");
+  };
+
   const { data: matchesData, isLoading: matchesLoading } = useMatches({
     limit: 10,
   });
@@ -46,15 +58,17 @@ export default function DashboardPage() {
             Dashboard
           </h1>
           <p className="text-sm text-white/50 mt-1">
-            Welcome back! Here's what's happening today.
+            {user ? `Welcome back, ${user.name}! Here's what's happening today.` : "Welcome! Here's the latest in the world of cricket."}
           </p>
         </div>
-        <Link to="/start-match">
-          <Button size="lg" className="gap-2 shadow-lg shadow-blue-500/25">
-            <Play className="h-4 w-4" />
-            Start New Match
-          </Button>
-        </Link>
+        <Button 
+          size="lg" 
+          className="gap-2 shadow-lg shadow-blue-500/25"
+          onClick={handleStartMatchClick}
+        >
+          <Play className="h-4 w-4" />
+          Start New Match
+        </Button>
       </motion.div>
 
       {/* Stats Overview */}
@@ -131,9 +145,9 @@ export default function DashboardPage() {
           <EmptyState
             icon={Activity}
             title="No Live Matches"
-            description="Start a new match to see live scoring here."
-            actionLabel="Start Match"
-            onAction={() => (window.location.href = "/start-match")}
+            description={user ? "Start a new match to see live scoring here." : "Log in to start a match and see live scoring here."}
+            actionLabel={user ? "Start Match" : "Login to Start"}
+            onAction={handleStartMatchClick}
           />
         )}
       </section>

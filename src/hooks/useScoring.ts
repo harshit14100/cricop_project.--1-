@@ -8,7 +8,8 @@ export function useScoreBall() {
   const { addBall } = useMatchStore()
 
   return useMutation({
-    mutationFn: scoringService.scoreBall,
+    mutationFn: ({ inningId, ballData }: { inningId: string; ballData: any }) => 
+      scoringService.scoreBall(inningId, ballData),
     onSuccess: (data) => {
       addBall(data)
       queryClient.invalidateQueries({ queryKey: ['live-match'] })

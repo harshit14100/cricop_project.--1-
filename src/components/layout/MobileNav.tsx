@@ -9,16 +9,24 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-const mobileItems = [
-  { icon: LayoutDashboard, label: 'Home', path: '/dashboard' },
-  { icon: Play, label: 'Match', path: '/start-match' },
-  { icon: Trophy, label: 'Team', path: '/create-team' },
-  { icon: History, label: 'History', path: '/history' },
-  { icon: Users, label: 'Players', path: '/players' },
-]
+import { useAuthStore } from '@/store'
 
 export function MobileNav() {
   const location = useLocation()
+  const { user } = useAuthStore()
+
+  const publicItems = [
+    { icon: LayoutDashboard, label: 'Home', path: '/dashboard' },
+    { icon: History, label: 'History', path: '/history' },
+    { icon: Users, label: 'Players', path: '/players' },
+  ]
+
+  const hostItems = [
+    { icon: Play, label: 'Match', path: '/start-match' },
+    { icon: Trophy, label: 'Team', path: '/create-team' },
+  ]
+
+  const items = user ? [...publicItems, ...hostItems] : publicItems
 
   return (
     <motion.nav
@@ -27,7 +35,7 @@ export function MobileNav() {
       className="fixed bottom-0 left-0 right-0 z-50 bg-[#0d1e36]/95 backdrop-blur-xl border-t border-white/5 md:hidden"
     >
       <div className="flex items-center justify-around h-16 safe-area-pb">
-        {mobileItems.map((item) => {
+        {items.map((item) => {
           const isActive = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)
           return (
             <Link

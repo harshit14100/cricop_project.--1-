@@ -66,6 +66,16 @@ export const authApi = {
     return response.data.data || response.data;
   },
 
+  async resetPassword(data: any) {
+    const response = await client.post("/auth/reset-password", data);
+    return response.data.data || response.data;
+  },
+
+  async getUserByUsername(username: string) {
+    const response = await client.get(`/users/profile/${username}`);
+    return response.data.data || response.data;
+  },
+
   async mockOtpLogin(phone: string) {
     return new Promise((resolve) => {
       setTimeout(() => {

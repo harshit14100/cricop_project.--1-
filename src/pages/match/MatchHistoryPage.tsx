@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Search, Filter, Trophy } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -7,8 +8,20 @@ import { MatchCard } from '@/components/shared/MatchCard'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { SkeletonCard } from '@/components/shared/SkeletonCard'
 import { useMatches } from '@/hooks'
+import { useAuthStore } from '@/store'
 
 export default function MatchHistoryPage() {
+  const navigate = useNavigate()
+  const { user } = useAuthStore()
+
+  const handleStartMatchClick = () => {
+    if (!user) {
+      navigate('/login')
+      return
+    }
+    navigate('/start-match')
+  }
+
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('all')
   const { data, isLoading } = useMatches()
@@ -69,9 +82,9 @@ export default function MatchHistoryPage() {
         <EmptyState
           icon={Trophy}
           title="No matches found"
-          description="Try adjusting your filters or start a new match."
-          actionLabel="Start Match"
-          onAction={() => window.location.href = '/start-match'}
+          description={user ? "Try adjusting your filters or start a new match." : "Log in to start a match and see them here."}
+          actionLabel={user ? "Start Match" : "Login to Start"}
+          onAction={handleStartMatchClick}
         />
       )}
     </div>

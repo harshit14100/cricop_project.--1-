@@ -1,8 +1,8 @@
-import { Navigate } from 'react-router-dom'
+import { Navigate, Outlet } from 'react-router-dom'
 import { useAuthStore } from '@/store'
 
 interface ProtectedRouteProps {
-  children: React.ReactNode
+  children?: React.ReactNode
   requiredRole?: 'user' | 'host' | 'admin'
 }
 
@@ -17,5 +17,5 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
     return <Navigate to="/dashboard" replace />
   }
 
-  return <>{children}</>
+  return children ? <>{children}</> : <Outlet />
 }

@@ -42,9 +42,8 @@ client.interceptors.response.use(
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      // Token refresh logic would go here
       useAuthStore.getState().logout();
-      window.location.href = '/login';
+      // No forced redirect here. ProtectedRoute handles redirection for private routes.
     }
 
     return Promise.reject(error);

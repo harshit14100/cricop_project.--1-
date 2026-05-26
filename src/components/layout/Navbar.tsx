@@ -1,6 +1,6 @@
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Bell, Search, Zap } from "lucide-react";
+import { Bell, Search, Zap, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -15,8 +15,11 @@ import {
 
 export function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const isMobile = useIsMobile();
   const { user } = useAuthStore();
+
+  const isHome = location.pathname === "/dashboard" || location.pathname === "/";
 
   return (
     <motion.header
@@ -25,7 +28,17 @@ export function Navbar() {
       className="fixed top-0 left-0 right-0 z-50 h-16 bg-[#0a1628]/80 backdrop-blur-xl border-b border-white/5 transition-all duration-300"
     >
       <div className="flex items-center justify-between h-full px-4 md:px-6 w-full">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
+          {!isHome && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white/70 hover:text-white -ml-2"
+              onClick={() => navigate(-1)}
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+          )}
           <Link to="/dashboard" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-electric flex items-center justify-center">
               <Zap className="h-4 w-4 text-white" />
@@ -92,22 +105,35 @@ export function Navbar() {
           </DropdownMenu>
 
           <div className="flex items-center gap-2 pl-2 border-l border-white/10">
-            <Avatar
-              className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all"
-              onClick={() => navigate("/settings")}
-            >
-              <AvatarImage src={user?.avatar} />
-              <AvatarFallback>{user?.name?.charAt(0) || "U"}</AvatarFallback>
-            </Avatar>
-            {!isMobile && (
-              <div className="hidden lg:block">
-                <p className="text-sm font-medium text-white line-clamp-1">
-                  {user?.name}
-                </p>
-                <p className="text-[10px] text-white/50 uppercase tracking-wider">
-                  {user?.role}
-                </p>
-              </div>
+            {user ? (
+              <>
+                <Avatar
+                  className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all"
+                  onClick={() => navigate("/settings")}
+                >
+                  <AvatarImage src={user?.avatar} />
+                  <AvatarFallback>{user?.name?.charAt(0) || "U"}</AvatarFallback>
+                </Avatar>
+                {!isMobile && (
+                  <div className="hidden lg:block">
+                    <p className="text-sm font-medium text-white line-clamp-1">
+                      {user?.name}
+                    </p>
+                    <p className="text-[10px] text-white/50 uppercase tracking-wider">
+                      {user?.role}
+                    </p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-white border-white/20 hover:bg-white/10"
+                onClick={() => navigate("/login")}
+              >
+                Login
+              </Button>
             )}
           </div>
         </div>

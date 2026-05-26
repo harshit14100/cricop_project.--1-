@@ -168,14 +168,17 @@ export default function LiveScoringPage() {
 
     scoreBall.mutate(
       {
-        matchId,
-        runs,
-        isWide,
-        isNoBall,
-        isBye: selectedExtra === "bye",
-        isLegBye: selectedExtra === "legBye",
-        batsmanId: strikerId,
-        bowlerId: bowlerId,
+        inningId: currentInnings.id,
+        ballData: {
+          matchId,
+          runs,
+          isWide,
+          isNoBall,
+          isBye: selectedExtra === "bye",
+          isLegBye: selectedExtra === "legBye",
+          batsmanId: strikerId,
+          bowlerId: bowlerId,
+        },
       },
       {
         onSuccess: () => {
@@ -208,12 +211,15 @@ export default function LiveScoringPage() {
 
     scoreBall.mutate(
       {
-        matchId,
-        runs: 0,
-        isWicket: true,
-        dismissalType: type.toLowerCase().replace(" ", "-"),
-        batsmanId: strikerId,
-        bowlerId: bowlerId,
+        inningId: currentInnings.id,
+        ballData: {
+          matchId,
+          runs: 0,
+          isWicket: true,
+          dismissalType: type.toLowerCase().replace(" ", "-"),
+          batsmanId: strikerId,
+          bowlerId: bowlerId,
+        },
       },
       {
         onSuccess: () => {

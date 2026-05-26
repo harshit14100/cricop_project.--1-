@@ -10,10 +10,10 @@ export default function SplashScreen() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigate(isAuthenticated ? '/dashboard' : '/login')
+      navigate('/dashboard')
     }, 3000)
     return () => clearTimeout(timer)
-  }, [isAuthenticated, navigate])
+  }, [navigate])
 
   return (
     <div className="min-h-screen bg-[#0a1628] flex items-center justify-center relative overflow-hidden">

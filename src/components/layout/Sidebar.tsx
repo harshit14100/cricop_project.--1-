@@ -16,27 +16,33 @@ import { cn } from "@/lib/utils";
 import { useAuthStore, useUIStore } from "@/store";
 import { useIsMobile } from "@/hooks";
 
-const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
-  { icon: Play, label: "Start Match", path: "/start-match" },
-  { icon: Trophy, label: "Create Team", path: "/create-team" },
-  { icon: History, label: "History", path: "/history" },
-  { icon: BarChart3, label: "Statistics", path: "/statistics" },
-  { icon: Users, label: "Players", path: "/players" },
-];
-
-const adminItems = [{ icon: Shield, label: "Admin", path: "/admin" }];
-
 export function Sidebar() {
   const location = useLocation();
   const { sidebarOpen, setSidebarOpen } = useUIStore();
   const { user } = useAuthStore();
   const isMobile = useIsMobile();
 
-  if (isMobile) return null;
+  const publicItems = [
+    { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
+    { icon: History, label: "History", path: "/history" },
+    { icon: BarChart3, label: "Statistics", path: "/statistics" },
+    { icon: Users, label: "Players", path: "/players" },
+  ];
 
-  const items =
-    user?.role === "admin" ? [...navItems, ...adminItems] : navItems;
+  const hostItems = [
+    { icon: Play, label: "Start Match", path: "/start-match" },
+    { icon: Trophy, label: "Create Team", path: "/create-team" },
+  ];
+
+  const adminItems = [{ icon: Shield, label: "Admin", path: "/admin" }];
+
+  const items = user
+    ? user.role === "admin"
+      ? [...publicItems, ...hostItems, ...adminItems]
+      : [...publicItems, ...hostItems]
+    : publicItems;
+
+  if (isMobile) return null;
 
   return (
     <motion.aside
@@ -46,7 +52,6 @@ export function Sidebar() {
       className="fixed left-0 top-16 bottom-0 z-40 bg-[#0d1e36]/95 backdrop-blur-xl border-r border-white/5"
     >
       <div className="flex flex-col h-full pt-4">
-
         <nav className="flex-1 px-3 space-y-1">
           {items.map((item) => {
             const isActive =
@@ -132,4 +137,3 @@ export function Sidebar() {
     </motion.aside>
   );
 }
-

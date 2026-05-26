@@ -1,12 +1,26 @@
 import { motion } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
+import { ChevronLeft } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 interface AuthLayoutProps {
   children: React.ReactNode
 }
 
 export function AuthLayout({ children }: AuthLayoutProps) {
+  const navigate = useNavigate()
+
   return (
     <div className="min-h-screen bg-[#0a1628] relative overflow-hidden flex items-center justify-center">
+      <Button
+        variant="ghost"
+        size="sm"
+        className="absolute top-6 left-6 z-20 text-white/50 hover:text-white gap-1"
+        onClick={() => navigate('/dashboard')}
+      >
+        <ChevronLeft className="h-4 w-4" />
+        Back to Home
+      </Button>
       {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl" />

@@ -93,6 +93,7 @@ export interface Match {
 }
 
 export interface Innings {
+  id: string
   battingTeam: string
   bowlingTeam: string
   runs: number

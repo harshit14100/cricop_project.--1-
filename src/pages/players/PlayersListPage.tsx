@@ -25,9 +25,11 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { SkeletonCard } from "@/components/shared/SkeletonCard";
 
 import { usePlayers, useCreatePlayer } from "@/hooks";
+import { useAuthStore } from "@/store";
 
 export default function PlayersListPage() {
   const navigate = useNavigate();
+  const { user } = useAuthStore();
 
   const [search, setSearch] = useState("");
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -36,6 +38,14 @@ export default function PlayersListPage() {
   const [battingStyle, setBattingStyle] = useState("right-handed");
 
   const createPlayer = useCreatePlayer();
+
+  const handleAddPlayerClick = () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    setIsAddOpen(true);
+  };
 
   const handleAddPlayer = () => {
     if (!newPlayerName.trim()) return;
@@ -81,7 +91,7 @@ export default function PlayersListPage() {
           </p>
         </div>
 
-        <Button className="gap-2 shrink-0" onClick={() => setIsAddOpen(true)}>
+        <Button className="gap-2 shrink-0" onClick={handleAddPlayerClick}>
           <Plus className="h-4 w-4" />
           Add Player
         </Button>
@@ -121,9 +131,9 @@ export default function PlayersListPage() {
         <EmptyState
           icon={User}
           title={fetchError ? "Error Loading Players" : "No players found"}
-          description={fetchError ? "Could not connect to the backend server." : "Add your first player to get started."}
-          actionLabel="Add Player"
-          onAction={() => setIsAddOpen(true)}
+          description={fetchError ? "Could not connect to the backend server." : user ? "Add your first player to get started." : "Log in to add players and track their stats."}
+          actionLabel={user ? "Add Player" : "Login to Add"}
+          onAction={handleAddPlayerClick}
         />
       )}
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>

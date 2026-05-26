@@ -34,7 +34,7 @@ export const playerApi = {
   },
 
   getStats: async (id: string): Promise<PlayerStats> => {
-    const { data } = await client.get<ApiResponse<PlayerStats>>(`/players/${id}/stats`);
+    const { data } = await client.get<ApiResponse<PlayerStats>>(`/users/players/${id}/stats`);
     return data.data;
   },
 
@@ -44,7 +44,7 @@ export const playerApi = {
   ): Promise<{ avatar: string }> => {
     const formData = new FormData();
     formData.append("avatar", file);
-    const { data } = await client.post<ApiResponse<{ avatar: string }>>(`/players/${id}/avatar`, formData, {
+    const { data } = await client.post<ApiResponse<{ avatar: string }>>(`/users/players/${id}/avatar`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return data.data;

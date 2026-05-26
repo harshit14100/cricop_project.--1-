@@ -18,37 +18,37 @@ interface ScoreBallData {
 }
 
 export const scoringApi = {
-  scoreBall: async (ballData: ScoreBallData): Promise<Ball> => {
-    const { data } = await client.post<ApiResponse<Ball>>('/scoring/ball', ballData)
+  scoreBall: async (inningId: string, ballData: ScoreBallData): Promise<Ball> => {
+    const { data } = await client.post<ApiResponse<Ball>>(`/users/innings/${inningId}/deliveries`, ballData)
     return data.data
   },
 
   undoLastBall: async (matchId: string): Promise<void> => {
-    await client.post(`/scoring/${matchId}/undo`)
+    await client.post(`/users/scoring/${matchId}/undo`)
   },
 
   retirePlayer: async (matchId: string, playerId: string, newPlayerId: string): Promise<void> => {
-    await client.post(`/scoring/${matchId}/retire`, { playerId, newPlayerId })
+    await client.post(`/users/scoring/${matchId}/retire`, { playerId, newPlayerId })
   },
 
   changeBowler: async (matchId: string, bowlerId: string): Promise<void> => {
-    await client.post(`/scoring/${matchId}/change-bowler`, { bowlerId })
+    await client.post(`/users/scoring/${matchId}/change-bowler`, { bowlerId })
   },
 
   changeBatsman: async (matchId: string, batsmanId: string, position: 'striker' | 'non-striker'): Promise<void> => {
-    await client.post(`/scoring/${matchId}/change-batsman`, { batsmanId, position })
+    await client.post(`/users/scoring/${matchId}/change-batsman`, { batsmanId, position })
   },
 
   endInnings: async (matchId: string): Promise<void> => {
-    await client.post(`/scoring/${matchId}/end-innings`)
+    await client.post(`/users/scoring/${matchId}/end-innings`)
   },
 
   endMatch: async (matchId: string): Promise<void> => {
-    await client.post(`/scoring/${matchId}/end`)
+    await client.post(`/users/scoring/${matchId}/end`)
   },
 
   getCommentary: async (matchId: string, page?: number): Promise<{ commentary: Ball[]; total: number }> => {
-    const { data } = await client.get<ApiResponse<{ commentary: Ball[]; total: number }>>(`/scoring/${matchId}/commentary`, {
+    const { data } = await client.get<ApiResponse<{ commentary: Ball[]; total: number }>>(`/users/scoring/${matchId}/commentary`, {
       params: { page },
     })
     return data.data

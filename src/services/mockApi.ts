@@ -583,77 +583,14 @@ export function setupMockAPI() {
 
       // AUTH ENDPOINTS
       if ((url.includes("/auth/login") || url.includes("/login")) && method === "post") {
-        const payload = typeof config.data === "string" ? JSON.parse(config.data) : config.data;
-        const phone = payload.phone || payload.phone_no;
-        const password = payload.password;
-
-        if (!phone) {
-          return Promise.reject({ response: { data: { message: "Phone number is required" } } });
-        }
-
-        const user = mockUsers.find((u) => u.phone === phone);
-        if (user && password && password.length >= 6) {
-          return Promise.resolve({
-            data: {
-              success: true,
-              data: {
-                user,
-                token: "mock-jwt-token-" + Date.now(),
-                refreshToken: "mock-refresh-token",
-              },
-            },
-          });
-        }
-
-        const newUser: User = {
-          id: "u" + Date.now(),
-          name: "User " + String(phone).slice(-4),
-          email: phone + "@cricop.com",
-          phone: String(phone),
-          role: "host",
-          createdAt: new Date().toISOString(),
-          isActive: true,
-        };
-        mockUsers.push(newUser);
-        return Promise.resolve({
-          data: {
-            success: true,
-            data: {
-              user: newUser,
-              token: "mock-jwt-token-" + Date.now(),
-              refreshToken: "mock-refresh-token",
-            },
-          },
-        });
+        // ...
       }
 
       if ((url.includes("/auth/signup") || url.includes("/auth/register")) && method === "post") {
-        const payload = typeof config.data === "string" ? JSON.parse(config.data) : config.data;
-        const phone = payload.phone || payload.phone_no;
-        
-        const newUser: User = {
-          id: "u" + Date.now(),
-          name: payload.name || "New User",
-          email: payload.email || (phone + "@cricop.com"),
-          phone: String(phone),
-          role: "host",
-          createdAt: new Date().toISOString(),
-          isActive: true,
-        };
-        mockUsers.push(newUser);
-        return Promise.resolve({
-          data: {
-            success: true,
-            data: {
-              user: newUser,
-              token: "mock-jwt-token-" + Date.now(),
-              refreshToken: "mock-refresh-token",
-            },
-          },
-        });
+        // ...
       }
 
-      if (url.includes("/auth/profile") && method === "get") {
+      if (url.includes("/users/me") && method === "get") {
         return Promise.resolve({
           data: { success: true, data: mockUsers[0] },
         });
@@ -664,7 +601,7 @@ export function setupMockAPI() {
       }
 
       // MATCH ENDPOINTS
-      if (url === "/matches" && method === "get") {
+      if (url === "/users/matches" && method === "get") {
         return Promise.resolve({
           data: {
             success: true,
@@ -673,7 +610,7 @@ export function setupMockAPI() {
         });
       }
 
-      if (url.match(/\/matches\/[^/]+$/) && method === "get") {
+      if (url.match(/\/users\/matches\/[^/]+$/) && method === "get") {
         const matchId = url.split("/").pop();
         const match = mockMatches.find((m) => m.id === matchId);
         if (match) {
@@ -681,7 +618,7 @@ export function setupMockAPI() {
         }
       }
 
-      if (url.endsWith("/matches") && method === "post") {
+      if (url.endsWith("/users/matches") && method === "post") {
         const payload =
           typeof config.data === "string"
             ? JSON.parse(config.data)
@@ -715,25 +652,25 @@ export function setupMockAPI() {
         return Promise.resolve({ data: { success: true, data: newMatch } });
       }
 
-      if (url.includes("/matches/toss") && method === "post") {
+      if (url.match(/\/users\/matches\/[^/]+\/toss$/) && method === "post") {
         return Promise.resolve({
           data: { success: true, data: mockMatches[0] },
         });
       }
 
       if (
-        url.includes("/start") &&
-        url.includes("/matches") &&
+        url.match(/\/users\/matches\/[^/]+\/innings$/) &&
         method === "post"
       ) {
         const parts = url.split("/");
-        const startIdx = parts.indexOf("matches");
-        const matchId = parts[startIdx + 1];
+        const matchIdx = parts.indexOf("matches");
+        const matchId = parts[matchIdx + 1];
         const match = mockMatches.find((m) => m.id === matchId);
 
         if (match && match.innings.length === 0) {
           match.status = "live";
           match.innings.push({
+            id: "i" + Date.now(),
             battingTeam:
               match.tossChoice === "bat"
                 ? match.tossWinner === "teamA"
@@ -766,24 +703,22 @@ export function setupMockAPI() {
         });
       }
 
-      if (url.match(/\/matches\/[^/]+\/live/) && method === "get") {
-        const matchId = url.split("/")[2];
+      if (url.match(/\/users\/matches\/[^/]+\/live/) && method === "get") {
+        const parts = url.split("/");
+        const matchIdx = parts.indexOf("matches");
+        const matchId = parts[matchIdx + 1];
         const match = mockMatches.find((m) => m.id === matchId);
         return Promise.resolve({
           data: { success: true, data: match || mockMatches[0] },
         });
       }
 
-      if (url.match(/\/matches\/[^/]+$/) && method === "get") {
-        const matchId = url.split("/").pop();
-        const match = mockMatches.find((m) => m.id === matchId);
-        if (match) {
-          return Promise.resolve({ data: { success: true, data: match } });
-        }
-      }
-
       // SCORING ENDPOINTS
-      if (url.includes("/scoring/ball") && method === "post") {
+      if (url.match(/\/users\/innings\/[^/]+\/deliveries$/) && method === "post") {
+        const parts = url.split("/");
+        const inningIdx = parts.indexOf("innings");
+        const inningId = parts[inningIdx + 1];
+        
         const payload =
           typeof config.data === "string"
             ? JSON.parse(config.data)
@@ -796,7 +731,7 @@ export function setupMockAPI() {
           });
         }
 
-        const currentInnings = match.innings[match.currentInnings - 1];
+        const currentInnings = match.innings.find(i => i.id === inningId) || match.innings[match.currentInnings - 1];
         if (!currentInnings) {
           return Promise.reject({
             response: { data: { message: "Innings not started" } },
@@ -811,7 +746,7 @@ export function setupMockAPI() {
 
         const ball: Ball = {
           id: "b" + Date.now(),
-          inningsId: `i${match.currentInnings}`,
+          inningsId: inningId,
           overNumber: Math.floor((currentInnings.balls || 0) / 6),
           ballNumber: ((currentInnings.balls || 0) % 6) + 1,
           batsmanId: payload.batsmanId || "p1",
@@ -848,7 +783,7 @@ export function setupMockAPI() {
         }
 
         // Auto-end innings if all players are out
-        const totalPlayers = match.innings[match.currentInnings - 1].battingTeam === match.teamA.id 
+        const totalPlayers = currentInnings.battingTeam === match.teamA.id 
           ? match.teamA.players.length 
           : match.teamB.players.length;
 
@@ -942,11 +877,13 @@ export function setupMockAPI() {
       }
 
       if (
-        url.includes("/scoring/") &&
+        url.includes("/users/scoring/") &&
         url.includes("/undo") &&
         method === "post"
       ) {
-        const matchId = url.split("/")[2];
+        const parts = url.split("/");
+        const scoringIdx = parts.indexOf("scoring");
+        const matchId = parts[scoringIdx + 1];
         const match = mockMatches.find((m) => m.id === matchId);
         if (!match) {
           return Promise.reject({
@@ -996,11 +933,13 @@ export function setupMockAPI() {
       }
 
       if (
-        url.includes("/scoring/") &&
+        url.includes("/users/scoring/") &&
         url.includes("/end-innings") &&
         method === "post"
       ) {
-        const matchId = url.split("/")[2];
+        const parts = url.split("/");
+        const scoringIdx = parts.indexOf("scoring");
+        const matchId = parts[scoringIdx + 1];
         const match = mockMatches.find((m) => m.id === matchId);
         if (match) {
           const currentInnings = match.innings[match.currentInnings - 1];
@@ -1010,6 +949,7 @@ export function setupMockAPI() {
             match.currentInnings = 2;
             // Create second innings
             match.innings.push({
+              id: "i" + Date.now(),
               battingTeam: currentInnings.bowlingTeam,
               bowlingTeam: currentInnings.battingTeam,
               runs: 0,
@@ -1032,11 +972,13 @@ export function setupMockAPI() {
 
       // MATCH End Mock Endpoint
       if (
-        url.includes("/scoring/") &&
+        url.includes("/users/scoring/") &&
         url.endsWith("/end") &&
         method === "post"
       ) {
-        const matchId = url.split("/scoring/")[1]?.split("/")[0];
+        const parts = url.split("/");
+        const scoringIdx = parts.indexOf("scoring");
+        const matchId = parts[scoringIdx + 1];
         const match = mockMatches.find((m) => m.id === matchId);
         if (match) {
           match.status = "completed";
@@ -1047,7 +989,7 @@ export function setupMockAPI() {
       }
 
       // TEAM/PLAYER ENDPOINTS
-      if (url === "/teams" && method === "get") {
+      if (url === "/users/teams" && method === "get") {
         return Promise.resolve({
           data: {
             success: true,
@@ -1059,7 +1001,7 @@ export function setupMockAPI() {
         });
       }
 
-      if (url === "/teams" && method === "post") {
+      if (url === "/users/teams" && method === "post") {
         const payload =
           typeof config.data === "string"
             ? JSON.parse(config.data)
@@ -1073,41 +1015,12 @@ export function setupMockAPI() {
           players: payload.players || [],
         };
 
-        // If players were sent, add them to global mockPlayers if they don't exist
-        if (payload.players && Array.isArray(payload.players)) {
-          payload.players.forEach((p: Player) => {
-            if (!mockPlayers.find(mp => mp.id === p.id)) {
-              mockPlayers.push({
-                ...p,
-                stats: p.stats || {
-                  matches: 0,
-                  runs: 0,
-                  ballsFaced: 0,
-                  wickets: 0,
-                  ballsBowled: 0,
-                  runsConceded: 0,
-                  catches: 0,
-                  stumpings: 0,
-                  highestScore: 0,
-                  bestBowling: "-",
-                  strikeRate: 0,
-                  economy: 0,
-                  average: 0,
-                  fifties: 0,
-                  hundreds: 0,
-                  sixes: 0,
-                  fours: 0,
-                }
-              });
-            }
-          });
-        }
-
+        // ...
         mockTeams.push(newTeam);
         return Promise.resolve({ data: { success: true, data: newTeam } });
       }
 
-      if (url.match(/\/teams\/[^/]+$/) && method === "get") {
+      if (url.match(/\/users\/teams\/[^/]+$/) && method === "get") {
         const teamId = url.split("/").pop();
         const team = mockTeams.find((t) => t.id === teamId);
         if (team) {
@@ -1115,7 +1028,7 @@ export function setupMockAPI() {
         }
       }
 
-      if (url.match(/\/teams\/[^/]+$/) && method === "put") {
+      if (url.match(/\/users\/teams\/[^/]+$/) && method === "put") {
         const teamId = url.split("/").pop();
         const teamIdx = mockTeams.findIndex((t) => t.id === teamId);
         if (teamIdx !== -1) {
@@ -1130,7 +1043,7 @@ export function setupMockAPI() {
         }
       }
 
-      if (url.match(/\/teams\/[^/]+$/) && method === "delete") {
+      if (url.match(/\/users\/teams\/[^/]+$/) && method === "delete") {
         const teamId = url.split("/").pop();
         const teamIdx = mockTeams.findIndex((t) => t.id === teamId);
         if (teamIdx !== -1) {
@@ -1139,7 +1052,7 @@ export function setupMockAPI() {
         }
       }
 
-      if (url === "/players" && method === "get") {
+      if (url === "/users/players" && method === "get") {
         return Promise.resolve({
           data: {
             success: true,
@@ -1148,7 +1061,7 @@ export function setupMockAPI() {
         });
       }
 
-      if (url.match(/\/players\/[^/]+$/) && method === "get") {
+      if (url.match(/\/users\/players\/[^/]+$/) && method === "get") {
         const playerId = url.split("/").pop();
         const player = mockPlayers.find((p) => p.id === playerId);
         if (player) {
@@ -1156,8 +1069,7 @@ export function setupMockAPI() {
         }
       }
 
-      // ---> NEW: Add Player Mock Endpoint <---
-      if (url === "/players" && method === "post") {
+      if (url === "/users/players" && method === "post") {
         const payload =
           typeof config.data === "string"
             ? JSON.parse(config.data)
@@ -1166,23 +1078,7 @@ export function setupMockAPI() {
           id: "p" + Date.now(),
           ...payload,
           stats: {
-            matches: 0,
-            runs: 0,
-            ballsFaced: 0,
-            wickets: 0,
-            ballsBowled: 0,
-            runsConceded: 0,
-            catches: 0,
-            stumpings: 0,
-            highestScore: 0,
-            bestBowling: "-",
-            strikeRate: 0,
-            economy: 0,
-            average: 0,
-            fifties: 0,
-            hundreds: 0,
-            sixes: 0,
-            fours: 0,
+            // ...
           },
         };
         mockPlayers.push(newPlayer);
@@ -1190,52 +1086,35 @@ export function setupMockAPI() {
       }
 
       // STATISTICS ENDPOINTS
-      if (url === "/statistics" && method === "get") {
+      if (url === "/users/statistics" && method === "get") {
         return Promise.resolve({ data: { success: true, data: mockStats } });
       }
 
-      if (url.match(/\/statistics\/player\/[^/]+$/) && method === "get") {
+      if (url.match(/\/users\/statistics\/player\/[^/]+$/) && method === "get") {
         return Promise.resolve({
           data: { success: true, data: mockPlayers[0].stats },
         });
       }
 
-      if (url === "/statistics/dashboard" && method === "get") {
+      if (url === "/users/statistics/dashboard" && method === "get") {
         return Promise.resolve({
           data: { success: true, data: mockDashboardStats },
         });
       }
 
-      if (url.match(/\/matches\/[^/]+\/highlights/) && method === "get") {
+      if (url.match(/\/users\/matches\/[^/]+\/highlights/) && method === "get") {
         return Promise.resolve({
           data: {
             success: true,
             data: [
-              {
-                type: "six",
-                description: "Massive six over deep mid-wicket",
-                over: 12,
-                ball: 3,
-              },
-              {
-                type: "four",
-                description: "Cracking cover drive",
-                over: 8,
-                ball: 5,
-              },
-              {
-                type: "wicket",
-                description: "Clean bowled",
-                over: 15,
-                ball: 2,
-              },
+              // ...
             ],
           },
         });
       }
 
       // SERIES ENDPOINTS
-      if (url === "/series" && method === "get") {
+      if (url === "/users/series" && method === "get") {
         return Promise.resolve({ data: { success: true, data: mockSeries } });
       }
 

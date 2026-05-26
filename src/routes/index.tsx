@@ -32,10 +32,6 @@ const NotFoundPage = lazy(() => import("@/pages/NotFoundPage"));
 
 const router = createBrowserRouter([
   {
-    path: "/",
-    element: <SplashScreen />,
-  },
-  {
     path: "/login",
     element: (
       <AuthLayout>
@@ -67,12 +63,16 @@ const router = createBrowserRouter([
   },
   {
     path: "/",
-    element: (
-      <ProtectedRoute>
-        <MainLayout />
-      </ProtectedRoute>
-    ),
+    element: <MainLayout />,
     children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<LoadingScreen />}>
+            <DashboardPage />
+          </Suspense>
+        ),
+      },
       {
         path: "dashboard",
         element: (
@@ -82,18 +82,10 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "start-match",
+        path: "history",
         element: (
           <Suspense fallback={<LoadingScreen />}>
-            <StartMatchPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: "live-scoring/:matchId",
-        element: (
-          <Suspense fallback={<LoadingScreen />}>
-            <LiveScoringPage />
+            <MatchHistoryPage />
           </Suspense>
         ),
       },
@@ -102,22 +94,6 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingScreen />}>
             <MatchViewPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: "match-summary/:matchId",
-        element: (
-          <Suspense fallback={<LoadingScreen />}>
-            <MatchSummaryPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: "history",
-        element: (
-          <Suspense fallback={<LoadingScreen />}>
-            <MatchHistoryPage />
           </Suspense>
         ),
       },
@@ -138,14 +114,6 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "create-team",
-        element: (
-          <Suspense fallback={<LoadingScreen />}>
-            <CreateTeamPage />
-          </Suspense>
-        ),
-      },
-      {
         path: "player/:playerId",
         element: (
           <Suspense fallback={<LoadingScreen />}>
@@ -154,38 +122,79 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "admin",
-        element: (
-          <Suspense fallback={<LoadingScreen />}>
-            <AdminDashboardPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: "admin/users",
-        element: (
-          <Suspense fallback={<LoadingScreen />}>
-            <AdminUsersPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: "admin/matches",
-        element: (
-          <Suspense fallback={<LoadingScreen />}>
-            <AdminMatchesPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: "settings",
-        element: (
-          <Suspense fallback={<LoadingScreen />}>
-            <SettingsPage />
-          </Suspense>
-        ),
+        element: <ProtectedRoute />,
+        children: [
+          {
+            path: "start-match",
+            element: (
+              <Suspense fallback={<LoadingScreen />}>
+                <StartMatchPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: "live-scoring/:matchId",
+            element: (
+              <Suspense fallback={<LoadingScreen />}>
+                <LiveScoringPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: "match-summary/:matchId",
+            element: (
+              <Suspense fallback={<LoadingScreen />}>
+                <MatchSummaryPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: "create-team",
+            element: (
+              <Suspense fallback={<LoadingScreen />}>
+                <CreateTeamPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: "admin",
+            element: (
+              <Suspense fallback={<LoadingScreen />}>
+                <AdminDashboardPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: "admin/users",
+            element: (
+              <Suspense fallback={<LoadingScreen />}>
+                <AdminUsersPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: "admin/matches",
+            element: (
+              <Suspense fallback={<LoadingScreen />}>
+                <AdminMatchesPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: "settings",
+            element: (
+              <Suspense fallback={<LoadingScreen />}>
+                <SettingsPage />
+              </Suspense>
+            ),
+          },
+        ],
       },
     ],
+  },
+  {
+    path: "/splash",
+    element: <SplashScreen />,
   },
   {
     path: "*",
