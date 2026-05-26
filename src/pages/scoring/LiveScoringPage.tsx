@@ -90,8 +90,16 @@ export default function LiveScoringPage() {
     setOptimisticWickets(0);
   }, [currentInnings?.runs, currentInnings?.balls, currentInnings?.wickets]);
 
-  const battingTeam = match?.teamA.id === currentInnings?.battingTeam ? match?.teamA : match?.teamB;
-  const bowlingTeam = match?.teamA.id === currentInnings?.bowlingTeam ? match?.teamA : match?.teamB;
+  const battingTeam = match?.team1_id === currentInnings?.battingTeam ? match?.teamA : match?.teamB;
+  const bowlingTeam = match?.team1_id === currentInnings?.battingTeam ? match?.teamB : match?.teamA;
+
+  const battingTeamName = match?.team1_id === currentInnings?.battingTeam 
+    ? (match?.teamA?.name || match?.team_1_name || "Team 1")
+    : (match?.teamB?.name || match?.team_2_name || "Team 2");
+
+  const bowlingTeamName = match?.team1_id === currentInnings?.battingTeam
+    ? (match?.teamB?.name || match?.team_2_name || "Team 2")
+    : (match?.teamA?.name || match?.team_1_name || "Team 1");
 
   const dismissedPlayerIds = currentInnings?.batsmen?.filter(b => b.isOut).map(b => b.playerId) || [];
   const availablePlayers = battingTeam?.players?.filter(p => !dismissedPlayerIds.includes(p.id)) || [];
@@ -184,7 +192,7 @@ export default function LiveScoringPage() {
         onSuccess: () => {
           if (isLegal) {
             const updatedBalls = currentInnings.balls + 1;
-            const maxBalls = match.totalOvers * 6;
+            const maxBalls = (match.overs || 20) * 6;
 
             if (updatedBalls >= maxBalls) {
               if (match.currentInnings >= 2) {
@@ -225,8 +233,8 @@ export default function LiveScoringPage() {
         onSuccess: () => {
           const updatedBalls = currentInnings.balls + 1;
           const updatedWickets = currentInnings.wickets + 1;
-          const maxBalls = match.totalOvers * 6;
-          const totalPlayers = battingTeam?.players?.length || 11;
+          const maxBalls = (match.overs || 20) * 6;
+          const totalPlayers = battingTeam?.players?.length || match.players_per_team || 11;
 
           if (updatedBalls >= maxBalls || updatedWickets >= totalPlayers) {
             if (match.currentInnings >= 2) {
@@ -482,57 +490,69 @@ export default function LiveScoringPage() {
             <div className="space-y-3">
               <label className="text-xs font-bold text-white/40 uppercase">Striker</label>
               <div className="grid grid-cols-2 gap-2">
-                {battingTeam?.players?.map(p => {
-                  const isOut = currentInnings?.batsmen?.find(b => b.playerId === p.id)?.isOut;
-                  return (
-                    <Button
-                      key={p.id}
-                      variant={strikerId === p.id ? "default" : "outline"}
-                      className={cn("justify-start truncate", isOut && "opacity-50 line-through")}
-                      onClick={() => setStrikerId(p.id)}
-                      disabled={nonStrikerId === p.id || isOut}
-                    >
-                      {p.name}
-                      {isOut && " (Out)"}
-                    </Button>
-                  );
-                })}
+                {battingTeam?.players ? (
+                  battingTeam.players.map(p => {
+                    const isOut = currentInnings?.batsmen?.find(b => b.playerId === p.id)?.isOut;
+                    return (
+                      <Button
+                        key={p.id}
+                        variant={strikerId === p.id ? "default" : "outline"}
+                        className={cn("justify-start truncate", isOut && "opacity-50 line-through")}
+                        onClick={() => setStrikerId(p.id)}
+                        disabled={nonStrikerId === p.id || isOut}
+                      >
+                        {p.name}
+                        {isOut && " (Out)"}
+                      </Button>
+                    );
+                  })
+                ) : (
+                  <p className="text-xs text-white/40 col-span-2">No players found for {battingTeamName}</p>
+                )}
               </div>
             </div>
 
             <div className="space-y-3">
               <label className="text-xs font-bold text-white/40 uppercase">Non-Striker</label>
               <div className="grid grid-cols-2 gap-2">
-                {battingTeam?.players?.map(p => {
-                  const isOut = currentInnings?.batsmen?.find(b => b.playerId === p.id)?.isOut;
-                  return (
-                    <Button
-                      key={p.id}
-                      variant={nonStrikerId === p.id ? "default" : "outline"}
-                      className={cn("justify-start truncate", isOut && "opacity-50 line-through")}
-                      onClick={() => setNonStrikerId(p.id)}
-                      disabled={strikerId === p.id || isOut}
-                    >
-                      {p.name}
-                      {isOut && " (Out)"}
-                    </Button>
-                  );
-                })}
+                {battingTeam?.players ? (
+                  battingTeam.players.map(p => {
+                    const isOut = currentInnings?.batsmen?.find(b => b.playerId === p.id)?.isOut;
+                    return (
+                      <Button
+                        key={p.id}
+                        variant={nonStrikerId === p.id ? "default" : "outline"}
+                        className={cn("justify-start truncate", isOut && "opacity-50 line-through")}
+                        onClick={() => setNonStrikerId(p.id)}
+                        disabled={strikerId === p.id || isOut}
+                      >
+                        {p.name}
+                        {isOut && " (Out)"}
+                      </Button>
+                    );
+                  })
+                ) : (
+                  <p className="text-xs text-white/40 col-span-2">No players found for {battingTeamName}</p>
+                )}
               </div>
             </div>
             <div className="space-y-3">
               <label className="text-xs font-bold text-white/40 uppercase">Bowler</label>
               <div className="grid grid-cols-2 gap-2">
-                {bowlingTeam?.players?.map(p => (
-                  <Button
-                    key={p.id}
-                    variant={bowlerId === p.id ? "default" : "outline"}
-                    className="justify-start truncate"
-                    onClick={() => setBowlerId(p.id)}
-                  >
-                    {p.name}
-                  </Button>
-                ))}
+                {bowlingTeam?.players ? (
+                  bowlingTeam.players.map(p => (
+                    <Button
+                      key={p.id}
+                      variant={bowlerId === p.id ? "default" : "outline"}
+                      className="justify-start truncate"
+                      onClick={() => setBowlerId(p.id)}
+                    >
+                      {p.name}
+                    </Button>
+                  ))
+                ) : (
+                  <p className="text-xs text-white/40 col-span-2">No players found for {bowlingTeamName}</p>
+                )}
               </div>
             </div>
 

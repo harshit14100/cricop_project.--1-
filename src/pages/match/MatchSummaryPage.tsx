@@ -12,6 +12,9 @@ export default function MatchSummaryPage() {
 
   if (!match) return null;
 
+  const team1Name = match.teamA?.name || match.team_1_name || "Team 1";
+  const team2Name = match.teamB?.name || match.team_2_name || "Team 2";
+
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <motion.div
@@ -31,7 +34,7 @@ export default function MatchSummaryPage() {
             Match Summary
           </h1>
           <p className="text-sm text-white/50">
-            {match.teamA.name} vs {match.teamB.name}
+            {team1Name} vs {team2Name}
           </p>
         </div>
       </motion.div>
@@ -54,12 +57,12 @@ export default function MatchSummaryPage() {
       {/* Score Summary */}
       <div className="grid grid-cols-2 gap-4">
         <Card className="glass-card p-4">
-          <p className="text-xs text-white/40 mb-1">{match.teamA.name}</p>
+          <p className="text-xs text-white/40 mb-1">{team1Name}</p>
           <p className="text-2xl font-bold text-white">186/6</p>
           <p className="text-xs text-white/50">20 overs</p>
         </Card>
         <Card className="glass-card p-4">
-          <p className="text-xs text-white/40 mb-1">{match.teamB.name}</p>
+          <p className="text-xs text-white/40 mb-1">{team2Name}</p>
           <p className="text-2xl font-bold text-white">187/5</p>
           <p className="text-xs text-white/50">18.4 overs</p>
         </Card>

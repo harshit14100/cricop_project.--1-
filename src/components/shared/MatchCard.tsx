@@ -12,9 +12,18 @@ interface MatchCardProps {
 }
 
 export function MatchCard({ match, index = 0 }: MatchCardProps) {
-  const currentInnings = match.innings[match.currentInnings - 1];
+  const currentInnings = match.innings && match.innings.length > 0 
+    ? match.innings[match.currentInnings - 1] 
+    : null;
   const isLive = match.status === "live";
   const isCompleted = match.status === "completed";
+  const isScheduled = match.status === "scheduled";
+
+  const teamA = match.teamA;
+  const teamB = match.teamB;
+
+  const team1Name = teamA?.name || match.team_1_name || "Team 1";
+  const team2Name = teamB?.name || match.team_2_name || "Team 2";
 
   return (
     <motion.div
@@ -39,12 +48,14 @@ export function MatchCard({ match, index = 0 }: MatchCardProps) {
                   </span>
                 ) : isCompleted ? (
                   "Completed"
+                ) : isScheduled ? (
+                  "Scheduled"
                 ) : (
                   "Upcoming"
                 )}
               </Badge>
               <span className="text-xs text-white/40">
-                {match.matchType.toUpperCase()}
+                {match.matchType?.toUpperCase() || "T20"}
               </span>
             </div>
             {match.seriesName && (
@@ -61,17 +72,16 @@ export function MatchCard({ match, index = 0 }: MatchCardProps) {
               <div className="flex-1 text-center">
                 <div
                   className="w-12 h-12 rounded-xl mx-auto mb-2 flex items-center justify-center text-lg font-bold text-white"
-                  style={{ backgroundColor: match.teamA.color || "#3b5bdb" }}
+                  style={{ backgroundColor: teamA?.color || "#3b5bdb" }}
                 >
-                  {match.teamA.shortName?.charAt(0) ||
-                    match.teamA.name.charAt(0)}
+                  {teamA?.shortName?.charAt(0) || team1Name.charAt(0)}
                 </div>
                 <p className="text-sm font-semibold text-white truncate">
-                  {match.teamA.shortName || match.teamA.name}
+                  {teamA?.shortName || team1Name}
                 </p>
                 {currentInnings &&
                   match.innings.length > 0 &&
-                  currentInnings.battingTeam === match.teamA.id && (
+                  currentInnings.battingTeam === match.team1_id && (
                     <div className="mt-1">
                       <p className="text-2xl font-bold text-white score-display">
                         {currentInnings.runs}/{currentInnings.wickets}
@@ -94,17 +104,16 @@ export function MatchCard({ match, index = 0 }: MatchCardProps) {
               <div className="flex-1 text-center">
                 <div
                   className="w-12 h-12 rounded-xl mx-auto mb-2 flex items-center justify-center text-lg font-bold text-white"
-                  style={{ backgroundColor: match.teamB.color || "#4263eb" }}
+                  style={{ backgroundColor: teamB?.color || "#4263eb" }}
                 >
-                  {match.teamB.shortName?.charAt(0) ||
-                    match.teamB.name.charAt(0)}
+                  {teamB?.shortName?.charAt(0) || team2Name.charAt(0)}
                 </div>
                 <p className="text-sm font-semibold text-white truncate">
-                  {match.teamB.shortName || match.teamB.name}
+                  {teamB?.shortName || team2Name}
                 </p>
                 {currentInnings &&
                   match.innings.length > 0 &&
-                  currentInnings.battingTeam === match.teamB.id && (
+                  currentInnings.battingTeam === match.team2_id && (
                     <div className="mt-1">
                       <p className="text-2xl font-bold text-white score-display">
                         {currentInnings.runs}/{currentInnings.wickets}
@@ -136,7 +145,7 @@ export function MatchCard({ match, index = 0 }: MatchCardProps) {
                       <Trophy className="h-3 w-3 text-amber-400" />
                       <span>
                         Need {currentInnings.target - currentInnings.runs} from{" "}
-                        {match.totalOvers * 6 - currentInnings.balls} balls
+                        {(match.overs || 20) * 6 - currentInnings.balls} balls
                       </span>
                     </div>
                   )}
@@ -169,22 +178,22 @@ export function MatchCard({ match, index = 0 }: MatchCardProps) {
             {isCompleted && (
               <div className="mt-4 pt-3 border-t border-white/5 text-center">
                 <p className="text-sm font-medium text-emerald-400">
-                  {match.teamA.name} won by 5 wickets
+                  {match.winner_team_id === match.team1_id ? team1Name : team2Name} won
                 </p>
-                {match.manOfTheMatch && (
+                {match.man_of_match_id && (
                   <p className="text-xs text-white/50 mt-1">
                     <Trophy className="h-3 w-3 inline mr-1 text-amber-400" />
-                    MOTM: {match.manOfTheMatch}
+                    MOTM: {match.man_of_match_id}
                   </p>
                 )}
               </div>
             )}
 
-            {!isLive && !isCompleted && match.startTime && (
+            {!isLive && !isCompleted && match.started_at && (
               <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-center gap-4 text-xs text-white/50">
                 <span className="flex items-center gap-1">
                   <Clock className="h-3 w-3" />
-                  {formatDate(match.startTime)}
+                  {formatDate(match.started_at)}
                 </span>
                 <span className="flex items-center gap-1">
                   <MapPin className="h-3 w-3" />

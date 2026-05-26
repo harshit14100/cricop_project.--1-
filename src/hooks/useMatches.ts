@@ -36,7 +36,7 @@ export function useCreateMatch() {
     mutationFn: matchService.createMatch,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['matches'] })
-      addToast({ title: 'Match created!', description: `${data.teamA.name} vs ${data.teamB.name}`, variant: 'success' })
+      addToast({ title: 'Match created!', variant: 'success' })
       return data
     },
     onError: (error: any) => {

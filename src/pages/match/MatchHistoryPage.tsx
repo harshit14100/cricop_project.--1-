@@ -29,7 +29,9 @@ export default function MatchHistoryPage() {
   const matches = data?.matches || []
   const filtered = matches.filter(m => {
     if (filter !== 'all' && m.status !== filter) return false
-    if (search && !m.teamA.name.toLowerCase().includes(search.toLowerCase()) && !m.teamB.name.toLowerCase().includes(search.toLowerCase())) return false
+    const teamAName = m.teamA?.name.toLowerCase() || "";
+    const teamBName = m.teamB?.name.toLowerCase() || "";
+    if (search && !teamAName.includes(search.toLowerCase()) && !teamBName.includes(search.toLowerCase())) return false
     return true
   })
 
@@ -60,7 +62,7 @@ export default function MatchHistoryPage() {
             <SelectItem value="all">All Matches</SelectItem>
             <SelectItem value="live">Live</SelectItem>
             <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="upcoming">Upcoming</SelectItem>
+            <SelectItem value="scheduled">Scheduled</SelectItem>
           </SelectContent>
         </Select>
       </div>

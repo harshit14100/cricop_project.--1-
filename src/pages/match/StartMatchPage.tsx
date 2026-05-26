@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { useCreateMatch, useTeams, usePlayers } from "@/hooks";
+import { matchApi } from "@/api";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/store";
 
@@ -126,28 +127,28 @@ export default function StartMatchPage() {
       return;
     }
 
-    // Pass custom data into mutation payload.
-    // Note: ensure your backend/API function also expects these new properties.
-    const match = await createMatch.mutateAsync({
-      matchType: matchData.matchType,
-      totalOvers: matchData.totalOvers,
-      teamAId: matchData.teamAId,
-      teamBId: matchData.teamBId,
-      newTeamAName: matchData.teamAId === "new" ? newTeamA : undefined,
-      newTeamBName: matchData.teamBId === "new" ? newTeamB : undefined,
-      playersPerTeam: playersPerTeam,
-      commonPlayerId: commonPlayerId === "none" ? undefined : commonPlayerId,
-      teamAPlayerIds,
-      teamBPlayerIds,
-      venue: matchData.venue,
-      umpires: matchData.umpires,
-      scorers: matchData.scorers,
-      tossWinner: matchData.tossWinner,
-      tossChoice: matchData.tossChoice,
-    } as any); // using 'as any' here if your hook types haven't been updated yet
+    try {
+      // 1. Create the match with basic info
+      const match = await createMatch.mutateAsync({
+        team1_id: matchData.teamAId,
+        team2_id: matchData.teamBId,
+        venue: matchData.venue || "TBD",
+        overs: matchData.totalOvers,
+        players_per_team: playersPerTeam,
+      });
 
-    if (match) {
-      handleNext();
+      if (match) {
+        // 2. Update the toss result
+        await matchApi.setToss({
+          matchId: match.id,
+          winner_team_id: matchData.tossWinner === "teamA" ? match.team1_id : match.team2_id,
+          choice: matchData.tossChoice as "bat" | "bowl",
+        });
+
+        handleNext();
+      }
+    } catch (error) {
+      // Error handled by mutation hooks
     }
   };
 

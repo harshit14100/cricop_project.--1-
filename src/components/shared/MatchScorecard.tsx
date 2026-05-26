@@ -20,8 +20,7 @@ export function MatchScorecard({ match }: MatchScorecardProps) {
           inningsNumber={idx + 1}
           isExpanded={expandedInnings === idx + 1}
           onToggle={() => setExpandedInnings(expandedInnings === idx + 1 ? 0 : idx + 1)}
-          teamA={match.teamA}
-          teamB={match.teamB}
+          match={match}
         />
       ))}
       
@@ -39,12 +38,17 @@ interface InningsCardProps {
   inningsNumber: number
   isExpanded: boolean
   onToggle: () => void
-  teamA: any
-  teamB: any
+  match: Match
 }
 
-function InningsCard({ innings, inningsNumber, isExpanded, onToggle, teamA, teamB }: InningsCardProps) {
-  const battingTeam = teamA.id === innings.battingTeam ? teamA : teamB
+function InningsCard({ innings, inningsNumber, isExpanded, onToggle, match }: InningsCardProps) {
+  const isTeam1Batting = match.team1_id === innings.battingTeam;
+  const battingTeam = isTeam1Batting ? match.teamA : match.teamB;
+  const battingTeamName = isTeam1Batting 
+    ? (match.teamA?.name || match.team_1_name || "Team 1")
+    : (match.teamB?.name || match.team_2_name || "Team 2");
+    
+  const battingTeamShort = isTeam1Batting ? match.teamA?.shortName : match.teamB?.shortName;
   
   return (
     <div className="glass-card overflow-hidden">
@@ -55,13 +59,13 @@ function InningsCard({ innings, inningsNumber, isExpanded, onToggle, teamA, team
         <div className="flex items-center gap-3">
           <div 
             className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white"
-            style={{ backgroundColor: battingTeam.color || '#3b5bdb' }}
+            style={{ backgroundColor: battingTeam?.color || '#3b5bdb' }}
           >
-            {battingTeam.shortName?.charAt(0)}
+            {battingTeamShort?.charAt(0) || battingTeamName.charAt(0)}
           </div>
           <div className="text-left">
             <h3 className="text-sm font-bold text-white">
-              {battingTeam.name} <span className="text-white/40 font-normal">Innings {inningsNumber}</span>
+              {battingTeamName} <span className="text-white/40 font-normal">Innings {inningsNumber}</span>
             </h3>
             <p className="text-xs text-white/60">
               {innings.runs}/{innings.wickets} ({formatOvers(innings.balls)} ov)

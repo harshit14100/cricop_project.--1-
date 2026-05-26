@@ -10,9 +10,22 @@ interface ScoreBoardProps {
 }
 
 export function ScoreBoard({ match, currentInnings, className }: ScoreBoardProps) {
-  const battingTeam = match.teamA.id === currentInnings.battingTeam ? match.teamA : match.teamB
-  const bowlingTeam = match.teamA.id === currentInnings.battingTeam ? match.teamB : match.teamA
-  const ballsRemaining = match.totalOvers * 6 - currentInnings.balls
+  const isTeam1Batting = match.team1_id === currentInnings.battingTeam;
+  
+  const battingTeamName = isTeam1Batting 
+    ? (match.teamA?.name || match.team_1_name || "Team 1")
+    : (match.teamB?.name || match.team_2_name || "Team 2");
+    
+  const bowlingTeamName = isTeam1Batting
+    ? (match.teamB?.name || match.team_2_name || "Team 2")
+    : (match.teamA?.name || match.team_1_name || "Team 1");
+
+  const battingTeamColor = isTeam1Batting ? match.teamA?.color : match.teamB?.color;
+  const battingTeamShort = isTeam1Batting ? match.teamA?.shortName : match.teamB?.shortName;
+  const bowlingTeamShort = isTeam1Batting ? match.teamB?.shortName : match.teamA?.shortName;
+
+  const matchOvers = match.overs || 20;
+  const ballsRemaining = matchOvers * 6 - currentInnings.balls;
   const rr = calculateRunRate(currentInnings.runs, currentInnings.balls)
   const requiredRR = currentInnings.target 
     ? calculateRequiredRate(currentInnings.target, currentInnings.runs, ballsRemaining)
@@ -32,18 +45,18 @@ export function ScoreBoard({ match, currentInnings, className }: ScoreBoardProps
         <div className="flex items-center gap-3">
           <div 
             className="w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold text-white"
-            style={{ backgroundColor: battingTeam.color || '#3b5bdb' }}
+            style={{ backgroundColor: battingTeamColor || '#3b5bdb' }}
           >
-            {battingTeam.shortName?.charAt(0)}
+            {battingTeamShort?.charAt(0) || battingTeamName.charAt(0)}
           </div>
           <div>
-            <p className="text-sm font-semibold text-white">{battingTeam.name}</p>
+            <p className="text-sm font-semibold text-white">{battingTeamName}</p>
             <p className="text-xs text-white/50">Innings {match.currentInnings}</p>
           </div>
         </div>
         <div className="text-right">
           <p className="text-xs text-white/50">vs</p>
-          <p className="text-xs font-medium text-white/70">{bowlingTeam.shortName || bowlingTeam.name}</p>
+          <p className="text-xs font-medium text-white/70">{bowlingTeamShort || bowlingTeamName}</p>
         </div>
       </div>
 
@@ -73,7 +86,7 @@ export function ScoreBoard({ match, currentInnings, className }: ScoreBoardProps
         <div className="flex items-center gap-1.5 text-white/60">
           <Timer className="h-4 w-4" />
           <span className="text-sm font-medium">
-            {formatOvers(currentInnings.balls)} / {match.totalOvers} ov
+            {formatOvers(currentInnings.balls)} / {matchOvers} ov
           </span>
         </div>
         <div className="flex items-center gap-1.5 text-electric">
@@ -107,7 +120,7 @@ export function ScoreBoard({ match, currentInnings, className }: ScoreBoardProps
         <motion.div 
           className="h-full bg-gradient-to-r from-blue-500 to-electric rounded-full"
           initial={{ width: 0 }}
-          animate={{ width: `${(currentInnings.balls / (match.totalOvers * 6)) * 100}%` }}
+          animate={{ width: `${(currentInnings.balls / (matchOvers * 6)) * 100}%` }}
           transition={{ duration: 0.5 }}
         />
       </div>

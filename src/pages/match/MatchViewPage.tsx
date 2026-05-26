@@ -15,17 +15,24 @@ export default function MatchViewPage() {
 
   if (!match) return null
 
-  const currentInnings = match.innings[match.currentInnings - 1]
+  const team1Name = match.teamA?.name || match.team_1_name || "Team 1";
+  const team2Name = match.teamB?.name || match.team_2_name || "Team 2";
+
+  const currentInnings = match.innings && match.innings.length > 0 
+    ? match.innings[match.currentInnings - 1] 
+    : null;
 
   return (
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-2xl font-bold text-white">{match.teamA.name} vs {match.teamB.name}</h1>
+        <h1 className="text-2xl font-bold text-white">{team1Name} vs {team2Name}</h1>
         <div className="flex items-center gap-2 mt-2">
           <Badge variant={match.status === 'live' ? 'live' : 'secondary'}>
             {match.status.toUpperCase()}
           </Badge>
-          <span className="text-sm text-white/50">{match.matchType.toUpperCase()} • {match.totalOvers} overs</span>
+          <span className="text-sm text-white/50">
+            {(match.matchType || "T20").toUpperCase()} • {match.overs || 20} overs
+          </span>
         </div>
       </motion.div>
 
