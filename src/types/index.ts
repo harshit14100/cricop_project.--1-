@@ -130,6 +130,10 @@ export interface Match {
   balls_in_current_over?: number;
   striker_name?: string;
   non_striker_name?: string;
+
+  striker_id?: string;
+  non_striker_id?: string;
+  current_bowler_id?: string;
 }
 
 export interface SuperStartMatchPayload {

@@ -62,6 +62,15 @@ export default function LiveScoringPage() {
   const [strikerId, setStrikerId] = useState("");
   const [nonStrikerId, setNonStrikerId] = useState("");
   const [bowlerId, setBowlerId] = useState("");
+
+  // Initialize from live match state
+  useEffect(() => {
+    if (match) {
+      if (match.striker_id) setStrikerId(match.striker_id);
+      if (match.non_striker_id) setNonStrikerId(match.non_striker_id);
+      if (match.current_bowler_id) setBowlerId(match.current_bowler_id);
+    }
+  }, [match?.id]); // Only run when match changes, not on every poll
   const [lastProcessedOver, setLastProcessedOver] = useState(0);
 
   // Optimistic UI States

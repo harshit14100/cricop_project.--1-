@@ -25,212 +25,6 @@ const mockUsers: User[] = [
   },
 ];
 
-const mockTeams: Team[] = [
-  {
-    team_id: "t1",
-    id: "t1",
-    name: "Mumbai Indians",
-    short_name: "MI",
-    color: "#004ba0",
-    players: [],
-  },
-  {
-    team_id: "t2",
-    id: "t2",
-    name: "Chennai Super Kings",
-    short_name: "CSK",
-    color: "#f85c00",
-    players: [],
-  },
-  {
-    team_id: "t3",
-    id: "t3",
-    name: "Royal Challengers",
-    short_name: "RCB",
-    color: "#ec1c24",
-    players: [],
-  },
-  {
-    team_id: "t4",
-    id: "t4",
-    name: "Kolkata Knight Riders",
-    short_name: "KKR",
-    color: "#3a225d",
-    players: [],
-  },
-];
-
-const mockMatches: Match[] = [
-  {
-    id: "m2",
-    matchType: "t20",
-    team1_id: "t3",
-    team_1_name: "Royal Challengers",
-    team2_id: "t4",
-    team_2_name: "Kolkata Knight Riders",
-    venue: "Eden Gardens",
-    overs: 20,
-    players_per_team: 11,
-    status: "upcoming",
-    currentInnings: 1,
-    teamA: {
-      team_id: "t3",
-      id: "t3",
-      name: "Royal Challengers",
-      short_name: "RCB",
-      color: "#ec1c24",
-      players: [],
-    },
-    teamB: {
-      team_id: "t4",
-      id: "t4",
-      name: "Kolkata Knight Riders",
-      short_name: "KKR",
-      color: "#3a225d",
-      players: [],
-    },
-    innings: [],
-    started_at: new Date(Date.now() + 86400000).toISOString(),
-    ended_at: null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    host_user_id: "u1",
-    toss_winner_id: null,
-    toss_decision: null,
-    winner_team_id: null,
-    man_of_match_id: null,
-    worst_player_id: null,
-  },
-  {
-    id: "m3",
-    matchType: "t20",
-    team1_id: "t1",
-    team_1_name: "Mumbai Indians",
-    team2_id: "t3",
-    team_2_name: "Royal Challengers",
-    venue: "Chinnaswamy Stadium",
-    overs: 20,
-    players_per_team: 11,
-    status: "completed",
-    currentInnings: 2,
-    teamA: {
-      team_id: "t1",
-      id: "t1",
-      name: "Mumbai Indians",
-      short_name: "MI",
-      color: "#004ba0",
-      players: [],
-    },
-    teamB: {
-      team_id: "t3",
-      id: "t3",
-      name: "Royal Challengers",
-      short_name: "RCB",
-      color: "#ec1c24",
-      players: [],
-    },
-    innings: [
-      {
-        id: "i2",
-        battingTeam: "t1",
-        bowlingTeam: "t3",
-        runs: 186,
-        wickets: 6,
-        balls: 120,
-        extras: { wides: 3, noBalls: 0, byes: 1, legByes: 2, penalty: 0 },
-        batsmen: [
-          {
-            playerId: "p1",
-            playerName: "Rohit Sharma",
-            runs: 68,
-            balls: 45,
-            fours: 8,
-            sixes: 2,
-            isOut: true,
-            strikeRate: 151.1,
-          },
-          {
-            playerId: "p2",
-            playerName: "Ishan Kishan",
-            runs: 42,
-            balls: 28,
-            fours: 5,
-            sixes: 1,
-            isOut: true,
-            strikeRate: 150.0,
-          },
-        ],
-        bowlers: [
-          {
-            playerId: "p5",
-            playerName: "Mohammed Siraj",
-            overs: 4,
-            balls: 0,
-            maidens: 0,
-            runs: 38,
-            wickets: 2,
-            wides: 1,
-            noBalls: 0,
-            economy: 9.5,
-          },
-        ],
-        partnerships: [],
-        fallOfWickets: [],
-        isCompleted: true,
-      },
-      {
-        id: "i3",
-        battingTeam: "t3",
-        bowlingTeam: "t1",
-        runs: 175,
-        wickets: 8,
-        balls: 120,
-        extras: { wides: 5, noBalls: 1, byes: 0, legByes: 3, penalty: 0 },
-        batsmen: [
-          {
-            playerId: "p6",
-            playerName: "Virat Kohli",
-            runs: 72,
-            balls: 52,
-            fours: 6,
-            sixes: 2,
-            isOut: true,
-            strikeRate: 138.5,
-          },
-        ],
-        bowlers: [
-          {
-            playerId: "p7",
-            playerName: "Jasprit Bumrah",
-            overs: 4,
-            balls: 0,
-            maidens: 0,
-            runs: 24,
-            wickets: 3,
-            wides: 0,
-            noBalls: 0,
-            economy: 6.0,
-          },
-        ],
-        partnerships: [],
-        fallOfWickets: [],
-        isCompleted: true,
-        target: 187,
-      },
-    ],
-    started_at: new Date(Date.now() - 172800000).toISOString(),
-    ended_at: new Date(Date.now() - 172800000 + 10800000).toISOString(),
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    host_user_id: "u1",
-    toss_winner_id: "t1",
-    toss_decision: "bat",
-    winner_team_id: "t1",
-    man_of_match_id: "p1",
-    worst_player_id: null,
-  },
-];
-
 const mockPlayers: Player[] = [
   {
     id: "p1",
@@ -359,6 +153,171 @@ const mockPlayers: Player[] = [
       sixes: 150,
       fours: 210,
     },
+  },
+];
+
+const mockTeams: Team[] = [
+  {
+    team_id: "t1",
+    id: "t1",
+    name: "Mumbai Indians",
+    short_name: "MI",
+    color: "#004ba0",
+    players: [mockPlayers[1], mockPlayers[2]],
+  },
+  {
+    team_id: "t2",
+    id: "t2",
+    name: "Chennai Super Kings",
+    short_name: "CSK",
+    color: "#f85c00",
+    players: [mockPlayers[3], mockPlayers[4]],
+  },
+  {
+    team_id: "t3",
+    id: "t3",
+    name: "Royal Challengers",
+    short_name: "RCB",
+    color: "#ec1c24",
+    players: [mockPlayers[0]],
+  },
+  {
+    team_id: "t4",
+    id: "t4",
+    name: "Kolkata Knight Riders",
+    short_name: "KKR",
+    color: "#3a225d",
+    players: [],
+  },
+];
+
+const mockMatches: Match[] = [
+  {
+    id: "m2",
+    matchType: "t20",
+    team1_id: "t3",
+    team_1_name: "Royal Challengers",
+    team2_id: "t4",
+    team_2_name: "Kolkata Knight Riders",
+    venue: "Eden Gardens",
+    overs: 20,
+    players_per_team: 11,
+    status: "upcoming",
+    currentInnings: 1,
+    teamA: mockTeams[2],
+    teamB: mockTeams[3],
+    innings: [],
+    started_at: new Date(Date.now() + 86400000).toISOString(),
+    ended_at: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    host_user_id: "u1",
+    toss_winner_id: null,
+    toss_decision: null,
+    winner_team_id: null,
+    man_of_match_id: null,
+    worst_player_id: null,
+    
+    // Populate live fields
+    batting_team_name: "RCB",
+    bowling_team_name: "KKR",
+    total_runs: 0,
+    wickets: 0,
+    completed_overs: 0,
+    balls_in_current_over: 0,
+    striker_name: "Select Striker",
+    non_striker_name: "Select Non-Striker",
+  },
+  {
+    id: "m3",
+    matchType: "t20",
+    team1_id: "t1",
+    team_1_name: "Mumbai Indians",
+    team2_id: "t3",
+    team_2_name: "Royal Challengers",
+    venue: "Chinnaswamy Stadium",
+    overs: 20,
+    players_per_team: 11,
+    status: "completed",
+    currentInnings: 2,
+    teamA: mockTeams[0],
+    teamB: mockTeams[2],
+    innings: [
+      {
+        id: "i2",
+        battingTeam: "t1",
+        bowlingTeam: "t3",
+        runs: 186,
+        wickets: 6,
+        balls: 120,
+        extras: { wides: 3, noBalls: 0, byes: 1, legByes: 2, penalty: 0 },
+        batsmen: [
+          {
+            playerId: "p2",
+            playerName: "Rohit Sharma",
+            runs: 68,
+            balls: 45,
+            fours: 8,
+            sixes: 2,
+            isOut: true,
+            strikeRate: 151.1,
+          },
+        ],
+        bowlers: [],
+        partnerships: [],
+        fallOfWickets: [],
+        isCompleted: true,
+      },
+      {
+        id: "i3",
+        battingTeam: "t3",
+        bowlingTeam: "t1",
+        runs: 175,
+        wickets: 8,
+        balls: 120,
+        extras: { wides: 5, noBalls: 1, byes: 0, legByes: 3, penalty: 0 },
+        batsmen: [
+          {
+            playerId: "p1",
+            playerName: "Virat Kohli",
+            runs: 72,
+            balls: 52,
+            fours: 6,
+            sixes: 2,
+            isOut: true,
+            strikeRate: 138.5,
+          },
+        ],
+        bowlers: [
+          {
+            playerId: "p3",
+            playerName: "Jasprit Bumrah",
+            overs: 4,
+            balls: 0,
+            maidens: 0,
+            runs: 24,
+            wickets: 3,
+            wides: 0,
+            noBalls: 0,
+            economy: 6.0,
+          },
+        ],
+        partnerships: [],
+        fallOfWickets: [],
+        isCompleted: true,
+        target: 187,
+      },
+    ],
+    started_at: new Date(Date.now() - 172800000).toISOString(),
+    ended_at: new Date(Date.now() - 172800000 + 10800000).toISOString(),
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    host_user_id: "u1",
+    toss_winner_id: "t1",
+    toss_decision: "bat",
+    winner_team_id: "t1",
+    man_of_match_id: "p2",
+    worst_player_id: null,
   },
 ];
 
@@ -640,6 +599,10 @@ export function setupMockAPI() {
           balls_in_current_over: 0,
           striker_name: "Select Striker",
           non_striker_name: "Select Non-Striker",
+          
+          striker_id: payload.striker_id,
+          non_striker_id: payload.non_striker_id,
+          current_bowler_id: payload.current_bowler_id,
         };
         mockMatches.push(newMatch);
         return Promise.resolve({ data: { success: true, data: newMatch } });
@@ -715,6 +678,38 @@ export function setupMockAPI() {
           match.balls_in_current_over = currentInnings.balls % 6;
           match.striker_name = currentInnings.batsmen.find(b => !b.isOut)?.playerName || "N/A";
           match.non_striker_name = currentInnings.batsmen.filter(b => !b.isOut)[1]?.playerName || "N/A";
+          
+          match.striker_id = currentInnings.batsmen.find(b => !b.isOut)?.playerId;
+          match.non_striker_id = currentInnings.batsmen.filter(b => !b.isOut)[1]?.playerId;
+        }
+
+        return Promise.resolve({
+          data: { success: true, data: match || mockMatches[0] },
+        });
+      }
+
+      if (url.match(/\/users\/matches\/[^/]+\/live/) && method === "get") {
+        const parts = url.split("/");
+        const matchIdx = parts.indexOf("matches");
+        const matchId = parts[matchIdx + 1];
+        const match = mockMatches.find((m) => m.id === matchId);
+        
+        if (match && match.innings.length > 0) {
+          const currentInnings = match.innings[match.currentInnings - 1];
+          const battingTeam = match.team1_id === currentInnings.battingTeam ? match.teamA : match.teamB;
+          const bowlingTeam = match.team1_id === currentInnings.battingTeam ? match.teamB : match.teamA;
+          
+          match.batting_team_name = battingTeam?.name || "Batting Team";
+          match.bowling_team_name = bowlingTeam?.name || "Bowling Team";
+          match.total_runs = currentInnings.runs;
+          match.wickets = currentInnings.wickets;
+          match.completed_overs = Math.floor(currentInnings.balls / 6);
+          match.balls_in_current_over = currentInnings.balls % 6;
+          match.striker_name = currentInnings.batsmen.find(b => !b.isOut)?.playerName || "N/A";
+          match.non_striker_name = currentInnings.batsmen.filter(b => !b.isOut)[1]?.playerName || "N/A";
+          
+          match.striker_id = currentInnings.batsmen.find(b => !b.isOut)?.playerId;
+          match.non_striker_id = currentInnings.batsmen.filter(b => !b.isOut)[1]?.playerId;
         }
 
         return Promise.resolve({

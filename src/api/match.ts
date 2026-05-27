@@ -3,7 +3,6 @@ import type {
   Match,
   ApiResponse,
   CreateMatchPayload,
-  StartMatchPayload,
 } from "@/types";
 
 interface TossData {
