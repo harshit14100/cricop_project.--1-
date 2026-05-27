@@ -81,7 +81,7 @@ export default function DashboardPage() {
           <>
             <StatCard
               title="Live Matches"
-              value={statsData?.liveMatches || 1}
+              value={statsData?.liveMatches || 0}
               icon={Activity}
               color="red"
               trend={12}
