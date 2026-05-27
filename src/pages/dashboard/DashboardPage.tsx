@@ -195,7 +195,7 @@ export default function DashboardPage() {
                 <SkeletonCard key={i} className="h-20" />
               ))
             ) : topPlayers.length > 0 ? (
-              topPlayers.map((player, i) => (
+              topPlayers.map((player: any, i: number) => (
                 <PlayerCard
                   key={player.id}
                   player={player}

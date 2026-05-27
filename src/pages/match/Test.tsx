@@ -30,6 +30,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useCreateMatch, useTeams, usePlayers } from "@/hooks";
+import { useUIStore } from "@/store";
 
 const steps = [
   { id: 1, title: "Match Setup", icon: Trophy },
@@ -46,6 +47,7 @@ function cn(...classes: (string | undefined | false)[]) {
 
 export default function StartMatchPage() {
   const navigate = useNavigate();
+  const { addToast } = useUIStore();
   const [currentStep, setCurrentStep] = useState(1);
 
   // Custom states added for fixes & new features
@@ -102,27 +104,90 @@ export default function StartMatchPage() {
   };
 
   const handleCreateMatch = async () => {
-    // Pass custom data into mutation payload.
-    const match = await createMatch.mutateAsync({
-      matchType: matchData.matchType,
-      totalOvers: matchData.totalOvers,
-      teamAId: matchData.teamAId,
-      teamBId: matchData.teamBId,
-      teamAPlayerIds: teamAPlayerIds,
-      teamBPlayerIds: teamBPlayerIds,
-      newTeamAName: matchData.teamAId === "new" ? newTeamA : undefined,
-      newTeamBName: matchData.teamBId === "new" ? newTeamB : undefined,
-      playersPerTeam: playersPerTeam,
-      commonPlayerId: commonPlayerId === "none" ? undefined : commonPlayerId,
-      venue: matchData.venue,
-      umpires: matchData.umpires,
-      scorers: matchData.scorers,
-      tossWinner: matchData.tossWinner,
-      tossChoice: matchData.tossChoice,
-    } as any);
+    if (teamAPlayerIds.length < 2 || teamBPlayerIds.length < 1) {
+      addToast({
+        title: "Invalid Squads",
+        description: "Please select enough players",
+        variant: "error",
+      });
 
-    if (match) {
-      handleNext();
+      return;
+    }
+
+    try {
+      const tossWinnerId =
+        matchData.tossWinner === "teamA"
+          ? matchData.teamAId
+          : matchData.teamBId;
+
+      const battingTeamId =
+        matchData.tossChoice === "bat"
+          ? tossWinnerId
+          : tossWinnerId === matchData.teamAId
+            ? matchData.teamBId
+            : matchData.teamAId;
+
+      const bowlingTeamId =
+        battingTeamId === matchData.teamAId
+          ? matchData.teamBId
+          : matchData.teamAId;
+
+      const battingTeamPlayers =
+        battingTeamId === matchData.teamAId
+          ? teamAPlayerIds
+          : teamBPlayerIds;
+
+      const bowlingTeamPlayers =
+        battingTeamId === matchData.teamAId
+          ? teamBPlayerIds
+          : teamAPlayerIds;
+
+      const response = await createMatch.mutateAsync({
+        team1_id: matchData.teamAId,
+
+        team2_id: matchData.teamBId,
+
+        venue: matchData.venue,
+
+        overs: matchData.totalOvers,
+
+        players_per_team: playersPerTeam,
+
+        team1_players: teamAPlayerIds,
+
+        team2_players: teamBPlayerIds,
+
+        toss_winner_id: tossWinnerId,
+
+        toss_decision: (matchData.tossChoice || "bat") as "bat" | "bowl",
+
+        batting_team_id: battingTeamId,
+
+        bowling_team_id: bowlingTeamId,
+
+        striker_id: battingTeamPlayers[0] || "",
+
+        non_striker_id: battingTeamPlayers[1] || "",
+
+        current_bowler_id: bowlingTeamPlayers[0] || "",
+      });
+
+      addToast({
+        title: "Success",
+        description: "Match created successfully",
+        variant: "success",
+      });
+
+      const matchId = (response as any)?.data?.id || (response as any)?.id;
+      navigate(`/live-scoring/${matchId}`);
+    } catch (error) {
+      console.error(error);
+
+      addToast({
+        title: "Error",
+        description: "Failed to create match",
+        variant: "error",
+      });
     }
   };
 
@@ -141,14 +206,16 @@ export default function StartMatchPage() {
 
   const players = Array.isArray(playersData)
     ? playersData
-    : playersData?.players || [];
-  const filteredPlayers = players.filter((p) =>
+    : (playersData as any)?.players || [];
+  const filteredPlayers = players.filter((p: any) =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const getTeamName = (teamId: string, defaultName: string) => {
     if (teamId === "new") return defaultName || "New Team";
-    return teamsData?.teams?.find((t) => t.team_id === teamId)?.name || "Select Team";
+    return (
+      (teamsData as any)?.teams?.find((t: any) => (t.team_id || t.id) === teamId)?.name || "Select Team"
+    );
   };
 
   return (
@@ -245,7 +312,7 @@ export default function StartMatchPage() {
                   <Select
                     value={matchData.matchType}
                     onValueChange={(v) =>
-                      setMatchData({ ...matchData, matchType: v as any })
+                      setMatchData((prev) => ({ ...prev, matchType: v as any }))
                     }
                   >
                     <SelectTrigger>
@@ -267,10 +334,10 @@ export default function StartMatchPage() {
                       type="number"
                       value={matchData.totalOvers}
                       onChange={(e) =>
-                        setMatchData({
-                          ...matchData,
+                        setMatchData((prev) => ({
+                          ...prev,
                           totalOvers: parseInt(e.target.value) || 20,
-                        })
+                        }))
                       }
                       min={1}
                       max={50}
@@ -314,7 +381,7 @@ export default function StartMatchPage() {
                     <Select
                       value={matchData.teamAId}
                       onValueChange={(v) =>
-                        setMatchData({ ...matchData, teamAId: v })
+                        setMatchData((prev) => ({ ...prev, teamAId: v }))
                       }
                     >
                       <SelectTrigger>
@@ -322,11 +389,13 @@ export default function StartMatchPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="new">+ Create New Team</SelectItem>
-                        {teamsData?.teams?.map((t) => (
-                          <SelectItem key={t.team_id} value={t.team_id}>
-                            {t.name}
-                          </SelectItem>
-                        ))}
+                        {((teamsData as any)?.teams || [])
+                          ?.filter((t: any) => (t.team_id || t.id) !== matchData.teamBId)
+                          .map((t: any) => (
+                            <SelectItem key={t.team_id || t.id} value={t.team_id || t.id}>
+                              {t.name}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                     {matchData.teamAId === "new" && (
@@ -344,7 +413,7 @@ export default function StartMatchPage() {
                     <Select
                       value={matchData.teamBId}
                       onValueChange={(v) =>
-                        setMatchData({ ...matchData, teamBId: v })
+                        setMatchData((prev) => ({ ...prev, teamBId: v }))
                       }
                     >
                       <SelectTrigger>
@@ -352,11 +421,13 @@ export default function StartMatchPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="new">+ Create New Team</SelectItem>
-                        {teamsData?.teams?.map((t) => (
-                          <SelectItem key={t.team_id} value={t.team_id}>
-                            {t.name}
-                          </SelectItem>
-                        ))}
+                        {((teamsData as any)?.teams || [])
+                          ?.filter((t: any) => (t.team_id || t.id) !== matchData.teamAId)
+                          .map((t: any) => (
+                            <SelectItem key={t.team_id || t.id} value={t.team_id || t.id}>
+                              {t.name}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                     {matchData.teamBId === "new" && (
@@ -425,7 +496,7 @@ export default function StartMatchPage() {
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-white/5">
-                            {filteredPlayers.map((player) => {
+                            {filteredPlayers.map((player: any) => {
                               const inTeamA = teamAPlayerIds.includes(
                                 player.id,
                               );
@@ -548,9 +619,8 @@ export default function StartMatchPage() {
                       </h3>
                       <div className="flex flex-wrap gap-1">
                         {teamAPlayerIds.map((id) => {
-                          const p = playersData?.players.find(
-                            (pl) => pl.id === id,
-                          );
+                          const p = (playersData as any)?.players.find(
+                            (pl: any) => pl.id === id,                          );
                           return (
                             <Badge
                               key={id}
@@ -584,9 +654,8 @@ export default function StartMatchPage() {
                       </h3>
                       <div className="flex flex-wrap gap-1">
                         {teamBPlayerIds.map((id) => {
-                          const p = playersData?.players.find(
-                            (pl) => pl.id === id,
-                          );
+                          const p = (playersData as any)?.players.find(
+                            (pl: any) => pl.id === id,                          );
                           return (
                             <Badge
                               key={id}
@@ -629,7 +698,7 @@ export default function StartMatchPage() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="none">None</SelectItem>
-                          {playersData?.players.map((p) => (
+                          {(playersData as any)?.players.map((p: any) => (
                             <SelectItem key={p.id} value={p.id}>
                               {p.name}
                             </SelectItem>
@@ -657,7 +726,7 @@ export default function StartMatchPage() {
                       placeholder="Wankhede Stadium, Mumbai"
                       value={matchData.venue}
                       onChange={(e) =>
-                        setMatchData({ ...matchData, venue: e.target.value })
+                        setMatchData((prev) => ({ ...prev, venue: e.target.value }))
                       }
                     />
                   </div>
@@ -695,7 +764,7 @@ export default function StartMatchPage() {
                     <Select
                       value={matchData.tossWinner}
                       onValueChange={(v) =>
-                        setMatchData({ ...matchData, tossWinner: v })
+                        setMatchData((prev) => ({ ...prev, tossWinner: v }))
                       }
                     >
                       <SelectTrigger>
@@ -722,7 +791,7 @@ export default function StartMatchPage() {
                         }
                         className="h-16 text-lg"
                         onClick={() =>
-                          setMatchData({ ...matchData, tossChoice: "bat" })
+                          setMatchData((prev) => ({ ...prev, tossChoice: "bat" }))
                         }
                       >
                         Bat
@@ -736,7 +805,7 @@ export default function StartMatchPage() {
                         }
                         className="h-16 text-lg"
                         onClick={() =>
-                          setMatchData({ ...matchData, tossChoice: "bowl" })
+                          setMatchData((prev) => ({ ...prev, tossChoice: "bowl" }))
                         }
                       >
                         Bowl
@@ -796,7 +865,7 @@ export default function StartMatchPage() {
                   <Button
                     onClick={() =>
                       navigate(
-                        `/live-scoring/${createMatch.data?.id || "abc123"}`,
+                        `/live-scoring/${(createMatch.data as any)?.data?.id || createMatch.data?.id || "abc123"}`,
                       )
                     }
                   >

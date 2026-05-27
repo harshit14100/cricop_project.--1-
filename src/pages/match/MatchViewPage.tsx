@@ -5,12 +5,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ScoreBoard } from '@/components/shared/ScoreBoard'
-import { useMatch, useMatchHighlights } from '@/hooks'
+import { useLiveMatch, useMatchHighlights } from '@/hooks'
 import { formatOvers, calculateRunRate } from '@/lib/utils'
 
 export default function MatchViewPage() {
   const { matchId } = useParams<{ matchId: string }>()
-  const { data: match } = useMatch(matchId || '')
+  const { data: match } = useLiveMatch(matchId || '')
   const { data: highlights } = useMatchHighlights(matchId || '')
 
   if (!match) return null

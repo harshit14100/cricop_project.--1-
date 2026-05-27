@@ -19,7 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScoreBoard } from "@/components/shared/ScoreBoard";
 import { MatchScorecard } from "@/components/shared/MatchScorecard";
 import {
-  useMatch,
+  useLiveMatch,
   useScoreBall,
   useUndoBall,
   useEndInnings,
@@ -48,7 +48,7 @@ const extraTypes = [
 export default function LiveScoringPage() {
   const { matchId } = useParams<{ matchId: string }>();
   const navigate = useNavigate();
-  const { data: match, isLoading: isMatchLoading } = useMatch(matchId || "");
+  const { data: match, isLoading: isMatchLoading } = useLiveMatch(matchId || "");
   const scoreBall = useScoreBall();
   const undoBall = useUndoBall();
   const endInnings = useEndInnings();
@@ -256,7 +256,7 @@ export default function LiveScoringPage() {
 
   const handleStartMatch = () => {
     if (matchId) {
-      startMatch.mutate(matchId);
+      startMatch.mutate({ matchId } as any);
     }
   };
 

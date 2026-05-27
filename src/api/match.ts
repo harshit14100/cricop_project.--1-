@@ -31,12 +31,12 @@ export const matchApi = {
     return data.data;
   },
 
-  createMatch: async (matchData: CreateMatchPayload): Promise<Match> => {
-    const { data } = await client.post<ApiResponse<Match>>(
-      "/users/matches",
-      matchData,
-    );
-    return data.data;
+  createMatch: async (payload: CreateMatchPayload) => {
+    const response = await client.post("/users/matches/setup", payload);
+
+    console.log("CREATE MATCH RESPONSE:", response.data);
+
+    return response.data;
   },
 
   updateMatch: async (
@@ -76,8 +76,9 @@ export const matchApi = {
 
   getLiveMatch: async (matchId: string): Promise<Match> => {
     const { data } = await client.get<ApiResponse<Match>>(
-      `/users/matches/${matchId}/live`,
+      `/matches/${matchId}/live`,
     );
+
     return data.data;
   },
 

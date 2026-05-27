@@ -19,9 +19,11 @@ export interface AuthState {
 }
 export interface Team {
   team_id: string;
+  id?: string; // Alias for backward compatibility
   name: string;
 
   short_name?: string;
+  shortName?: string; // Alias for backward compatibility
   logo?: string;
   color?: string;
 
@@ -86,7 +88,7 @@ export interface PlayerStats {
   fours?: number;
 }
 
-export type MatchStatus = "scheduled" | "live" | "completed" | "cancelled";
+export type MatchStatus = "scheduled" | "live" | "completed" | "cancelled" | "upcoming";
 export type TossDecision = "bat" | "bowl";
 
 export interface Match {
@@ -172,9 +174,24 @@ export interface StartMatchPayload {
 export interface CreateMatchPayload {
   team1_id: string;
   team2_id: string;
+
   venue: string;
   overs: number;
   players_per_team: number;
+
+  team1_players: string[];
+  team2_players: string[];
+
+  toss_winner_id: string;
+  toss_decision: "bat" | "bowl";
+
+  batting_team_id: string;
+  bowling_team_id: string;
+
+  striker_id: string;
+  non_striker_id: string;
+
+  current_bowler_id: string;
 }
 
 export interface Innings {

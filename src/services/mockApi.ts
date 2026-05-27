@@ -27,30 +27,34 @@ const mockUsers: User[] = [
 
 const mockTeams: Team[] = [
   {
+    team_id: "t1",
     id: "t1",
     name: "Mumbai Indians",
-    shortName: "MI",
+    short_name: "MI",
     color: "#004ba0",
     players: [],
   },
   {
+    team_id: "t2",
     id: "t2",
     name: "Chennai Super Kings",
-    shortName: "CSK",
+    short_name: "CSK",
     color: "#f85c00",
     players: [],
   },
   {
+    team_id: "t3",
     id: "t3",
     name: "Royal Challengers",
-    shortName: "RCB",
+    short_name: "RCB",
     color: "#ec1c24",
     players: [],
   },
   {
+    team_id: "t4",
     id: "t4",
     name: "Kolkata Knight Riders",
-    shortName: "KKR",
+    short_name: "KKR",
     color: "#3a225d",
     players: [],
   },
@@ -61,25 +65,34 @@ const mockMatches: Match[] = [
     id: "m1",
     seriesName: "IPL 2026",
     matchType: "t20",
-    totalOvers: 20,
+    team1_id: "t1",
+    team_1_name: "Mumbai Indians",
+    team2_id: "t2",
+    team_2_name: "Chennai Super Kings",
+    venue: "Wankhede Stadium",
+    overs: 20,
+    players_per_team: 11,
     status: "live",
     currentInnings: 1,
     teamA: {
+      team_id: "t1",
       id: "t1",
       name: "Mumbai Indians",
-      shortName: "MI",
+      short_name: "MI",
       color: "#004ba0",
       players: [],
     },
     teamB: {
+      team_id: "t2",
       id: "t2",
       name: "Chennai Super Kings",
-      shortName: "CSK",
+      short_name: "CSK",
       color: "#f85c00",
       players: [],
     },
     innings: [
       {
+        id: "i1",
         battingTeam: "t1",
         bowlingTeam: "t2",
         runs: 156,
@@ -127,54 +140,88 @@ const mockMatches: Match[] = [
         isCompleted: false,
       },
     ],
-    startTime: new Date().toISOString(),
+    started_at: new Date().toISOString(),
+    ended_at: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    host_user_id: "u1",
+    toss_winner_id: "t1",
+    toss_decision: "bat",
+    winner_team_id: null,
+    man_of_match_id: null,
+    worst_player_id: null,
   },
   {
     id: "m2",
     matchType: "t20",
-    totalOvers: 20,
+    team1_id: "t3",
+    team_1_name: "Royal Challengers",
+    team2_id: "t4",
+    team_2_name: "Kolkata Knight Riders",
+    venue: "Eden Gardens",
+    overs: 20,
+    players_per_team: 11,
     status: "upcoming",
     currentInnings: 1,
     teamA: {
+      team_id: "t3",
       id: "t3",
       name: "Royal Challengers",
-      shortName: "RCB",
+      short_name: "RCB",
       color: "#ec1c24",
       players: [],
     },
     teamB: {
+      team_id: "t4",
       id: "t4",
       name: "Kolkata Knight Riders",
-      shortName: "KKR",
+      short_name: "KKR",
       color: "#3a225d",
       players: [],
     },
     innings: [],
-    startTime: new Date(Date.now() + 86400000).toISOString(),
-    venue: "Eden Gardens",
+    started_at: new Date(Date.now() + 86400000).toISOString(),
+    ended_at: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    host_user_id: "u1",
+    toss_winner_id: null,
+    toss_decision: null,
+    winner_team_id: null,
+    man_of_match_id: null,
+    worst_player_id: null,
   },
   {
     id: "m3",
     matchType: "t20",
-    totalOvers: 20,
+    team1_id: "t1",
+    team_1_name: "Mumbai Indians",
+    team2_id: "t3",
+    team_2_name: "Royal Challengers",
+    venue: "Chinnaswamy Stadium",
+    overs: 20,
+    players_per_team: 11,
     status: "completed",
     currentInnings: 2,
     teamA: {
+      team_id: "t1",
       id: "t1",
       name: "Mumbai Indians",
-      shortName: "MI",
+      short_name: "MI",
       color: "#004ba0",
       players: [],
     },
     teamB: {
+      team_id: "t3",
       id: "t3",
       name: "Royal Challengers",
-      shortName: "RCB",
+      short_name: "RCB",
       color: "#ec1c24",
       players: [],
     },
     innings: [
       {
+        id: "i2",
         battingTeam: "t1",
         bowlingTeam: "t3",
         runs: 186,
@@ -222,6 +269,7 @@ const mockMatches: Match[] = [
         isCompleted: true,
       },
       {
+        id: "i3",
         battingTeam: "t3",
         bowlingTeam: "t1",
         runs: 175,
@@ -260,9 +308,16 @@ const mockMatches: Match[] = [
         target: 187,
       },
     ],
-    startTime: new Date(Date.now() - 172800000).toISOString(),
-    endTime: new Date(Date.now() - 172800000 + 10800000).toISOString(),
-    manOfTheMatch: "Rohit Sharma",
+    started_at: new Date(Date.now() - 172800000).toISOString(),
+    ended_at: new Date(Date.now() - 172800000 + 10800000).toISOString(),
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    host_user_id: "u1",
+    toss_winner_id: "t1",
+    toss_decision: "bat",
+    winner_team_id: "t1",
+    man_of_match_id: "p1",
+    worst_player_id: null,
   },
 ];
 
@@ -623,30 +678,48 @@ export function setupMockAPI() {
           typeof config.data === "string"
             ? JSON.parse(config.data)
             : config.data;
+        
+        const teamAObj = mockTeams.find(t => (t.team_id || t.id) === payload.team1_id);
+        const teamBObj = mockTeams.find(t => (t.team_id || t.id) === payload.team2_id);
+
         const newMatch: Match = {
           id: "m" + Date.now(),
           ...payload,
+          team_1_name: teamAObj?.name || payload.newTeamAName || "Team A",
+          team_2_name: teamBObj?.name || payload.newTeamBName || "Team B",
           status: "upcoming",
           currentInnings: 1,
           innings: [],
           teamA: {
-            id: payload.teamAId,
-            name: payload.newTeamAName || "Team A",
-            shortName: "TA",
-            color: "#3b5bdb",
+            team_id: payload.team1_id,
+            id: payload.team1_id,
+            name: teamAObj?.name || payload.newTeamAName || "Team A",
+            short_name: teamAObj?.short_name || "TA",
+            color: teamAObj?.color || "#3b5bdb",
             players: mockPlayers.filter((p) =>
-              payload.teamAPlayerIds?.includes(p.id),
+              payload.team1_players?.includes(p.id),
             ),
           },
           teamB: {
-            id: payload.teamBId,
-            name: payload.newTeamBName || "Team B",
-            shortName: "TB",
-            color: "#f85c00",
+            team_id: payload.team2_id,
+            id: payload.team2_id,
+            name: teamBObj?.name || payload.newTeamBName || "Team B",
+            short_name: teamBObj?.short_name || "TB",
+            color: teamBObj?.color || "#f85c00",
             players: mockPlayers.filter((p) =>
-              payload.teamBPlayerIds?.includes(p.id),
+              payload.team2_players?.includes(p.id),
             ),
           },
+          started_at: new Date().toISOString(),
+          ended_at: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          host_user_id: "u1",
+          toss_winner_id: payload.toss_winner_id || null,
+          toss_decision: payload.toss_decision || null,
+          winner_team_id: null,
+          man_of_match_id: null,
+          worst_player_id: null,
         };
         mockMatches.push(newMatch);
         return Promise.resolve({ data: { success: true, data: newMatch } });
@@ -672,21 +745,21 @@ export function setupMockAPI() {
           match.innings.push({
             id: "i" + Date.now(),
             battingTeam:
-              match.tossChoice === "bat"
-                ? match.tossWinner === "teamA"
-                  ? match.teamA.id
-                  : match.teamB.id
-                : match.tossWinner === "teamA"
-                  ? match.teamB.id
-                  : match.teamA.id,
+              match.toss_decision === "bat"
+                ? match.toss_winner_id === match.team1_id
+                  ? match.teamA?.team_id || ""
+                  : match.teamB?.team_id || ""
+                : match.toss_winner_id === match.team1_id
+                  ? match.teamB?.team_id || ""
+                  : match.teamA?.team_id || "",
             bowlingTeam:
-              match.tossChoice === "bowl"
-                ? match.tossWinner === "teamA"
-                  ? match.teamA.id
-                  : match.teamB.id
-                : match.tossWinner === "teamA"
-                  ? match.teamB.id
-                  : match.teamA.id,
+              match.toss_decision === "bowl"
+                ? match.toss_winner_id === match.team1_id
+                  ? match.teamA?.team_id || ""
+                  : match.teamB?.team_id || ""
+                : match.toss_winner_id === match.team1_id
+                  ? match.teamB?.team_id || ""
+                  : match.teamA?.team_id || "",
             runs: 0,
             wickets: 0,
             balls: 0,
@@ -703,7 +776,7 @@ export function setupMockAPI() {
         });
       }
 
-      if (url.match(/\/users\/matches\/[^/]+\/live/) && method === "get") {
+      if (url.match(/\/matches\/[^/]+\/live/) && method === "get") {
         const parts = url.split("/");
         const matchIdx = parts.indexOf("matches");
         const matchId = parts[matchIdx + 1];
@@ -783,9 +856,9 @@ export function setupMockAPI() {
         }
 
         // Auto-end innings if all players are out
-        const totalPlayers = currentInnings.battingTeam === match.teamA.id 
-          ? match.teamA.players.length 
-          : match.teamB.players.length;
+        const totalPlayers = currentInnings.battingTeam === match.teamA?.team_id 
+          ? match.teamA?.players?.length || 11 
+          : match.teamB?.players?.length || 11;
 
         if (currentInnings.wickets >= totalPlayers) {
           currentInnings.isCompleted = true;
@@ -1008,9 +1081,9 @@ export function setupMockAPI() {
             : config.data;
         
         const newTeam: Team = {
-          id: "t" + Date.now(),
+          team_id: "t" + Date.now(),
           name: payload.name,
-          shortName: payload.shortName,
+          short_name: payload.short_name,
           color: payload.color,
           players: payload.players || [],
         };

@@ -40,10 +40,11 @@ export default function CreateTeamPage() {
     if (!teamData.name || !teamData.shortName) return;
 
     createTeam.mutate({
+      team_id: "", // Server will generate this
       name: teamData.name,
-      shortName: teamData.shortName,
+      short_name: teamData.shortName,
       color: teamData.color,
-      players: (players || []).map((p) => ({
+      players: (players || []).map((p: any) => ({
         id: p.id,
         name: p.name,
         battingStyle: "right-handed" as const,

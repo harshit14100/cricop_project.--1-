@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { useCreateMatch, useTeams, usePlayers } from "@/hooks";
-import { matchApi } from "@/api";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/store";
 
@@ -79,12 +78,12 @@ export default function StartMatchPage() {
   // Pre-fill players when team is selected
   useEffect(() => {
     if (matchData.teamAId && matchData.teamAId !== "new") {
-      const teamA = teamsData?.teams?.find(
-        (t) => t.team_id === matchData.teamAId,
+      const teamA = (teamsData as any)?.teams?.find(
+        (t: any) => (t.team_id || t.id) === matchData.teamAId,
       );
       if (teamA?.players) {
         setTeamAPlayerIds(
-          teamA.players.map((p) => p.id).slice(0, playersPerTeam),
+          teamA.players.map((p: any) => p.id).slice(0, playersPerTeam),
         );
       }
     }
@@ -92,12 +91,12 @@ export default function StartMatchPage() {
 
   useEffect(() => {
     if (matchData.teamBId && matchData.teamBId !== "new") {
-      const teamB = teamsData?.teams?.find(
-        (t) => t.team_id === matchData.teamBId,
+      const teamB = (teamsData as any)?.teams?.find(
+        (t: any) => (t.team_id || t.id) === matchData.teamBId,
       );
       if (teamB?.players) {
         setTeamBPlayerIds(
-          teamB.players.map((p) => p.id).slice(0, playersPerTeam),
+          teamB.players.map((p: any) => p.id).slice(0, playersPerTeam),
         );
       }
     }
@@ -122,38 +121,82 @@ export default function StartMatchPage() {
   };
 
   const handleCreateMatch = async () => {
-    if (teamAPlayerIds.length === 0 || teamBPlayerIds.length === 0) {
-      addToast({
-        title: "Incomplete Squads",
-        description: "Each team must have at least one player to start.",
-        variant: "error",
-      });
-      return;
-    }
-
     try {
-      // 1. Create the match with basic info
-      const match = await createMatch.mutateAsync({
+      const battingTeamPlayers =
+        matchData.tossChoice === "bat"
+          ? matchData.tossWinner === "teamA"
+            ? teamAPlayerIds
+            : teamBPlayerIds
+          : matchData.tossWinner === "teamA"
+            ? teamBPlayerIds
+            : teamAPlayerIds;
+
+      const bowlingTeamPlayers =
+        matchData.tossChoice === "bat"
+          ? matchData.tossWinner === "teamA"
+            ? teamBPlayerIds
+            : teamAPlayerIds
+          : matchData.tossWinner === "teamA"
+            ? teamAPlayerIds
+            : teamBPlayerIds;
+
+      const matchResponse = await createMatch.mutateAsync({
         team1_id: matchData.teamAId,
         team2_id: matchData.teamBId,
-        venue: matchData.venue || "TBD",
+
+        venue: matchData.venue,
         overs: matchData.totalOvers,
         players_per_team: playersPerTeam,
+
+        team1_players: teamAPlayerIds,
+        team2_players: teamBPlayerIds,
+
+        toss_winner_id:
+          matchData.tossWinner === "teamA"
+            ? matchData.teamAId
+            : matchData.teamBId,
+
+        toss_decision: (matchData.tossChoice || "bat") as "bat" | "bowl",
+
+        batting_team_id:
+          matchData.tossChoice === "bat"
+            ? matchData.tossWinner === "teamA"
+              ? matchData.teamAId
+              : matchData.teamBId
+            : matchData.tossWinner === "teamA"
+              ? matchData.teamBId
+              : matchData.teamAId,
+
+        bowling_team_id:
+          matchData.tossChoice === "bat"
+            ? matchData.tossWinner === "teamA"
+              ? matchData.teamBId
+              : matchData.teamAId
+            : matchData.tossWinner === "teamA"
+              ? matchData.teamAId
+              : matchData.teamBId,
+
+        striker_id: battingTeamPlayers[0] || "",
+        non_striker_id: battingTeamPlayers[1] || "",
+        current_bowler_id: bowlingTeamPlayers[0] || "",
       });
 
-      if (match) {
-        // 2. Update the toss result
-        await matchApi.setToss({
-          matchId: match.id,
-          winner_team_id:
-            matchData.tossWinner === "teamA" ? match.team1_id : match.team2_id,
-          choice: matchData.tossChoice as "bat" | "bowl",
-        });
+      console.log("CREATED MATCH:", matchResponse);
 
-        handleNext();
+      const matchId =
+        (matchResponse as any)?.match_id ||
+        (matchResponse as any)?.data?.match_id;
+
+      if (!matchId) {
+        console.error("MATCH ID MISSING");
+        return;
       }
-    } catch (error) {
-      // Error handled by mutation hooks
+
+      console.log("MATCH ID:", matchId);
+
+      navigate(`/live-scoring/${matchId}`);
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -181,8 +224,8 @@ export default function StartMatchPage() {
 
   const players = Array.isArray(playersData)
     ? playersData
-    : playersData?.players || [];
-  const filteredPlayers = players.filter((p) =>
+    : (playersData as any)?.players || [];
+  const filteredPlayers = (players || []).filter((p: any) =>
     p?.name?.toLowerCase().includes(playerSearchTerm.toLowerCase()),
   );
 
@@ -222,11 +265,15 @@ export default function StartMatchPage() {
   };
 
   const teamAName =
-    teamsData?.teams?.find((t) => t.team_id === matchData.teamAId)?.name ||
+    (teamsData as any)?.teams?.find(
+      (t: any) => (t.team_id || t.id) === matchData.teamAId,
+    )?.name ||
     newTeamA ||
     "Team A";
   const teamBName =
-    teamsData?.teams?.find((t) => t.team_id === matchData.teamBId)?.name ||
+    (teamsData as any)?.teams?.find(
+      (t: any) => (t.team_id || t.id) === matchData.teamBId,
+    )?.name ||
     newTeamB ||
     "Team B";
 
@@ -248,7 +295,7 @@ export default function StartMatchPage() {
       {/* Progress Steps */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
-          {steps.map((step, i) => {
+          {steps.map((step: any, i: number) => {
             const isActive = step.id === currentStep;
             const isCompleted = step.id < currentStep;
             return (
@@ -324,7 +371,7 @@ export default function StartMatchPage() {
                   <Select
                     value={matchData.matchType}
                     onValueChange={(v) =>
-                      setMatchData({ ...matchData, matchType: v as any })
+                      setMatchData((prev) => ({ ...prev, matchType: v as any }))
                     }
                   >
                     <SelectTrigger>
@@ -346,10 +393,10 @@ export default function StartMatchPage() {
                       type="number"
                       value={matchData.totalOvers}
                       onChange={(e) =>
-                        setMatchData({
-                          ...matchData,
+                        setMatchData((prev) => ({
+                          ...prev,
                           totalOvers: parseInt(e.target.value) || 20,
-                        })
+                        }))
                       }
                       min={1}
                       max={50}
@@ -385,7 +432,7 @@ export default function StartMatchPage() {
                     <Select
                       value={matchData.teamAId}
                       onValueChange={(v) =>
-                        setMatchData({ ...matchData, teamAId: v })
+                        setMatchData((prev) => ({ ...prev, teamAId: v }))
                       }
                     >
                       <SelectTrigger>
@@ -393,11 +440,19 @@ export default function StartMatchPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="new">Custom Team Name</SelectItem>
-                        {teamsData?.teams?.map((t) => (
-                          <SelectItem key={t.team_id} value={t.team_id}>
-                            {t.name}
-                          </SelectItem>
-                        ))}
+                        {((teamsData as any)?.teams || [])
+                          ?.filter(
+                            (t: any) =>
+                              (t.team_id || t.id) !== matchData.teamBId,
+                          )
+                          .map((t: any) => (
+                            <SelectItem
+                              key={t.team_id || t.id}
+                              value={t.team_id || t.id}
+                            >
+                              {t.name}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                     {/* Fixed: Show Input when creating new Team A */}
@@ -416,7 +471,7 @@ export default function StartMatchPage() {
                     <Select
                       value={matchData.teamBId}
                       onValueChange={(v) =>
-                        setMatchData({ ...matchData, teamBId: v })
+                        setMatchData((prev) => ({ ...prev, teamBId: v }))
                       }
                     >
                       <SelectTrigger>
@@ -424,21 +479,19 @@ export default function StartMatchPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="new">Custom Team Name</SelectItem>
-                        {teamsData?.teams?.map((t) => (
-                          <SelectItem key={t.team_id} value={t.team_id}>
-                            {t.name}
-                          </SelectItem>
-                        )) || (
-                          <>
-                            <SelectItem value="t2">
-                              Chennai Super Kings
+                        {((teamsData as any)?.teams || [])
+                          ?.filter(
+                            (t: any) =>
+                              (t.team_id || t.id) !== matchData.teamAId,
+                          )
+                          .map((t: any) => (
+                            <SelectItem
+                              key={t.team_id || t.id}
+                              value={t.team_id || t.id}
+                            >
+                              {t.name}
                             </SelectItem>
-                            <SelectItem value="t4">
-                              Kolkata Knight Riders
-                            </SelectItem>
-                            <SelectItem value="t5">Delhi Capitals</SelectItem>
-                          </>
-                        )}
+                          ))}
                       </SelectContent>
                     </Select>
                     {/* Fixed: Show Input when creating new Team B */}
@@ -499,7 +552,7 @@ export default function StartMatchPage() {
                         </h3>
                       </div>
                       <div className="p-3 rounded-xl bg-white/5 border border-white/10 min-h-[200px] max-h-[300px] overflow-y-auto space-y-1">
-                        {filteredPlayers?.map((p) => {
+                        {filteredPlayers?.map((p: any) => {
                           const isSelectedInOtherTeam = teamBPlayerIds.includes(
                             p.id,
                           );
@@ -545,7 +598,7 @@ export default function StartMatchPage() {
                         </h3>
                       </div>
                       <div className="p-3 rounded-xl bg-white/5 border border-white/10 min-h-[200px] max-h-[300px] overflow-y-auto space-y-1">
-                        {filteredPlayers?.map((p) => {
+                        {filteredPlayers?.map((p: any) => {
                           const isSelectedInOtherTeam = teamAPlayerIds.includes(
                             p.id,
                           );
@@ -596,7 +649,7 @@ export default function StartMatchPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">None</SelectItem>
-                        {players.map((p) => (
+                        {players.map((p: any) => (
                           <SelectItem key={p.id} value={p.id}>
                             {p?.name || "Unknown Player"}
                           </SelectItem>
@@ -623,7 +676,10 @@ export default function StartMatchPage() {
                       placeholder="Wankhede Stadium, Mumbai"
                       value={matchData.venue}
                       onChange={(e) =>
-                        setMatchData({ ...matchData, venue: e.target.value })
+                        setMatchData((prev) => ({
+                          ...prev,
+                          venue: e.target.value,
+                        }))
                       }
                     />
                   </div>
@@ -790,7 +846,10 @@ export default function StartMatchPage() {
                                 "ring-4 ring-blue-500/20 scale-105",
                             )}
                             onClick={() =>
-                              setMatchData({ ...matchData, tossChoice: "bat" })
+                              setMatchData((prev) => ({
+                                ...prev,
+                                tossChoice: "bat",
+                              }))
                             }
                           >
                             BAT
@@ -807,7 +866,10 @@ export default function StartMatchPage() {
                                 "ring-4 ring-blue-500/20 scale-105",
                             )}
                             onClick={() =>
-                              setMatchData({ ...matchData, tossChoice: "bowl" })
+                              setMatchData((prev) => ({
+                                ...prev,
+                                tossChoice: "bowl",
+                              }))
                             }
                           >
                             BOWL
@@ -819,11 +881,11 @@ export default function StartMatchPage() {
                         variant="ghost"
                         className="text-white/40 hover:text-white"
                         onClick={() => {
-                          setMatchData({
-                            ...matchData,
+                          setMatchData((prev) => ({
+                            ...prev,
                             tossWinner: "",
                             tossChoice: "",
-                          });
+                          }));
                           setCoinResult(null);
                         }}
                       >
@@ -855,7 +917,11 @@ export default function StartMatchPage() {
                 <div className="flex items-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10">
                   <Input
                     readOnly
-                    value={`https://cricop.com/match/${createMatch.data?.id || "abc123"}`}
+                    value={
+                      createMatch.data?.id
+                        ? `https://cricop.com/match/${createMatch.data.id}`
+                        : "Generating link..."
+                    }
                     className="border-0 bg-transparent"
                   />
                   <Button
@@ -884,7 +950,7 @@ export default function StartMatchPage() {
                   <Button
                     onClick={() =>
                       navigate(
-                        `/live-scoring/${createMatch.data?.id || "abc123"}`,
+                        `/live-scoring/${(createMatch.data as any)?.data?.id || createMatch.data?.id || "abc123"}`,
                       )
                     }
                   >

@@ -1,5 +1,5 @@
 import client from "./client";
-import type { Team, Player, ApiResponse } from "@/types";
+import type { Team, Player } from "@/types";
 
 export const teamApi = {
   getTeams: async (params?: { search?: string; page?: number; limit?: number }): Promise<{ teams: Team[]; total: number }> => {
