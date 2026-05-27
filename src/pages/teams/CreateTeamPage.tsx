@@ -18,29 +18,36 @@ export default function CreateTeamPage() {
     color: "#3b82f6",
   });
 
-  const [players, setPlayers] = useState<string[]>([]);
+  const [players, setPlayers] = useState<{ id: string; name: string }[]>([]);
   const [newPlayerName, setNewPlayerName] = useState("");
 
   const addPlayer = () => {
-    if (newPlayerName.trim()) {
-      setPlayers([...players, newPlayerName.trim()]);
+    if (newPlayerName && newPlayerName.trim()) {
+      setPlayers((prev) => [
+        ...prev,
+        { id: `p-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`, name: newPlayerName.trim() },
+      ]);
       setNewPlayerName("");
     }
   };
 
-  const removePlayer = (index: number) => {
-    setPlayers(players.filter((_, i) => i !== index));
+  const removePlayer = (id: string) => {
+    setPlayers((prev) => prev.filter((p) => p.id !== id));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!teamData.name || !teamData.shortName) return;
+
     createTeam.mutate({
-      ...teamData,
-      players: players.map((name, index) => ({
-        id: `p-${Date.now()}-${index}`,
-        name,
-        battingStyle: "right-handed",
-      })) as any,
+      name: teamData.name,
+      shortName: teamData.shortName,
+      color: teamData.color,
+      players: (players || []).map((p) => ({
+        id: p.id,
+        name: p.name,
+        battingStyle: "right-handed" as const,
+      })),
     }, {
       onSuccess: () => {
         navigate("/players");
@@ -129,7 +136,7 @@ export default function CreateTeamPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-white">
                 <Users className="h-5 w-5 text-electric" />
-                Squad Members ({players.length})
+                Squad Members ({players?.length || 0})
               </CardTitle>
               <CardDescription className="text-white/40">
                 Add players to your team squad
@@ -142,12 +149,13 @@ export default function CreateTeamPage() {
                   className="bg-white/5 border-white/10 text-white focus:border-electric/50"
                   value={newPlayerName}
                   onChange={(e) => setNewPlayerName(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addPlayer())}
+                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addPlayer())}
                 />
                 <Button 
                   type="button" 
                   onClick={addPlayer}
                   className="bg-electric hover:bg-electric/80"
+                  disabled={!newPlayerName.trim()}
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
@@ -155,9 +163,9 @@ export default function CreateTeamPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 max-h-[300px] overflow-y-auto pr-2">
                 <AnimatePresence>
-                  {players.map((name, index) => (
+                  {(players || []).map((player, index) => (
                     <motion.div
-                      key={`${name}-${index}`}
+                      key={player.id}
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.9 }}
@@ -167,11 +175,11 @@ export default function CreateTeamPage() {
                         <div className="w-8 h-8 rounded-full bg-electric/20 flex items-center justify-center text-xs font-bold text-electric">
                           {index + 1}
                         </div>
-                        <span className="text-white text-sm font-medium">{name}</span>
+                        <span className="text-white text-sm font-medium">{player.name}</span>
                       </div>
                       <button
                         type="button"
-                        onClick={() => removePlayer(index)}
+                        onClick={() => removePlayer(player.id)}
                         className="text-white/20 hover:text-red-400 transition-colors"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -179,7 +187,7 @@ export default function CreateTeamPage() {
                     </motion.div>
                   ))}
                 </AnimatePresence>
-                {players.length === 0 && (
+                {(!players || players.length === 0) && (
                   <div className="col-span-full py-8 text-center border-2 border-dashed border-white/5 rounded-xl">
                     <UserPlus className="h-8 w-8 text-white/10 mx-auto mb-2" />
                     <p className="text-white/20 text-sm">No players added yet</p>
@@ -234,7 +242,7 @@ export default function CreateTeamPage() {
             </div>
             <div>
               <h3 className="text-xl font-bold text-white">{teamData.name || "Your Team Name"}</h3>
-              <p className="text-white/50 text-sm">{players.length} Players • New Team</p>
+              <p className="text-white/50 text-sm">{players?.length || 0} Players • New Team</p>
             </div>
           </div>
         </div>

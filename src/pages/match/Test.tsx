@@ -139,14 +139,16 @@ export default function StartMatchPage() {
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 
-  const players = Array.isArray(playersData) ? playersData : playersData?.players || [];
+  const players = Array.isArray(playersData)
+    ? playersData
+    : playersData?.players || [];
   const filteredPlayers = players.filter((p) =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const getTeamName = (teamId: string, defaultName: string) => {
     if (teamId === "new") return defaultName || "New Team";
-    return teamsData?.teams.find((t) => t.id === teamId)?.name || "Select Team";
+    return teamsData?.teams?.find((t) => t.team_id === teamId)?.name || "Select Team";
   };
 
   return (
@@ -284,7 +286,7 @@ export default function StartMatchPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="new">+ Create New Series</SelectItem>
-                      {teamsData?.teams.length === 0 ? (
+                      {teamsData?.teams?.length === 0 ? (
                         <SelectItem value="none" disabled>
                           No series available
                         </SelectItem>
@@ -320,8 +322,8 @@ export default function StartMatchPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="new">+ Create New Team</SelectItem>
-                        {teamsData?.teams.map((t) => (
-                          <SelectItem key={t.id} value={t.id}>
+                        {teamsData?.teams?.map((t) => (
+                          <SelectItem key={t.team_id} value={t.team_id}>
                             {t.name}
                           </SelectItem>
                         ))}
@@ -350,8 +352,8 @@ export default function StartMatchPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="new">+ Create New Team</SelectItem>
-                        {teamsData?.teams.map((t) => (
-                          <SelectItem key={t.id} value={t.id}>
+                        {teamsData?.teams?.map((t) => (
+                          <SelectItem key={t.team_id} value={t.team_id}>
                             {t.name}
                           </SelectItem>
                         ))}

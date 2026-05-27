@@ -1022,7 +1022,7 @@ export function setupMockAPI() {
 
       if (url.match(/\/users\/teams\/[^/]+$/) && method === "get") {
         const teamId = url.split("/").pop();
-        const team = mockTeams.find((t) => t.id === teamId);
+        const team = mockTeams.find((t) => t.team_id === teamId);
         if (team) {
           return Promise.resolve({ data: { success: true, data: team } });
         }
@@ -1030,7 +1030,7 @@ export function setupMockAPI() {
 
       if (url.match(/\/users\/teams\/[^/]+$/) && method === "put") {
         const teamId = url.split("/").pop();
-        const teamIdx = mockTeams.findIndex((t) => t.id === teamId);
+        const teamIdx = mockTeams.findIndex((t) => t.team_id === teamId);
         if (teamIdx !== -1) {
           const payload =
             typeof config.data === "string"
@@ -1045,7 +1045,7 @@ export function setupMockAPI() {
 
       if (url.match(/\/users\/teams\/[^/]+$/) && method === "delete") {
         const teamId = url.split("/").pop();
-        const teamIdx = mockTeams.findIndex((t) => t.id === teamId);
+        const teamIdx = mockTeams.findIndex((t) => t.team_id === teamId);
         if (teamIdx !== -1) {
           mockTeams.splice(teamIdx, 1);
           return Promise.resolve({ data: { success: true } });

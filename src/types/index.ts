@@ -1,3 +1,5 @@
+import { client } from "@/api";
+
 export interface User {
   id: string;
   name: string;
@@ -15,16 +17,20 @@ export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
 }
-
 export interface Team {
-  id: string;
+  team_id: string;
   name: string;
-  shortName: string;
+
+  short_name?: string;
   logo?: string;
-  color: string;
-  players: Player[];
-  captainId?: string;
-  wicketKeeperId?: string;
+  color?: string;
+
+  players?: Player[];
+
+  captain_id?: string;
+  wicket_keeper_id?: string;
+
+  created_at?: string;
 }
 
 export interface Player {
@@ -113,6 +119,36 @@ export interface Match {
   matchType?: "t20" | "odi" | "test" | "custom";
   shareableLink?: string;
 }
+
+export interface SuperStartMatchPayload {
+  team1_id: string;
+  team2_id: string;
+
+  venue: string;
+  overs: number;
+
+  team1_players: string[];
+  team2_players: string[];
+
+  toss_winner_id: string;
+  toss_decision: "bat" | "bowl";
+
+  batting_team_id: string;
+  bowling_team_id: string;
+
+  striker_id: string;
+  non_striker_id: string;
+
+  current_bowler_id: string;
+}
+
+export const matchesApi = {
+  async setupMatch(payload: SuperStartMatchPayload) {
+    const response = await client.post("/users/matches/setup", payload);
+
+    return response.data;
+  },
+};
 
 export interface StartMatchPayload {
   team1_id: string;

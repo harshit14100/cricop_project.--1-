@@ -79,7 +79,9 @@ export default function StartMatchPage() {
   // Pre-fill players when team is selected
   useEffect(() => {
     if (matchData.teamAId && matchData.teamAId !== "new") {
-      const teamA = teamsData?.teams.find((t) => t.id === matchData.teamAId);
+      const teamA = teamsData?.teams?.find(
+        (t) => t.team_id === matchData.teamAId,
+      );
       if (teamA?.players) {
         setTeamAPlayerIds(
           teamA.players.map((p) => p.id).slice(0, playersPerTeam),
@@ -90,7 +92,9 @@ export default function StartMatchPage() {
 
   useEffect(() => {
     if (matchData.teamBId && matchData.teamBId !== "new") {
-      const teamB = teamsData?.teams.find((t) => t.id === matchData.teamBId);
+      const teamB = teamsData?.teams?.find(
+        (t) => t.team_id === matchData.teamBId,
+      );
       if (teamB?.players) {
         setTeamBPlayerIds(
           teamB.players.map((p) => p.id).slice(0, playersPerTeam),
@@ -141,7 +145,8 @@ export default function StartMatchPage() {
         // 2. Update the toss result
         await matchApi.setToss({
           matchId: match.id,
-          winner_team_id: matchData.tossWinner === "teamA" ? match.team1_id : match.team2_id,
+          winner_team_id:
+            matchData.tossWinner === "teamA" ? match.team1_id : match.team2_id,
           choice: matchData.tossChoice as "bat" | "bowl",
         });
 
@@ -174,7 +179,9 @@ export default function StartMatchPage() {
     }
   };
 
-  const players = Array.isArray(playersData) ? playersData : playersData?.players || [];
+  const players = Array.isArray(playersData)
+    ? playersData
+    : playersData?.players || [];
   const filteredPlayers = players.filter((p) =>
     p?.name?.toLowerCase().includes(playerSearchTerm.toLowerCase()),
   );
@@ -215,11 +222,11 @@ export default function StartMatchPage() {
   };
 
   const teamAName =
-    teamsData?.teams.find((t) => t.id === matchData.teamAId)?.name ||
+    teamsData?.teams?.find((t) => t.team_id === matchData.teamAId)?.name ||
     newTeamA ||
     "Team A";
   const teamBName =
-    teamsData?.teams.find((t) => t.id === matchData.teamBId)?.name ||
+    teamsData?.teams?.find((t) => t.team_id === matchData.teamBId)?.name ||
     newTeamB ||
     "Team B";
 
@@ -386,8 +393,8 @@ export default function StartMatchPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="new">Custom Team Name</SelectItem>
-                        {teamsData?.teams.map((t) => (
-                          <SelectItem key={t.id} value={t.id}>
+                        {teamsData?.teams?.map((t) => (
+                          <SelectItem key={t.team_id} value={t.team_id}>
                             {t.name}
                           </SelectItem>
                         ))}
@@ -417,8 +424,8 @@ export default function StartMatchPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="new">Custom Team Name</SelectItem>
-                        {teamsData?.teams.map((t) => (
-                          <SelectItem key={t.id} value={t.id}>
+                        {teamsData?.teams?.map((t) => (
+                          <SelectItem key={t.team_id} value={t.team_id}>
                             {t.name}
                           </SelectItem>
                         )) || (
