@@ -630,6 +630,16 @@ export function setupMockAPI() {
           winner_team_id: null,
           man_of_match_id: null,
           worst_player_id: null,
+          
+          // Populate live fields
+          batting_team_name: teamAObj?.name || "Team A",
+          bowling_team_name: teamBObj?.name || "Team B",
+          total_runs: 0,
+          wickets: 0,
+          completed_overs: 0,
+          balls_in_current_over: 0,
+          striker_name: "Select Striker",
+          non_striker_name: "Select Non-Striker",
         };
         mockMatches.push(newMatch);
         return Promise.resolve({ data: { success: true, data: newMatch } });
@@ -691,6 +701,22 @@ export function setupMockAPI() {
         const matchIdx = parts.indexOf("matches");
         const matchId = parts[matchIdx + 1];
         const match = mockMatches.find((m) => m.id === matchId);
+        
+        if (match && match.innings.length > 0) {
+          const currentInnings = match.innings[match.currentInnings - 1];
+          const battingTeam = match.team1_id === currentInnings.battingTeam ? match.teamA : match.teamB;
+          const bowlingTeam = match.team1_id === currentInnings.battingTeam ? match.teamB : match.teamA;
+          
+          match.batting_team_name = battingTeam?.name || "Batting Team";
+          match.bowling_team_name = bowlingTeam?.name || "Bowling Team";
+          match.total_runs = currentInnings.runs;
+          match.wickets = currentInnings.wickets;
+          match.completed_overs = Math.floor(currentInnings.balls / 6);
+          match.balls_in_current_over = currentInnings.balls % 6;
+          match.striker_name = currentInnings.batsmen.find(b => !b.isOut)?.playerName || "N/A";
+          match.non_striker_name = currentInnings.batsmen.filter(b => !b.isOut)[1]?.playerName || "N/A";
+        }
+
         return Promise.resolve({
           data: { success: true, data: match || mockMatches[0] },
         });

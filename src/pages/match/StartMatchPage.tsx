@@ -184,19 +184,30 @@ export default function StartMatchPage() {
       console.log("CREATED MATCH:", matchResponse);
 
       const matchId =
+        (matchResponse as any)?.id ||
+        (matchResponse as any)?.data?.id ||
         (matchResponse as any)?.match_id ||
         (matchResponse as any)?.data?.match_id;
 
       if (!matchId) {
-        console.error("MATCH ID MISSING");
+        console.error("MATCH ID MISSING IN RESPONSE", matchResponse);
+        addToast({
+          title: "Match Created",
+          description: "Match was created but we couldn't get the ID. Please check history.",
+          variant: "warning",
+        });
         return;
       }
 
       console.log("MATCH ID:", matchId);
-
       navigate(`/live-scoring/${matchId}`);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error("CREATE MATCH ERROR:", err);
+      addToast({
+        title: "Creation Failed",
+        description: err.response?.data?.message || "An unexpected error occurred while creating the match.",
+        variant: "error",
+      });
     }
   };
 
@@ -948,11 +959,23 @@ export default function StartMatchPage() {
                     WhatsApp
                   </Button>
                   <Button
-                    onClick={() =>
-                      navigate(
-                        `/live-scoring/${(createMatch.data as any)?.data?.id || createMatch.data?.id || "abc123"}`,
-                      )
-                    }
+                    onClick={() => {
+                      const id =
+                        (createMatch.data as any)?.id ||
+                        (createMatch.data as any)?.data?.id ||
+                        (createMatch.data as any)?.match_id ||
+                        (createMatch.data as any)?.data?.match_id;
+                      
+                      if (id) {
+                        navigate(`/live-scoring/${id}`);
+                      } else {
+                        addToast({
+                          title: "Match ID not found",
+                          description: "Please check your match history.",
+                          variant: "error"
+                        });
+                      }
+                    }}
                   >
                     Start Scoring
                   </Button>

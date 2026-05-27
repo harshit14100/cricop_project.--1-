@@ -120,6 +120,16 @@ export interface Match {
   seriesName?: string;
   matchType?: "t20" | "odi" | "test" | "custom";
   shareableLink?: string;
+
+  // Live scoring fields
+  batting_team_name?: string;
+  bowling_team_name?: string;
+  total_runs?: number;
+  wickets?: number;
+  completed_overs?: number;
+  balls_in_current_over?: number;
+  striker_name?: string;
+  non_striker_name?: string;
 }
 
 export interface SuperStartMatchPayload {

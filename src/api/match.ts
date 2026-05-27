@@ -65,21 +65,20 @@ export const matchApi = {
     return data.data;
   },
 
-  startMatch: async (payload: StartMatchPayload): Promise<Match> => {
-    const { data } = await client.post<ApiResponse<Match>>(
-      "/users/matches/start",
-      payload,
-    );
+  startMatch: async (matchId: string) => {
+    const { data } = await client.post(`/users/matches/${matchId}/start`);
 
-    return data.data;
+    console.log("START MATCH RESPONSE:", data);
+
+    return data;
   },
 
   getLiveMatch: async (matchId: string): Promise<Match> => {
-    const { data } = await client.get<ApiResponse<Match>>(
-      `/matches/${matchId}/live`,
-    );
+    const response = await client.get(`/users/matches/${matchId}/live`);
 
-    return data.data;
+    console.log("LIVE API RESPONSE:", response.data);
+
+    return response.data.data;
   },
 
   getShareableLink: async (matchId: string): Promise<string> => {

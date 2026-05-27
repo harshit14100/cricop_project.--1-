@@ -178,14 +178,29 @@ export default function StartMatchPage() {
         variant: "success",
       });
 
-      const matchId = (response as any)?.data?.id || (response as any)?.id;
+      const matchId =
+        (response as any)?.id ||
+        (response as any)?.data?.id ||
+        (response as any)?.match_id ||
+        (response as any)?.data?.match_id;
+
+      if (!matchId) {
+        console.error("MATCH ID MISSING");
+        addToast({
+          title: "Error",
+          description: "Match was created but ID is missing in response.",
+          variant: "error",
+        });
+        return;
+      }
+      
       navigate(`/live-scoring/${matchId}`);
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      console.error("CREATE MATCH ERROR:", error);
 
       addToast({
         title: "Error",
-        description: "Failed to create match",
+        description: error.response?.data?.message || "Failed to create match. Please try again.",
         variant: "error",
       });
     }
