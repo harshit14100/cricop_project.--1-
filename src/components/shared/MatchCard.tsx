@@ -161,11 +161,11 @@ export function MatchCard({ match, index = 0 }: MatchCardProps) {
                       <span
                         className={cn(
                           "text-white/70",
-                          batsman.playerId === "p1" &&
+                          batsman.playerId === match.striker_id &&
                             "text-electric font-medium",
                         )}
                       >
-                        {batsman.playerName} {batsman.playerId === "p1" && "*"}
+                        {batsman.playerName} {batsman.playerId === match.striker_id && "*"}
                       </span>
                       <span className="text-white font-medium">
                         {batsman.runs} ({batsman.balls})

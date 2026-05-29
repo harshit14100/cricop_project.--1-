@@ -155,6 +155,59 @@ const mockPlayers: Player[] = [
       fours: 210,
     },
   },
+  {
+    id: "p6",
+    name: "Suryakumar Yadav",
+    battingStyle: "right-handed",
+    bowlingStyle: "right-arm-offbreak",
+    stats: {
+      matches: 60, runs: 2100, ballsFaced: 1200, wickets: 0, ballsBowled: 0, runsConceded: 0, catches: 25, stumpings: 0, highestScore: 117, bestBowling: "-", strikeRate: 175.0, economy: 0, average: 46.0, fifties: 18, hundreds: 4, sixes: 130, fours: 190,
+    },
+  },
+  {
+    id: "p7",
+    name: "Hardik Pandya",
+    battingStyle: "right-handed",
+    bowlingStyle: "right-arm-fast",
+    stats: {
+      matches: 90, runs: 1300, ballsFaced: 900, wickets: 75, ballsBowled: 1500, runsConceded: 2000, catches: 40, stumpings: 0, highestScore: 71, bestBowling: "4/16", strikeRate: 144.4, economy: 8.0, average: 25.0, fifties: 3, hundreds: 0, sixes: 65, fours: 90,
+    },
+  },
+  {
+    id: "p8",
+    name: "Ishan Kishan",
+    battingStyle: "left-handed",
+    isWicketKeeper: true,
+    stats: {
+      matches: 45, runs: 1200, ballsFaced: 850, wickets: 0, ballsBowled: 0, runsConceded: 0, catches: 20, stumpings: 5, highestScore: 89, bestBowling: "-", strikeRate: 141.1, economy: 0, average: 28.0, fifties: 6, hundreds: 0, sixes: 45, fours: 120,
+    },
+  },
+  {
+    id: "p9",
+    name: "Ruturaj Gaikwad",
+    battingStyle: "right-handed",
+    stats: {
+      matches: 25, runs: 800, ballsFaced: 550, wickets: 0, ballsBowled: 0, runsConceded: 0, catches: 10, stumpings: 0, highestScore: 101, bestBowling: "-", strikeRate: 145.4, economy: 0, average: 35.0, fifties: 5, hundreds: 1, sixes: 30, fours: 80,
+    },
+  },
+  {
+    id: "p10",
+    name: "Deepak Chahar",
+    battingStyle: "right-handed",
+    bowlingStyle: "right-arm-medium",
+    stats: {
+      matches: 50, runs: 150, ballsFaced: 110, wickets: 60, ballsBowled: 1100, runsConceded: 1400, catches: 15, stumpings: 0, highestScore: 21, bestBowling: "6/7", strikeRate: 136.3, economy: 7.6, average: 10.0, fifties: 0, hundreds: 0, sixes: 5, fours: 12,
+    },
+  },
+  {
+    id: "p11",
+    name: "Matheesha Pathirana",
+    battingStyle: "right-handed",
+    bowlingStyle: "right-arm-fast",
+    stats: {
+      matches: 20, runs: 10, ballsFaced: 15, wickets: 30, ballsBowled: 450, runsConceded: 600, catches: 5, stumpings: 0, highestScore: 5, bestBowling: "4/20", strikeRate: 66.6, economy: 8.0, average: 5.0, fifties: 0, hundreds: 0, sixes: 0, fours: 1,
+    },
+  },
 ];
 
 const mockTeams: Team[] = [
@@ -164,7 +217,7 @@ const mockTeams: Team[] = [
     name: "Mumbai Indians",
     short_name: "MI",
     color: "#004ba0",
-    players: [mockPlayers[1], mockPlayers[2]],
+    players: [mockPlayers[1], mockPlayers[2], mockPlayers[5], mockPlayers[6], mockPlayers[7]],
   },
   {
     team_id: "t2",
@@ -172,7 +225,7 @@ const mockTeams: Team[] = [
     name: "Chennai Super Kings",
     short_name: "CSK",
     color: "#f85c00",
-    players: [mockPlayers[3], mockPlayers[4]],
+    players: [mockPlayers[3], mockPlayers[4], mockPlayers[8], mockPlayers[9], mockPlayers[10]],
   },
   {
     team_id: "t3",
@@ -214,10 +267,21 @@ const mockMatches: Match[] = [
         battingTeam: "t1",
         bowlingTeam: "t2",
         runs: 156,
-        wickets: 3,
+        wickets: 2,
         balls: 98,
         extras: { wides: 4, noBalls: 1, byes: 0, legByes: 2, penalty: 0 },
         batsmen: [
+          {
+            playerId: "p8",
+            playerName: "Ishan Kishan",
+            runs: 24,
+            balls: 15,
+            fours: 4,
+            sixes: 1,
+            isOut: true,
+            dismissal: { type: "caught", bowlerName: "Deepak Chahar", fielderName: "MS Dhoni" },
+            strikeRate: 160.0,
+          },
           {
             playerId: "p2",
             playerName: "Rohit Sharma",
@@ -229,7 +293,18 @@ const mockMatches: Match[] = [
             strikeRate: 140.6,
           },
           {
-            playerId: "p3",
+            playerId: "p7",
+            playerName: "Hardik Pandya",
+            runs: 15,
+            balls: 10,
+            fours: 2,
+            sixes: 0,
+            isOut: true,
+            dismissal: { type: "bowled", bowlerName: "Matheesha Pathirana" },
+            strikeRate: 150.0,
+          },
+          {
+            playerId: "p6",
             playerName: "Suryakumar Yadav",
             runs: 38,
             balls: 24,
@@ -241,7 +316,7 @@ const mockMatches: Match[] = [
         ],
         bowlers: [
           {
-            playerId: "p4",
+            playerId: "p10",
             playerName: "Deepak Chahar",
             overs: 3,
             balls: 4,
@@ -252,9 +327,45 @@ const mockMatches: Match[] = [
             noBalls: 0,
             economy: 7.0,
           },
+          {
+            playerId: "p11",
+            playerName: "Matheesha Pathirana",
+            overs: 4,
+            balls: 0,
+            maidens: 0,
+            runs: 35,
+            wickets: 1,
+            wides: 1,
+            noBalls: 1,
+            economy: 8.75,
+          },
+          {
+            playerId: "p4",
+            playerName: "Ravindra Jadeja",
+            overs: 4,
+            balls: 0,
+            maidens: 0,
+            runs: 30,
+            wickets: 0,
+            wides: 0,
+            noBalls: 0,
+            economy: 7.5,
+          }
         ],
-        partnerships: [],
-        fallOfWickets: [],
+        partnerships: [
+          {
+            batsman1Id: "p8",
+            batsman1Name: "Ishan Kishan",
+            batsman2Id: "p2",
+            batsman2Name: "Rohit Sharma",
+            runs: 40,
+            balls: 25,
+          }
+        ],
+        fallOfWickets: [
+          { wicketNumber: 1, runs: 40, overs: 4.1, batsmanName: "Ishan Kishan", partnership: 40 },
+          { wicketNumber: 2, runs: 75, overs: 8.3, batsmanName: "Hardik Pandya", partnership: 35 },
+        ],
         isCompleted: false,
       },
     ],
@@ -468,6 +579,7 @@ export function setupMockAPI() {
           role: "user",
           createdAt: new Date().toISOString(),
           isActive: true,
+          battingStyle: "right-handed",
         };
         mockUsers.push(newUser);
         return Promise.resolve({

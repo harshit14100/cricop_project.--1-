@@ -9,6 +9,7 @@ export interface User {
   role: "user" | "host" | "admin";
   createdAt: string;
   isActive: boolean;
+  battingStyle?: "right-handed" | "left-handed";
 }
 
 export interface AuthState {

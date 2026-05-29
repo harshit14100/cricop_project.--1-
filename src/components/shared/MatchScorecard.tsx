@@ -149,7 +149,7 @@ function InningsCard({ innings, inningsNumber, isExpanded, onToggle, match }: In
                 {innings.bowlers.map((bowler) => (
                   <tr key={bowler.playerId} className="text-white/80">
                     <td className="p-3 font-semibold text-white">{bowler.playerName}</td>
-                    <td className="p-3 text-right text-white/60">{formatOvers(bowler.balls)}</td>
+                    <td className="p-3 text-right text-white/60">{bowler.overs}.{bowler.balls}</td>
                     <td className="p-3 text-right text-white/60">{bowler.maidens}</td>
                     <td className="p-3 text-right text-white/60">{bowler.runs}</td>
                     <td className="p-3 text-right font-bold text-white">{bowler.wickets}</td>

@@ -7,9 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useLogin } from "@/hooks";
+import { z } from "zod";
 
-// Regex patterns
-const phoneRegex = /^\d{10}$/; // Exactly 10 digits
+// Regex patterns & Zod schemas
+const phoneSchema = z.string().regex(/^\d{10}$/, "Please enter exactly 10 digits.");
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -23,8 +24,9 @@ export default function LoginPage() {
     let isValid = true;
     const newErrors = { phone: "", password: "" };
 
-    if (!phoneRegex.test(formData.phone)) {
-      newErrors.phone = "Please enter a valid 10-digit phone number.";
+    const phoneValidation = phoneSchema.safeParse(formData.phone);
+    if (!phoneValidation.success) {
+      newErrors.phone = phoneValidation.error.issues[0].message;
       isValid = false;
     }
 
@@ -83,6 +85,7 @@ export default function LoginPage() {
                 id="phone"
                 type="tel"
                 placeholder="+91 98765 43210"
+                maxLength={10}
                 className={`pl-10 ${errors.phone ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                 value={formData.phone}
                 onChange={(e) => {
