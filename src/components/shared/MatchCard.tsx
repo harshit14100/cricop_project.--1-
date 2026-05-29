@@ -34,7 +34,7 @@ export function MatchCard({ match, index = 0 }: MatchCardProps) {
       <Link to={isLive ? `/live-scoring/${match.id}` : `/match/${match.id}`}>
         <Card className="glass-card-hover overflow-hidden cursor-pointer group">
           {/* Header */}
-          <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
+          <div className="px-3 py-2 sm:px-4 sm:py-3 border-b border-white/5 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Badge
                 variant={
@@ -54,39 +54,39 @@ export function MatchCard({ match, index = 0 }: MatchCardProps) {
                   "Upcoming"
                 )}
               </Badge>
-              <span className="text-xs text-white/40">
+              <span className="text-[10px] sm:text-xs text-white/40">
                 {match.matchType?.toUpperCase() || "T20"}
               </span>
             </div>
             {match.seriesName && (
-              <span className="text-xs text-white/40 truncate max-w-[150px]">
+              <span className="text-[10px] sm:text-xs text-white/40 truncate max-w-[100px] sm:max-w-[150px]">
                 {match.seriesName}
               </span>
             )}
           </div>
 
           {/* Teams & Score */}
-          <div className="p-4">
-            <div className="flex items-center justify-between gap-4">
+          <div className="p-3 sm:p-4">
+            <div className="flex items-center justify-between gap-2 sm:gap-4">
               {/* Team A */}
               <div className="flex-1 text-center">
                 <div
-                  className="w-12 h-12 rounded-xl mx-auto mb-2 flex items-center justify-center text-lg font-bold text-white"
+                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl mx-auto mb-1.5 sm:mb-2 flex items-center justify-center text-base sm:text-lg font-bold text-white"
                   style={{ backgroundColor: teamA?.color || "#3b5bdb" }}
                 >
                   {teamA?.shortName?.charAt(0) || team1Name.charAt(0)}
                 </div>
-                <p className="text-sm font-semibold text-white truncate">
+                <p className="text-xs sm:text-sm font-semibold text-white truncate max-w-[80px] sm:max-w-[120px] mx-auto">
                   {teamA?.shortName || team1Name}
                 </p>
                 {currentInnings &&
                   match.innings.length > 0 &&
                   currentInnings.battingTeam === match.team1_id && (
                     <div className="mt-1">
-                      <p className="text-2xl font-bold text-white score-display">
+                      <p className="text-xl sm:text-2xl font-bold text-white score-display">
                         {currentInnings.runs}/{currentInnings.wickets}
                       </p>
-                      <p className="text-xs text-white/50">
+                      <p className="text-[10px] sm:text-xs text-white/50">
                         {formatOvers(currentInnings.balls)} ov
                       </p>
                     </div>
@@ -95,30 +95,30 @@ export function MatchCard({ match, index = 0 }: MatchCardProps) {
 
               {/* VS */}
               <div className="flex-shrink-0">
-                <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
-                  <span className="text-xs font-bold text-white/40">VS</span>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/5 flex items-center justify-center">
+                  <span className="text-[10px] sm:text-xs font-bold text-white/40">VS</span>
                 </div>
               </div>
 
               {/* Team B */}
               <div className="flex-1 text-center">
                 <div
-                  className="w-12 h-12 rounded-xl mx-auto mb-2 flex items-center justify-center text-lg font-bold text-white"
+                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl mx-auto mb-1.5 sm:mb-2 flex items-center justify-center text-base sm:text-lg font-bold text-white"
                   style={{ backgroundColor: teamB?.color || "#4263eb" }}
                 >
                   {teamB?.shortName?.charAt(0) || team2Name.charAt(0)}
                 </div>
-                <p className="text-sm font-semibold text-white truncate">
+                <p className="text-xs sm:text-sm font-semibold text-white truncate max-w-[80px] sm:max-w-[120px] mx-auto">
                   {teamB?.shortName || team2Name}
                 </p>
                 {currentInnings &&
                   match.innings.length > 0 &&
                   currentInnings.battingTeam === match.team2_id && (
                     <div className="mt-1">
-                      <p className="text-2xl font-bold text-white score-display">
+                      <p className="text-xl sm:text-2xl font-bold text-white score-display">
                         {currentInnings.runs}/{currentInnings.wickets}
                       </p>
-                      <p className="text-xs text-white/50">
+                      <p className="text-[10px] sm:text-xs text-white/50">
                         {formatOvers(currentInnings.balls)} ov
                       </p>
                     </div>

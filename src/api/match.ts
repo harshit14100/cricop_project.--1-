@@ -1,9 +1,5 @@
 import client from "./client";
-import type {
-  Match,
-  ApiResponse,
-  CreateMatchPayload,
-} from "@/types";
+import type { Match, ApiResponse, CreateMatchPayload } from "@/types";
 
 interface TossData {
   matchId: string;
@@ -77,7 +73,7 @@ export const matchApi = {
 
     console.log("LIVE API RESPONSE:", response.data);
 
-    return response.data.data;
+    return response.data;
   },
 
   getShareableLink: async (matchId: string): Promise<string> => {

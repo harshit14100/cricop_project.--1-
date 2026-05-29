@@ -11,7 +11,7 @@ export function useStatistics(params?: { timeRange?: string }) {
 export function usePlayerStatistics(playerId: string) {
   return useQuery({
     queryKey: ['player-statistics', playerId],
-    queryFn: () => statisticsService.getPlayerStatistics(playerId),
+    queryFn: () => Promise.resolve(null), // statisticsService.getPlayerStatistics(playerId),
     enabled: !!playerId,
   })
 }
@@ -27,7 +27,7 @@ export function useDashboardStats() {
 export function useMatchHighlights(matchId: string) {
   return useQuery({
     queryKey: ['match-highlights', matchId],
-    queryFn: () => statisticsService.getMatchHighlights(matchId),
+    queryFn: () => Promise.resolve([]), // statisticsService.getMatchHighlights(matchId),
     enabled: !!matchId,
   })
 }

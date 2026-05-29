@@ -1,17 +1,17 @@
 import { useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Activity, FileText, MessageSquare, Star, BarChart3, Trophy } from 'lucide-react'
+import { Activity, FileText, MessageSquare, Star, BarChart3 } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ScoreBoard } from '@/components/shared/ScoreBoard'
-import { useLiveMatch, useMatchHighlights } from '@/hooks'
+import { useLiveMatch } from '@/hooks'
 import { formatOvers, calculateRunRate } from '@/lib/utils'
 
 export default function MatchViewPage() {
   const { matchId } = useParams<{ matchId: string }>()
   const { data: match } = useLiveMatch(matchId || '')
-  const { data: highlights } = useMatchHighlights(matchId || '')
+  // const { data: highlights } = useMatchHighlights(matchId || '')
 
   if (!match) return null
 
@@ -143,6 +143,7 @@ export default function MatchViewPage() {
 
         <TabsContent value="highlights" className="mt-4">
           <div className="space-y-3">
+            {/*
             {highlights?.map((h, i) => (
               <Card key={i} className="glass-card p-4">
                 <div className="flex items-center gap-3">
@@ -154,10 +155,11 @@ export default function MatchViewPage() {
                 </div>
               </Card>
             )) || (
+            */}
               <Card className="glass-card p-8 text-center">
                 <p className="text-sm text-white/50">No highlights available yet</p>
               </Card>
-            )}
+            {/* )} */}
           </div>
         </TabsContent>
 

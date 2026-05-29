@@ -8,16 +8,35 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useLogin } from "@/hooks";
 
+// Regex patterns
+const phoneRegex = /^\d{10}$/; // Exactly 10 digits
+
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [formData, setFormData] = useState({ phone: "", password: "" });
+  const [errors, setErrors] = useState({ phone: "", password: "" });
   const login = useLogin();
   const navigate = useNavigate();
 
+  const validate = () => {
+    let isValid = true;
+    const newErrors = { phone: "", password: "" };
+
+    if (!phoneRegex.test(formData.phone)) {
+      newErrors.phone = "Please enter a valid 10-digit phone number.";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    login.mutate(formData);
+    if (validate()) {
+      login.mutate(formData);
+    }
   };
 
   return (
@@ -64,14 +83,16 @@ export default function LoginPage() {
                 id="phone"
                 type="tel"
                 placeholder="+91 98765 43210"
-                className="pl-10"
+                className={`pl-10 ${errors.phone ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                 value={formData.phone}
-                onChange={(e) =>
-                  setFormData({ ...formData, phone: e.target.value })
-                }
+                onChange={(e) => {
+                  setFormData({ ...formData, phone: e.target.value });
+                  if (errors.phone) setErrors({ ...errors, phone: "" });
+                }}
                 required
               />
             </div>
+            {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone}</p>}
           </div>
 
           <div className="space-y-2">
@@ -82,11 +103,12 @@ export default function LoginPage() {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
-                className="pl-10 pr-10"
+                className={`pl-10 pr-10 ${errors.password ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                 value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
+                onChange={(e) => {
+                  setFormData({ ...formData, password: e.target.value });
+                  if (errors.password) setErrors({ ...errors, password: "" });
+                }}
                 required
               />
               <button
@@ -101,6 +123,7 @@ export default function LoginPage() {
                 )}
               </button>
             </div>
+            {errors.password && <p className="text-xs text-red-500 mt-1">{errors.password}</p>}
           </div>
 
           <div className="flex items-center justify-between">

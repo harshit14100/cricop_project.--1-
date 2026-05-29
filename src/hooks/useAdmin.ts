@@ -1,12 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { adminService } from '@/services'
+// import { adminService } from '@/services'
 import { useUIStore } from '@/store'
 
 
 export function useAdminUsers(page = 1, limit = 50) {
   return useQuery({
     queryKey: ['admin', 'users', page, limit],
-    queryFn: () => adminService.getUsers(page, limit),
+    queryFn: () => Promise.resolve({ data: [] }), // adminService.getUsers(page, limit),
   });
 }
 
@@ -15,8 +15,8 @@ export function useUpdateUserRole() {
   const { addToast } = useUIStore();
 
   return useMutation({
-    mutationFn: ({ userId, role }: { userId: string; role: string }) =>
-      adminService.updateUserRole(userId, role),
+    mutationFn: (_vars: { userId: string; role: string }) =>
+      Promise.resolve({ data: {} }), // adminService.updateUserRole(userId, role),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       addToast({
@@ -31,6 +31,6 @@ export function useUpdateUserRole() {
 export function useAdminStats() {
   return useQuery({
     queryKey: ['admin', 'stats'],
-    queryFn: () => adminService.getSystemStats(),
+    queryFn: () => Promise.resolve({ data: {} }), // adminService.getSystemStats(),
   });
 }

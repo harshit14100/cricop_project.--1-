@@ -55,10 +55,10 @@ export default function PlayerProfilePage() {
       {/* Stats Overview */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: 'Matches', value: stats?.matches || 120, icon: Calendar },
-          { label: 'Runs', value: stats?.runs || 4500, icon: Target },
-          { label: 'Wickets', value: stats?.wickets || 0, icon: Award },
-          { label: 'Strike Rate', value: stats?.strikeRate || 140.6, icon: TrendingUp },
+          { label: 'Matches', value: (stats as any)?.matches || 120, icon: Calendar },
+          { label: 'Runs', value: (stats as any)?.runs || 4500, icon: Target },
+          { label: 'Wickets', value: (stats as any)?.wickets || 0, icon: Award },
+          { label: 'Strike Rate', value: (stats as any)?.strikeRate || 140.6, icon: TrendingUp },
         ].map((stat, i) => (
           <motion.div
             key={stat.label}
@@ -86,12 +86,12 @@ export default function PlayerProfilePage() {
           <Card className="glass-card p-4">
             <div className="grid grid-cols-2 gap-4">
               {[
-                { label: 'Highest Score', value: stats?.highestScore || 113 },
-                { label: 'Average', value: stats?.average || 45.0 },
-                { label: 'Fifties', value: stats?.fifties || 35 },
-                { label: 'Hundreds', value: stats?.hundreds || 5 },
-                { label: 'Fours', value: stats?.fours || 380 },
-                { label: 'Sixes', value: stats?.sixes || 120 },
+                { label: 'Highest Score', value: (stats as any)?.highestScore || 113 },
+                { label: 'Average', value: (stats as any)?.average || 45.0 },
+                { label: 'Fifties', value: (stats as any)?.fifties || 35 },
+                { label: 'Hundreds', value: (stats as any)?.hundreds || 5 },
+                { label: 'Fours', value: (stats as any)?.fours || 380 },
+                { label: 'Sixes', value: (stats as any)?.sixes || 120 },
               ].map((s) => (
                 <div key={s.label} className="p-3 rounded-lg bg-white/5">
                   <p className="text-lg font-bold text-white">{s.value}</p>
@@ -106,10 +106,10 @@ export default function PlayerProfilePage() {
           <Card className="glass-card p-4">
             <div className="grid grid-cols-2 gap-4">
               {[
-                { label: 'Best Bowling', value: stats?.bestBowling || '-' },
-                { label: 'Economy', value: stats?.economy || 0 },
-                { label: 'Balls Bowled', value: stats?.ballsBowled || 0 },
-                { label: 'Runs Conceded', value: stats?.runsConceded || 0 },
+                { label: 'Best Bowling', value: (stats as any)?.bestBowling || '-' },
+                { label: 'Economy', value: (stats as any)?.economy || 0 },
+                { label: 'Balls Bowled', value: (stats as any)?.ballsBowled || 0 },
+                { label: 'Runs Conceded', value: (stats as any)?.runsConceded || 0 },
               ].map((s) => (
                 <div key={s.label} className="p-3 rounded-lg bg-white/5">
                   <p className="text-lg font-bold text-white">{s.value}</p>

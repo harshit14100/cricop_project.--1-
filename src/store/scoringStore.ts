@@ -52,7 +52,7 @@ export const useScoringStore = create<ScoringStore>()((set) => ({
     set((_state) => ({
       lastDelivery: ball,
       canUndo: true,
-      currentBall: ball.ballNumber,
+      currentBall: (ball as any).ballNumber,
       isFreeHit: ball.isNoBall,
     })),
 

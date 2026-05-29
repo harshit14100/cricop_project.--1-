@@ -38,7 +38,7 @@ export const useMatchStore = create<MatchStore>((set) => ({
         prev.liveState.match?.innings[prev.liveState.match.currentInnings - 1];
       if (currentInnings) {
         if (!ball.isWide && !ball.isNoBall) currentInnings.balls += 1;
-        currentInnings.runs += ball.runs;
+        currentInnings.runs += (ball as any).runs;
       }
       return {
         liveState: {

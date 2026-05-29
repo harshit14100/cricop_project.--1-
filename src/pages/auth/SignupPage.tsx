@@ -7,6 +7,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useSignup } from '@/hooks'
 
+// Regex patterns
+const phoneRegex = /^\d{10}$/;
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [step, setStep] = useState(1)
@@ -17,19 +21,66 @@ export default function SignupPage() {
     password: '',
     confirmPassword: '',
   })
+  const [errors, setErrors] = useState({
+    phone: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  })
   const signup = useSignup()
+
+  const validateStep1 = () => {
+    let isValid = true;
+    const newErrors = { ...errors, phone: "", email: "" };
+
+    if (!phoneRegex.test(formData.phone)) {
+      newErrors.phone = "Please enter a valid 10-digit phone number.";
+      isValid = false;
+    }
+
+    if (!emailRegex.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address.";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleNextStep = () => {
+    if (validateStep1()) {
+      setStep(2);
+    }
+  };
+
+  const validateStep2 = () => {
+    let isValid = true;
+    const newErrors = { ...errors, password: "", confirmPassword: "" };
+
+    if (formData.password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters long.";
+      isValid = false;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match.";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (formData.password !== formData.confirmPassword) {
-      return
+    if (validateStep2()) {
+      signup.mutate({
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        password: formData.password,
+      })
     }
-    signup.mutate({
-      name: formData.name,
-      phone: formData.phone,
-      email: formData.email,
-      password: formData.password,
-    })
   }
 
   return (
@@ -93,12 +144,16 @@ export default function SignupPage() {
                     id="phone"
                     type="tel"
                     placeholder="+91 98765 43210"
-                    className="pl-10"
+                    className={`pl-10 ${errors.phone ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, phone: e.target.value });
+                      if (errors.phone) setErrors({ ...errors, phone: "" });
+                    }}
                     required
                   />
                 </div>
+                {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone}</p>}
               </div>
 
               <div className="space-y-2">
@@ -109,18 +164,22 @@ export default function SignupPage() {
                     id="email"
                     type="email"
                     placeholder="virat@cricket.com"
-                    className="pl-10"
+                    className={`pl-10 ${errors.email ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, email: e.target.value });
+                      if (errors.email) setErrors({ ...errors, email: "" });
+                    }}
                     required
                   />
                 </div>
+                {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
               </div>
 
               <Button
                 type="button"
                 className="w-full h-12 text-base font-semibold"
-                onClick={() => setStep(2)}
+                onClick={handleNextStep}
                 disabled={!formData.name || !formData.phone || !formData.email}
               >
                 Continue
@@ -137,9 +196,12 @@ export default function SignupPage() {
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Min 8 characters"
-                    className="pl-10 pr-10"
+                    className={`pl-10 pr-10 ${errors.password ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                     value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, password: e.target.value });
+                      if (errors.password) setErrors({ ...errors, password: "" });
+                    }}
                     required
                   />
                   <button
@@ -150,6 +212,7 @@ export default function SignupPage() {
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+                {errors.password && <p className="text-xs text-red-500 mt-1">{errors.password}</p>}
               </div>
 
               <div className="space-y-2">
@@ -160,15 +223,16 @@ export default function SignupPage() {
                     id="confirm"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Confirm password"
-                    className="pl-10"
+                    className={`pl-10 ${errors.confirmPassword ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                     value={formData.confirmPassword}
-                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, confirmPassword: e.target.value });
+                      if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: "" });
+                    }}
                     required
                   />
                 </div>
-                {formData.confirmPassword && formData.password !== formData.confirmPassword && (
-                  <p className="text-xs text-red-400">Passwords do not match</p>
-                )}
+                {errors.confirmPassword && <p className="text-xs text-red-500 mt-1">{errors.confirmPassword}</p>}
               </div>
 
               <div className="flex items-start gap-2">
@@ -191,7 +255,6 @@ export default function SignupPage() {
                   type="submit"
                   className="flex-1 h-12 text-base font-semibold"
                   isLoading={signup.isPending}
-                  disabled={formData.password !== formData.confirmPassword || formData.password.length < 8}
                 >
                   Create Account
                 </Button>
