@@ -1,0 +1,6 @@
+import{c as a,u as o,j as e,m as i,B as s,L as n}from"./index-rUNqqvF_.js";import{A as c}from"./arrow-left-B-sC-tOu.js";/**
+ * @license lucide-react v0.344.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const m=a("Home",[["path",{d:"m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z",key:"y5dka4"}],["polyline",{points:"9 22 9 12 15 12 15 22",key:"e2us08"}]]);function x(){const t=o();return e.jsx("div",{className:"min-h-screen bg-[#0a1628] flex items-center justify-center",children:e.jsxs(i.div,{initial:{opacity:0,y:20},animate:{opacity:1,y:0},className:"text-center px-4",children:[e.jsx("div",{className:"text-8xl font-bold text-white/10 mb-4",children:"404"}),e.jsx("h1",{className:"text-2xl font-bold text-white mb-2",children:"Page Not Found"}),e.jsx("p",{className:"text-sm text-white/50 mb-8 max-w-sm mx-auto",children:"The page you're looking for doesn't exist or has been moved."}),e.jsxs("div",{className:"flex gap-3 justify-center",children:[e.jsxs(s,{variant:"ghost",onClick:()=>t(-1),className:"gap-2 text-white/60",children:[e.jsx(c,{className:"h-4 w-4"}),"Go Back"]}),e.jsx(n,{to:"/dashboard",children:e.jsxs(s,{className:"gap-2",children:[e.jsx(m,{className:"h-4 w-4"}),"Go Home"]})})]})]})})}export{x as default};
