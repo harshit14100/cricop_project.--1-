@@ -6,6 +6,7 @@ import type {
   Player,
   Series,
   Statistics,
+  PlayerRanking,
   DashboardStats,
   Ball,
 } from "@/types";
@@ -332,156 +333,6 @@ const mockSeries: Series[] = [
     status: "ongoing",
   },
 ];
-
-const mockStats: Statistics = {
-  topBatsmen: [
-    {
-      playerId: "p1",
-      playerName: "Virat Kohli",
-      teamName: "RCB",
-      value: 4500,
-      matches: 120,
-    },
-    {
-      playerId: "p2",
-      playerName: "Rohit Sharma",
-      teamName: "MI",
-      value: 3800,
-      matches: 115,
-    },
-    {
-      playerId: "p5",
-      playerName: "MS Dhoni",
-      teamName: "CSK",
-      value: 3200,
-      matches: 130,
-    },
-    {
-      playerId: "p4",
-      playerName: "Ravindra Jadeja",
-      teamName: "CSK",
-      value: 2100,
-      matches: 105,
-    },
-    {
-      playerId: "p3",
-      playerName: "Jasprit Bumrah",
-      teamName: "MI",
-      value: 120,
-      matches: 98,
-    },
-  ],
-  topBowlers: [
-    {
-      playerId: "p3",
-      playerName: "Jasprit Bumrah",
-      teamName: "MI",
-      value: 145,
-      matches: 98,
-    },
-    {
-      playerId: "p4",
-      playerName: "Ravindra Jadeja",
-      teamName: "CSK",
-      value: 89,
-      matches: 105,
-    },
-  ],
-  mostSixes: [
-    {
-      playerId: "p2",
-      playerName: "Rohit Sharma",
-      teamName: "MI",
-      value: 180,
-      matches: 115,
-    },
-    {
-      playerId: "p1",
-      playerName: "Virat Kohli",
-      teamName: "RCB",
-      value: 120,
-      matches: 120,
-    },
-    {
-      playerId: "p5",
-      playerName: "MS Dhoni",
-      teamName: "CSK",
-      value: 150,
-      matches: 130,
-    },
-  ],
-  highestStrikeRates: [
-    {
-      playerId: "p2",
-      playerName: "Rohit Sharma",
-      teamName: "MI",
-      value: 145.2,
-      matches: 115,
-    },
-    {
-      playerId: "p1",
-      playerName: "Virat Kohli",
-      teamName: "RCB",
-      value: 140.6,
-      matches: 120,
-    },
-    {
-      playerId: "p5",
-      playerName: "MS Dhoni",
-      teamName: "CSK",
-      value: 138.9,
-      matches: 130,
-    },
-  ],
-  economyLeaders: [
-    {
-      playerId: "p3",
-      playerName: "Jasprit Bumrah",
-      teamName: "MI",
-      value: 7.6,
-      matches: 98,
-    },
-    {
-      playerId: "p4",
-      playerName: "Ravindra Jadeja",
-      teamName: "CSK",
-      value: 7.2,
-      matches: 105,
-    },
-  ],
-  mvpRankings: [
-    {
-      playerId: "p1",
-      playerName: "Virat Kohli",
-      teamName: "RCB",
-      value: 920,
-      matches: 120,
-    },
-    {
-      playerId: "p2",
-      playerName: "Rohit Sharma",
-      teamName: "MI",
-      value: 885,
-      matches: 115,
-    },
-    {
-      playerId: "p5",
-      playerName: "MS Dhoni",
-      teamName: "CSK",
-      value: 870,
-      matches: 130,
-    },
-  ],
-};
-
-const mockDashboardStats: DashboardStats = {
-  totalMatches: 156,
-  liveMatches: 0,
-  upcomingMatches: 2,
-  completedMatches: 154,
-  totalPlayers: 48,
-  totalTeams: 12,
-};
 
 // Store ball history for each match to support Undo
 const mockBallHistory: Record<string, Ball[]> = {};
@@ -1091,7 +942,40 @@ export function setupMockAPI() {
 
       // STATISTICS ENDPOINTS
       if (url === "/users/statistics" && method === "get") {
-        return Promise.resolve({ data: { success: true, data: mockStats } });
+        const sortedByRuns = [...mockPlayers].sort((a, b) => (b.stats?.runs || 0) - (a.stats?.runs || 0));
+        const sortedByWickets = [...mockPlayers].sort((a, b) => (b.stats?.wickets || 0) - (a.stats?.wickets || 0));
+        const sortedBySixes = [...mockPlayers].sort((a, b) => (b.stats?.sixes || 0) - (a.stats?.sixes || 0));
+        const sortedBySR = [...mockPlayers].sort((a, b) => (b.stats?.strikeRate || 0) - (a.stats?.strikeRate || 0));
+        const sortedByEcon = [...mockPlayers].filter(p => (p.stats?.ballsBowled || 0) > 0).sort((a, b) => (a.stats?.economy || 0) - (b.stats?.economy || 0));
+
+        const getTeamName = (playerId: string) => {
+          const team = mockTeams.find(t => t.players?.some(p => p.id === playerId));
+          return team?.short_name || "IND";
+        };
+
+        const mapToRanking = (players: Player[], valueGetter: (p: Player) => number): PlayerRanking[] => {
+          return players.slice(0, 5).map(p => ({
+            playerId: p.id,
+            playerName: p.name,
+            teamName: getTeamName(p.id),
+            value: valueGetter(p),
+            matches: p.stats?.matches || 0,
+            battingStyle: p.battingStyle,
+            bowlingStyle: p.bowlingStyle,
+            avatar: p.avatar,
+          }));
+        };
+
+        const stats: Statistics = {
+          topBatsmen: mapToRanking(sortedByRuns, p => p.stats?.runs || 0),
+          topBowlers: mapToRanking(sortedByWickets, p => p.stats?.wickets || 0),
+          mostSixes: mapToRanking(sortedBySixes, p => p.stats?.sixes || 0),
+          highestStrikeRates: mapToRanking(sortedBySR, p => p.stats?.strikeRate || 0),
+          economyLeaders: mapToRanking(sortedByEcon, p => p.stats?.economy || 0),
+          mvpRankings: mapToRanking(sortedByRuns, p => (p.stats?.runs || 0) / 10 + (p.stats?.wickets || 0) * 20),
+        };
+
+        return Promise.resolve({ data: { success: true, data: stats } });
       }
 
       if (url.match(/\/users\/statistics\/player\/[^/]+$/) && method === "get") {
@@ -1101,8 +985,16 @@ export function setupMockAPI() {
       }
 
       if (url === "/users/statistics/dashboard" && method === "get") {
+        const stats: DashboardStats = {
+          totalMatches: mockMatches.length,
+          liveMatches: mockMatches.filter(m => m.status === "live").length,
+          upcomingMatches: mockMatches.filter(m => m.status === "upcoming").length,
+          completedMatches: mockMatches.filter(m => m.status === "completed").length,
+          totalPlayers: mockPlayers.length,
+          totalTeams: mockTeams.length,
+        };
         return Promise.resolve({
-          data: { success: true, data: mockDashboardStats },
+          data: { success: true, data: stats },
         });
       }
 

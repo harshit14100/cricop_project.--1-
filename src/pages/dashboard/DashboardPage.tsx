@@ -89,7 +89,7 @@ export default function DashboardPage() {
             />
             <StatCard
               title="Total Matches"
-              value={statsData?.totalMatches || 156}
+              value={statsData?.totalMatches || 0}
               icon={Trophy}
               color="amber"
               trend={8}
@@ -97,7 +97,7 @@ export default function DashboardPage() {
             />
             <StatCard
               title="Players"
-              value={statsData?.totalPlayers || 48}
+              value={statsData?.totalPlayers || 0}
               icon={Users}
               color="blue"
               trend={5}
@@ -105,7 +105,7 @@ export default function DashboardPage() {
             />
             <StatCard
               title="Teams"
-              value={statsData?.totalTeams || 12}
+              value={statsData?.totalTeams || 0}
               icon={TrendingUp}
               color="green"
               trend={2}

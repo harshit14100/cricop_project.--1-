@@ -88,7 +88,12 @@ export interface PlayerStats {
   fours?: number;
 }
 
-export type MatchStatus = "scheduled" | "live" | "completed" | "cancelled" | "upcoming";
+export type MatchStatus =
+  | "scheduled"
+  | "live"
+  | "completed"
+  | "cancelled"
+  | "upcoming";
 export type TossDecision = "bat" | "bowl";
 
 export interface Match {
@@ -291,12 +296,13 @@ export interface Dismissal {
 
 export interface Ball {
   id: string;
+  matchId: string;
   inningsId: string;
-  overNumber: number;
-  ballNumber: number;
   batsmanId: string;
   bowlerId: string;
-  runs: number;
+  batsmanRuns: number;
+  extraRuns: number;
+  totalRuns: number;
   isWicket: boolean;
   isWide: boolean;
   isNoBall: boolean;
@@ -350,6 +356,8 @@ export interface PlayerRanking {
   value: number;
   matches: number;
   avatar?: string;
+  battingStyle?: string;
+  bowlingStyle?: string;
 }
 
 export interface DashboardStats {

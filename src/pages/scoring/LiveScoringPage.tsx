@@ -308,44 +308,25 @@ export default function LiveScoringPage() {
 
   return (
     <div className="space-y-4 pb-24 md:pb-0">
-      {/* Backend Live State Header */}
-      <div className="p-4 bg-white/5 rounded-2xl border border-white/10 mb-4">
-        <h1 className="text-xl font-bold text-white mb-2">
-          {match?.batting_team_name} vs {match?.bowling_team_name}
-        </h1>
+      <h1>
+        {match?.batting_team_name} vs {match?.bowling_team_name}
+      </h1>
 
-        <h2 className="text-3xl font-black text-blue-400">
-          {match?.total_runs}/{match?.wickets}
-        </h2>
+      <h2>
+        {match?.total_runs}/{match?.wickets}
+      </h2>
 
-        <div className="flex items-center gap-4 mt-2">
-          <p className="text-white/60">
-            Overs:{" "}
-            <span className="text-white font-medium">
-              {match?.completed_overs}.{match?.balls_in_current_over}
-            </span>
-          </p>
-        </div>
+      <p>
+        {match?.completed_overs}.{match?.balls_in_current_over}
+      </p>
 
-        <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-white/5">
-          <div>
-            <p className="text-xs text-white/40 uppercase tracking-wider">
-              Striker
-            </p>
-            <p className="text-sm font-semibold text-white">
-              {match?.striker_name || "N/A"}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-white/40 uppercase tracking-wider">
-              Non-Striker
-            </p>
-            <p className="text-sm font-semibold text-white">
-              {match?.non_striker_name || "N/A"}
-            </p>
-          </div>
-        </div>
-      </div>
+      <p>
+        {match?.striker_name}
+      </p>
+
+      <p>
+        {match?.non_striker_name}
+      </p>
 
       <AnimatePresence>
         {celebration && (

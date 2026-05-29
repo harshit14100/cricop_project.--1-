@@ -115,7 +115,9 @@ export default function StatisticsPage() {
                     player={{
                       id: player.playerId,
                       name: player.playerName,
-                      battingStyle: "right-handed",
+                      battingStyle: player.battingStyle as any,
+                      bowlingStyle: player.bowlingStyle as any,
+                      avatar: player.avatar,
                     }}
                     rank={i + 1}
                     statValue={
