@@ -48,7 +48,7 @@ function InningsCard({ innings, inningsNumber, isExpanded, onToggle, match }: In
     ? (match.teamA?.name || match.team_1_name || "Team 1")
     : (match.teamB?.name || match.team_2_name || "Team 2");
     
-  const battingTeamShort = isTeam1Batting ? match.teamA?.shortName : match.teamB?.shortName;
+  const battingTeamShort = isTeam1Batting ? (match.teamA?.short_name || match.teamA?.shortName) : (match.teamB?.short_name || match.teamB?.shortName);
   
   return (
     <div className="glass-card overflow-hidden">
@@ -115,9 +115,9 @@ function InningsCard({ innings, inningsNumber, isExpanded, onToggle, match }: In
                 <tr className="bg-white/5">
                   <td className="p-3 font-bold text-white">Extras</td>
                   <td colSpan={5} className="p-3 text-right text-white/60">
-                    {innings.extras.wides + innings.extras.noBalls + innings.extras.byes + innings.extras.legByes} 
+                    {(innings.extras?.wides || 0) + (innings.extras?.noBalls || 0) + (innings.extras?.byes || 0) + (innings.extras?.legByes || 0)} 
                     <span className="ml-2 text-[10px]">
-                      (w {innings.extras.wides}, nb {innings.extras.noBalls}, b {innings.extras.byes}, lb {innings.extras.legByes})
+                      (w {innings.extras?.wides || 0}, nb {innings.extras?.noBalls || 0}, b {innings.extras?.byes || 0}, lb {innings.extras?.legByes || 0})
                     </span>
                   </td>
                 </tr>
@@ -161,14 +161,14 @@ function InningsCard({ innings, inningsNumber, isExpanded, onToggle, match }: In
           </div>
 
           {/* Fall of Wickets */}
-          {innings.fallOfWickets.length > 0 && (
+          {innings.fallOfWickets && innings.fallOfWickets.length > 0 && (
             <div className="p-3 border-t border-white/10">
               <h4 className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-2">Fall of Wickets</h4>
               <p className="text-[11px] text-white/60 leading-relaxed">
                 {innings.fallOfWickets.map((fow, i) => (
                   <span key={i}>
                     {fow.runs}-{fow.wicketNumber} ({fow.batsmanName}, {fow.overs} ov)
-                    {i < innings.fallOfWickets.length - 1 ? ', ' : ''}
+                    {i < (innings.fallOfWickets?.length || 0) - 1 ? ', ' : ''}
                   </span>
                 ))}
               </p>

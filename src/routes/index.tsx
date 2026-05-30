@@ -16,6 +16,7 @@ const LiveScoringPage = lazy(() => import("@/pages/scoring/LiveScoringPage"));
 const MatchSummaryPage = lazy(() => import("@/pages/match/MatchSummaryPage"));
 const MatchHistoryPage = lazy(() => import("@/pages/match/MatchHistoryPage"));
 const MatchViewPage = lazy(() => import("@/pages/match/MatchViewPage"));
+const LiveMatchPage = lazy(() => import("@/pages/match/LiveMatchPage"));
 const StatisticsPage = lazy(() => import("@/pages/statistics/StatisticsPage"));
 const PlayerProfilePage = lazy(
   () => import("@/pages/players/PlayerProfilePage"),
@@ -94,6 +95,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingScreen />}>
             <MatchViewPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "match/:matchId/live",
+        element: (
+          <Suspense fallback={<LoadingScreen />}>
+            <LiveMatchPage />
           </Suspense>
         ),
       },

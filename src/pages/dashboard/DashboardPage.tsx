@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import {
@@ -9,6 +10,8 @@ import {
   ArrowRight,
   Zap,
   Activity,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -17,7 +20,12 @@ import { MatchCard } from "@/components/shared/MatchCard";
 import { PlayerCard } from "@/components/shared/PlayerCard";
 import { SkeletonCard } from "@/components/shared/SkeletonCard";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { useMatches, useDashboardStats, usePlayers } from "@/hooks";
+import {
+  useMatches,
+  useDashboardStats,
+  usePlayers,
+  useLiveMatches,
+} from "@/hooks";
 import { useAuthStore } from "@/store";
 
 export default function DashboardPage() {
@@ -36,13 +44,37 @@ export default function DashboardPage() {
     limit: 10,
   });
   const { data: statsData, isLoading: statsLoading } = useDashboardStats();
-  const { data: playersData, isLoading: playersLoading } = usePlayers({ limit: 5 });
+  const { data: playersData, isLoading: playersLoading } = usePlayers({
+    limit: 5,
+  });
 
-  const matches = matchesData?.matches || [];
-  const liveMatches = matches.filter((m) => m.status === "live");
+  const matchesRaw = Array.isArray(matchesData)
+    ? matchesData
+    : (matchesData as any)?.matches || [];
+  const matches = Array.isArray(matchesRaw) ? matchesRaw : [];
+
+  const liveMatches = matches.filter((m: any) => m.status === "live");
+  const liveMatchQueries = useLiveMatches(liveMatches.map((m: any) => m.id));
+
+  const liveMatchesWithScore = liveMatches.map((match: any, index: number) => ({
+    ...match,
+    ...(liveMatchQueries[index]?.data || {}),
+  }));
+
+  const [livePage, setLivePage] = useState(0);
+  const livePerPage = 2;
+  const totalLivePages = Math.ceil(liveMatchesWithScore.length / livePerPage);
+  const paginatedLiveMatches = liveMatchesWithScore.slice(
+    livePage * livePerPage,
+    (livePage + 1) * livePerPage
+  );
+
   const upcomingMatches = matches.filter((m) => m.status === "scheduled");
-  
-  const players = Array.isArray(playersData) ? playersData : playersData?.players || [];
+
+  const playersRaw = Array.isArray(playersData)
+    ? playersData
+    : (playersData as any)?.players || [];
+  const players = Array.isArray(playersRaw) ? playersRaw : [];
   const topPlayers = players.slice(0, 5);
 
   return (
@@ -58,11 +90,13 @@ export default function DashboardPage() {
             Dashboard
           </h1>
           <p className="text-sm text-white/50 mt-1">
-            {user ? `Welcome back, ${user.name}! Here's what's happening today.` : "Welcome! Here's the latest in the world of cricket."}
+            {user
+              ? `Welcome back, ${user.name}! Here's what's happening today.`
+              : "Welcome! Here's the latest in the world of cricket."}
           </p>
         </div>
-        <Button 
-          size="lg" 
+        <Button
+          size="lg"
           className="gap-2 shadow-lg shadow-blue-500/25"
           onClick={handleStartMatchClick}
         >
@@ -118,10 +152,37 @@ export default function DashboardPage() {
       {/* Live Matches */}
       <section>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-            <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-            Live Matches
-          </h2>
+          <div className="flex items-center gap-4">
+            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+              <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+              Live Matches
+            </h2>
+            {totalLivePages > 1 && (
+              <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-white/40 hover:text-white"
+                  onClick={() => setLivePage((p) => Math.max(0, p - 1))}
+                  disabled={livePage === 0}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-[10px] font-medium text-white/40 px-1">
+                  {livePage + 1} / {totalLivePages}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-white/40 hover:text-white"
+                  onClick={() => setLivePage((p) => Math.min(totalLivePages - 1, p + 1))}
+                  disabled={livePage === totalLivePages - 1}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
           <Link
             to="/history"
             className="text-sm text-electric hover:text-electric/80 flex items-center gap-1"
@@ -135,9 +196,9 @@ export default function DashboardPage() {
             <SkeletonCard className="h-64" />
             <SkeletonCard className="h-64" />
           </div>
-        ) : liveMatches.length > 0 ? (
+        ) : paginatedLiveMatches.length > 0 ? (
           <div className="grid md:grid-cols-2 gap-4">
-            {liveMatches.map((match, i) => (
+            {paginatedLiveMatches.map((match, i) => (
               <MatchCard key={match.id} match={match} index={i} />
             ))}
           </div>
@@ -145,7 +206,11 @@ export default function DashboardPage() {
           <EmptyState
             icon={Activity}
             title="No Live Matches"
-            description={user ? "Start a new match to see live scoring here." : "Log in to start a match and see live scoring here."}
+            description={
+              user
+                ? "Start a new match to see live scoring here."
+                : "Log in to start a match and see live scoring here."
+            }
             actionLabel={user ? "Start Match" : "Login to Start"}
             onAction={handleStartMatchClick}
           />
@@ -208,7 +273,9 @@ export default function DashboardPage() {
               ))
             ) : (
               <div className="glass-card p-6 text-center">
-                <p className="text-sm text-white/40">No player data available</p>
+                <p className="text-sm text-white/40">
+                  No player data available
+                </p>
               </div>
             )}
           </div>

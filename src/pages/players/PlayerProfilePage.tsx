@@ -43,9 +43,9 @@ export default function PlayerProfilePage() {
               {player.isWicketKeeper && <Badge variant="secondary">WK</Badge>}
             </div>
             <p className="text-sm text-white/60 capitalize">{player.battingStyle} • {player.bowlingStyle?.replace(/-/g, ' ')}</p>
-            {player.phone && (
+            {player.phone_no && (
               <p className="text-sm text-white/40 mt-1 flex items-center justify-center md:justify-start gap-1">
-                <Phone className="h-3 w-3" /> {player.phone}
+                <Phone className="h-3 w-3" /> {player.phone_no}
               </p>
             )}
           </div>

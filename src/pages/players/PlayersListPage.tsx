@@ -52,7 +52,7 @@ export default function PlayersListPage() {
     createPlayer.mutate(
       { 
         name: newPlayerName, 
-        phone: newPlayerPhone,
+        phone_no: newPlayerPhone,
         battingStyle: battingStyle as any 
       },
       {

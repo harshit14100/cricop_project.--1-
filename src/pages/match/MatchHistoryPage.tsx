@@ -26,7 +26,9 @@ export default function MatchHistoryPage() {
   const [filter, setFilter] = useState('all')
   const { data, isLoading } = useMatches()
 
-  const matches = data?.matches || []
+  const matchesRaw = Array.isArray(data) ? data : (data as any)?.matches || [];
+  const matches = Array.isArray(matchesRaw) ? matchesRaw : [];
+  
   const filtered = matches.filter(m => {
     if (filter !== 'all' && m.status !== filter) return false
     const teamAName = m.teamA?.name.toLowerCase() || "";

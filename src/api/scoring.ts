@@ -1,5 +1,5 @@
 import client from "./client";
-import type { Ball, ApiResponse } from "@/types";
+import type { Ball } from "@/types";
 
 interface ScoreBallData {
   matchId: string;
@@ -19,15 +19,20 @@ interface ScoreBallData {
 }
 
 export const scoringApi = {
+  startInning: async (matchId: string): Promise<any> => {
+    const { data } = await client.post(`/users/matches/${matchId}/innings`);
+    return data;
+  },
+
   scoreBall: async (
     inningId: string,
     ballData: ScoreBallData,
-  ): Promise<Ball> => {
-    const { data } = await client.post<ApiResponse<Ball>>(
+  ): Promise<any> => {
+    const { data } = await client.post(
       `/users/innings/${inningId}/deliveries`,
       ballData,
     );
-    return data.data;
+    return data;
   },
 
   undoLastBall: async (matchId: string): Promise<void> => {
@@ -72,11 +77,13 @@ export const scoringApi = {
     matchId: string,
     page?: number,
   ): Promise<{ commentary: Ball[]; total: number }> => {
-    const { data } = await client.get<
-      ApiResponse<{ commentary: Ball[]; total: number }>
-    >(`/users/scoring/${matchId}/commentary`, {
-      params: { page },
-    });
-    return data.data;
+    const { data } = await client.get(
+      `/users/scoring/${matchId}/commentary`,
+      {
+        params: { page },
+      },
+    );
+    return data;
   },
 };
+

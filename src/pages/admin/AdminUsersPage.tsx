@@ -26,7 +26,7 @@ export default function AdminUsersPage() {
   const filtered = Array.isArray(users) ? users.filter(
     (u: User) =>
       u.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase()),
+      u.email?.toLowerCase().includes(search.toLowerCase()),
   ) : [];
 
   return (

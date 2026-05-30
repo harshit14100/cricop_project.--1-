@@ -68,7 +68,7 @@ export default function SettingsPage() {
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-white">{user?.name || 'User'}</h3>
             <p className="text-sm text-white/50">{user?.email}</p>
-            <p className="text-sm text-white/50">{user?.phone}</p>
+            <p className="text-sm text-white/50">{user?.phone_no}</p>
           </div>
           <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
             <DialogTrigger asChild>

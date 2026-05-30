@@ -166,7 +166,7 @@ export default function MatchViewPage() {
         <TabsContent value="stats" className="mt-4">
           <div className="grid grid-cols-2 gap-4">
             <Card className="glass-card p-4 text-center">
-              <p className="text-2xl font-bold text-white">{currentInnings?.partnerships[0]?.runs || 45}</p>
+              <p className="text-2xl font-bold text-white">{currentInnings?.partnerships?.[0]?.runs || 45}</p>
               <p className="text-xs text-white/50">Highest Partnership</p>
             </Card>
             <Card className="glass-card p-4 text-center">

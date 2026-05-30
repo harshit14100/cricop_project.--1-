@@ -1,5 +1,5 @@
 import client from "./client";
-import type { Match, ApiResponse, CreateMatchPayload } from "@/types";
+import type { Match, CreateMatchPayload } from "@/types";
 
 interface TossData {
   matchId: string;
@@ -13,17 +13,26 @@ export const matchApi = {
     page?: number;
     limit?: number;
   }): Promise<{ matches: Match[]; total: number }> => {
-    const { data } = await client.get<
-      ApiResponse<{ matches: Match[]; total: number }>
-    >("/users/matches", { params });
-    return data.data;
+    const response = await client.get<any>("/users/matches", { params });
+    const data = response.data;
+    
+    if (Array.isArray(data)) {
+      return { matches: data, total: data.length };
+    }
+
+    // Handle nested success/data wrapper from mock/some backends
+    const mainData = data.data || data;
+    const matches = mainData.matches || (Array.isArray(mainData) ? mainData : []);
+    const total = mainData.total || matches.length;
+    
+    return { matches, total };
   },
 
   getMatch: async (id: string): Promise<Match> => {
-    const { data } = await client.get<ApiResponse<Match>>(
+    const { data } = await client.get<Match>(
       `/users/matches/${id}`,
     );
-    return data.data;
+    return data;
   },
 
   createMatch: async (payload: CreateMatchPayload) => {
@@ -38,30 +47,33 @@ export const matchApi = {
     id: string,
     matchData: Partial<Match>,
   ): Promise<Match> => {
-    const { data } = await client.put<ApiResponse<Match>>(
+    const { data } = await client.put<Match>(
       `/users/matches/${id}`,
       matchData,
     );
-    return data.data;
+    return data;
   },
 
   deleteMatch: async (id: string): Promise<void> => {
     await client.delete(`/users/matches/${id}`);
   },
 
-  setToss: async (tossData: TossData): Promise<Match> => {
-    const { data } = await client.post<ApiResponse<Match>>(
+  setToss: async (tossData: TossData): Promise<any> => {
+    const { data } = await client.post(
       `/users/matches/${tossData.matchId}/toss`,
       {
         toss_winner_id: tossData.winner_team_id,
         toss_decision: tossData.choice,
       },
     );
-    return data.data;
+    return data;
   },
 
   startMatch: async (matchId: string) => {
-    const { data } = await client.post(`/users/matches/${matchId}/start`);
+    // The spec says /users/matches/start but usually it needs an ID. 
+    // If it's in the body or URL depends on the actual backend implementation.
+    // Keeping it as a POST but removing .data.data
+    const { data } = await client.post(`/users/matches/start`, { match_id: matchId });
 
     console.log("START MATCH RESPONSE:", data);
 
@@ -73,13 +85,13 @@ export const matchApi = {
 
     console.log("LIVE API RESPONSE:", response.data);
 
-    return response.data;
+    return response.data.data;
   },
 
   getShareableLink: async (matchId: string): Promise<string> => {
-    const { data } = await client.get<ApiResponse<{ link: string }>>(
+    const { data } = await client.get<{ link: string }>(
       `/users/matches/${matchId}/share`,
     );
-    return data.data.link;
+    return data.link;
   },
 };

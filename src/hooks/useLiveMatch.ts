@@ -1,14 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
-import { matchApi } from "@/api/match";
+import { useQueries } from "@tanstack/react-query";
+import { matchService } from "@/services";
 
-export const useLiveMatch = (matchId: string) => {
-  return useQuery({
-    queryKey: ["live-match", matchId],
-
-    queryFn: () => matchApi.getLiveMatch(matchId),
-
-    enabled: !!matchId,
-
-    refetchInterval: 2000,
+export function useLiveMatches(matchIds: string[]) {
+  return useQueries({
+    queries: (matchIds || []).map((id) => ({
+      queryKey: ["live-match", id],
+      queryFn: () => matchService.getLiveMatch(id),
+      refetchInterval: 2000,
+    })),
   });
-};
+}

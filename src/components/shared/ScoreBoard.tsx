@@ -21,8 +21,8 @@ export function ScoreBoard({ match, currentInnings, className }: ScoreBoardProps
     : (match.teamA?.name || match.team_1_name || "Team 1");
 
   const battingTeamColor = isTeam1Batting ? match.teamA?.color : match.teamB?.color;
-  const battingTeamShort = isTeam1Batting ? match.teamA?.shortName : match.teamB?.shortName;
-  const bowlingTeamShort = isTeam1Batting ? match.teamB?.shortName : match.teamA?.shortName;
+  const battingTeamShort = isTeam1Batting ? (match.teamA?.short_name || match.teamA?.shortName) : (match.teamB?.short_name || match.teamB?.shortName);
+  const bowlingTeamShort = isTeam1Batting ? (match.teamB?.short_name || match.teamB?.shortName) : (match.teamA?.short_name || match.teamA?.shortName);
 
   const matchOvers = match.overs || 20;
   const ballsRemaining = matchOvers * 6 - currentInnings.balls;

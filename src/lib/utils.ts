@@ -37,6 +37,11 @@ export function calculateRequiredRate(target: number, runs: number, ballsRemaini
   return parseFloat(((runsNeeded / ballsRemaining) * 6).toFixed(2))
 }
 
+export function calculateEconomy(runs: number, balls: number): string {
+  if (balls === 0) return "0.00"
+  return ((runs / balls) * 6).toFixed(2)
+}
+
 export function generateId(): string {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
 }

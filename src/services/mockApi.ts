@@ -19,10 +19,30 @@ const mockUsers: User[] = [
     id: "u1",
     name: "Virat Kohli",
     email: "virat@cricket.com",
-    phone: "+919876543210",
+    phone_no: "+919876543210",
     role: "admin",
     createdAt: "2024-01-01",
     isActive: true,
+    battingStyle: "right-handed",
+    stats: {
+      matches: 120,
+      runs: 4500,
+      ballsFaced: 3200,
+      wickets: 0,
+      ballsBowled: 0,
+      runsConceded: 0,
+      catches: 45,
+      stumpings: 0,
+      highestScore: 113,
+      bestBowling: "-",
+      strikeRate: 140.6,
+      economy: 0,
+      average: 45.0,
+      fifties: 35,
+      hundreds: 5,
+      sixes: 120,
+      fours: 380,
+    },
   },
 ];
 
@@ -107,7 +127,7 @@ const mockPlayers: Player[] = [
   {
     id: "p4",
     name: "Ravindra Jadeja",
-    battingStyle: "left-handed",
+    battingStyle: "right-handed",
     bowlingStyle: "left-arm-spin",
     stats: {
       matches: 105,
@@ -176,7 +196,7 @@ const mockPlayers: Player[] = [
   {
     id: "p8",
     name: "Ishan Kishan",
-    battingStyle: "left-handed",
+    battingStyle: "right-handed",
     isWicketKeeper: true,
     stats: {
       matches: 45, runs: 1200, ballsFaced: 850, wickets: 0, ballsBowled: 0, runsConceded: 0, catches: 20, stumpings: 5, highestScore: 89, bestBowling: "-", strikeRate: 141.1, economy: 0, average: 28.0, fifties: 6, hundreds: 0, sixes: 45, fours: 120,
@@ -403,31 +423,65 @@ const mockMatches: Match[] = [
     venue: "Eden Gardens",
     overs: 20,
     players_per_team: 11,
-    status: "upcoming",
-    currentInnings: 1,
+    status: "live",
+    currentInnings: 2,
     teamA: mockTeams[2],
     teamB: mockTeams[3],
-    innings: [],
-    started_at: new Date(Date.now() + 86400000).toISOString(),
+    innings: [
+      {
+        id: "i4",
+        inning_number: 1,
+        battingTeam: "t4",
+        bowlingTeam: "t3",
+        runs: 182,
+        wickets: 5,
+        balls: 120,
+        isCompleted: true,
+        batsmen: [],
+        bowlers: []
+      },
+      {
+        id: "i5",
+        inning_number: 2,
+        battingTeam: "t3",
+        bowlingTeam: "t4",
+        runs: 145,
+        wickets: 4,
+        balls: 94,
+        isCompleted: false,
+        target: 183,
+        batsmen: [
+          { playerId: "p7", playerName: "Virat Kohli", runs: 72, balls: 45, isOut: false, strikeRate: 160 },
+          { playerId: "p9", playerName: "Glenn Maxwell", runs: 28, balls: 15, isOut: false, strikeRate: 186.67 }
+        ],
+        bowlers: [
+          { playerId: "p10", playerName: "Sunil Narine", overs: 3, balls: 4, maidens: 0, runs: 24, wickets: 2 }
+        ]
+      }
+    ],
+    started_at: new Date().toISOString(),
     ended_at: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     host_user_id: "u1",
-    toss_winner_id: null,
-    toss_decision: null,
+    toss_winner_id: "t4",
+    toss_decision: "bat",
     winner_team_id: null,
     man_of_match_id: null,
     worst_player_id: null,
     
     // Populate live fields
-    batting_team_name: "RCB",
-    bowling_team_name: "KKR",
-    total_runs: 0,
-    wickets: 0,
-    completed_overs: 0,
-    balls_in_current_over: 0,
-    striker_name: "Select Striker",
-    non_striker_name: "Select Non-Striker",
+    batting_team_name: "Royal Challengers",
+    bowling_team_name: "Kolkata Knight Riders",
+    total_runs: 145,
+    wickets: 4,
+    completed_overs: 15,
+    balls_in_current_over: 4,
+    striker_name: "Virat Kohli",
+    non_striker_name: "Glenn Maxwell",
+    striker_id: "p7",
+    non_striker_id: "p9",
+    current_bowler_id: "p10",
   },
   {
     id: "m3",
@@ -575,11 +629,29 @@ export function setupMockAPI() {
           id: "u" + Date.now(),
           name: payload.name || "New User",
           email: payload.email || "user@example.com",
-          phone: payload.phone || "",
+          phone_no: payload.phone || "",
           role: "user",
           createdAt: new Date().toISOString(),
           isActive: true,
           battingStyle: "right-handed",
+          stats: {
+            matches: 0,
+            runs: 0,
+            ballsFaced: 0,
+            wickets: 0,
+            ballsBowled: 0,
+            runsConceded: 0,
+            catches: 0,
+            stumpings: 0,
+            highestScore: 0,
+            strikeRate: 0,
+            economy: 0,
+            average: 0,
+            fifties: 0,
+            hundreds: 0,
+            sixes: 0,
+            fours: 0,
+          },
         };
         mockUsers.push(newUser);
         return Promise.resolve({
@@ -606,10 +678,7 @@ export function setupMockAPI() {
       // MATCH ENDPOINTS
       if (url === "/users/matches" && method === "get") {
         return Promise.resolve({
-          data: {
-            success: true,
-            data: { matches: mockMatches, total: mockMatches.length },
-          },
+          data: { matches: mockMatches, total: mockMatches.length },
         });
       }
 
@@ -856,10 +925,12 @@ export function setupMockAPI() {
         }
 
         // Update Extras Object
-        if (isWide) currentInnings.extras.wides += (1 + (payload.runs || 0));
-        else if (isNoBall) currentInnings.extras.noBalls += (1 + (payload.runs || 0));
-        else if (isBye) currentInnings.extras.byes += (payload.runs || 0);
-        else if (isLegBye) currentInnings.extras.legByes += (payload.runs || 0);
+        if (currentInnings.extras) {
+          if (isWide) currentInnings.extras.wides += (1 + (payload.runs || 0));
+          else if (isNoBall) currentInnings.extras.noBalls += (1 + (payload.runs || 0));
+          else if (isBye) currentInnings.extras.byes += (payload.runs || 0);
+          else if (isLegBye) currentInnings.extras.legByes += (payload.runs || 0);
+        }
 
         if (payload.isWicket) {
           currentInnings.wickets += 1;
@@ -898,8 +969,8 @@ export function setupMockAPI() {
           if (!payload.isWide) {
             batsman.balls += 1;
             batsman.runs += payload.runs || 0;
-            if (payload.runs === 4) batsman.fours += 1;
-            if (payload.runs === 6) batsman.sixes += 1;
+            if (payload.runs === 4) batsman.fours = (batsman.fours || 0) + 1;
+            if (payload.runs === 6) batsman.sixes = (batsman.sixes || 0) + 1;
             batsman.strikeRate = parseFloat(((batsman.runs / batsman.balls) * 100).toFixed(2));
           }
           
@@ -932,8 +1003,8 @@ export function setupMockAPI() {
           const runsConceded = (payload.runs || 0) + (payload.isWide || payload.isNoBall ? 1 : 0);
           
           bowler.runs += runsConceded;
-          if (payload.isWide) bowler.wides += 1;
-          if (payload.isNoBall) bowler.noBalls += 1;
+          if (payload.isWide) bowler.wides = (bowler.wides || 0) + 1;
+          if (payload.isNoBall) bowler.noBalls = (bowler.noBalls || 0) + 1;
           if (payload.isWicket) bowler.wickets += 1;
           
           if (isLegal) {
@@ -1000,10 +1071,12 @@ export function setupMockAPI() {
           const penalty = isWide || isNoBall ? 1 : 0;
           currentInnings.runs -= (((lastBall as any).runs || 0) + penalty);
 
-          if (isWide) currentInnings.extras.wides -= (1 + ((lastBall as any).runs || 0));
-          else if (isNoBall) currentInnings.extras.noBalls -= (1 + ((lastBall as any).runs || 0));
-          else if (isBye) currentInnings.extras.byes -= ((lastBall as any).runs || 0);
-          else if (isLegBye) currentInnings.extras.legByes -= ((lastBall as any).runs || 0);
+          if (currentInnings.extras) {
+            if (isWide) currentInnings.extras.wides -= (1 + ((lastBall as any).runs || 0));
+            else if (isNoBall) currentInnings.extras.noBalls -= (1 + ((lastBall as any).runs || 0));
+            else if (isBye) currentInnings.extras.byes -= ((lastBall as any).runs || 0);
+            else if (isLegBye) currentInnings.extras.legByes -= ((lastBall as any).runs || 0);
+          }
 
           if (lastBall.isWicket) {
             currentInnings.wickets -= 1;
@@ -1033,7 +1106,7 @@ export function setupMockAPI() {
             // Create second innings
             match.innings.push({
               id: "i" + Date.now(),
-              battingTeam: currentInnings.bowlingTeam,
+              battingTeam: currentInnings.bowlingTeam || "",
               bowlingTeam: currentInnings.battingTeam,
               runs: 0,
               wickets: 0,
@@ -1091,7 +1164,7 @@ export function setupMockAPI() {
             : config.data;
         
         const newTeam: Team = {
-          team_id: "t" + Date.now(),
+          id: "t" + Date.now(),
           name: payload.name,
           short_name: payload.short_name,
           color: payload.color,
@@ -1214,15 +1287,15 @@ export function setupMockAPI() {
 
       if (url === "/users/statistics/dashboard" && method === "get") {
         const stats: DashboardStats = {
-          totalMatches: mockMatches.length,
-          liveMatches: 20,
+          totalMatches: 28,
+          liveMatches: 22,
           upcomingMatches: mockMatches.filter(m => m.status === "upcoming").length,
           completedMatches: mockMatches.filter(m => m.status === "completed").length,
           totalPlayers: 8,
-          totalTeams: 6,
+          totalTeams: 7,
         };
         return Promise.resolve({
-          data: { success: true, data: stats },
+          data: stats,
         });
       }
 

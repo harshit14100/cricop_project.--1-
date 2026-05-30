@@ -8,16 +8,7 @@ export function usePlayers(_params?: any) {
     queryKey: ["players"],
     queryFn: async () => {
       const response = await playerService.getPlayers();
-      // Handle various response formats
-      if (Array.isArray(response)) {
-        return { players: response, total: response.length };
-      }
-      if (response && typeof response === 'object') {
-        const players = response.players || response.data || [];
-        const total = response.total || (Array.isArray(players) ? players.length : 0);
-        return { players, total };
-      }
-      return { players: [], total: 0 };
+      return response || { players: [], total: 0 };
     },
     staleTime: 60000,
   });

@@ -4,14 +4,13 @@ import { useAuthStore } from "@/store";
 export const authApi = {
   async login(data: { phone: string; password: string }) {
     const response = await client.post("/auth/login", {
-      phone: data.phone,
-      phone_no: data.phone, // Supporting both conventions
+      phone_no: data.phone,
       password: data.password,
     });
 
-    const responseData = response.data.data || response.data;
+    const responseData = response.data;
 
-    if (responseData.token) {
+    if (responseData && responseData.token) {
       useAuthStore.getState().setToken(responseData.token);
       useAuthStore.getState().setAuthenticated(true);
 
@@ -31,15 +30,14 @@ export const authApi = {
   }) {
     const response = await client.post("/auth/signup", {
       name: data.name,
-      phone: data.phone,
-      phone_no: data.phone, // Supporting both conventions
+      phone_no: data.phone,
       email: data.email,
       password: data.password,
     });
 
-    const responseData = response.data.data || response.data;
+    const responseData = response.data;
 
-    if (responseData.token) {
+    if (responseData && responseData.token) {
       useAuthStore.getState().setToken(responseData.token);
       useAuthStore.getState().setAuthenticated(true);
 
@@ -52,28 +50,29 @@ export const authApi = {
   },
 
   async logout() {
+    await client.post("/auth/logout");
     useAuthStore.getState().logout();
     return true;
   },
 
   async getProfile() {
     const response = await client.get("/users/me");
-    return response.data.data || response.data;
+    return response.data;
   },
 
   async updateProfile(data: any) {
     const response = await client.put("/users/me", data);
-    return response.data.data || response.data;
+    return response.data;
   },
 
   async resetPassword(data: any) {
     const response = await client.post("/auth/reset-password", data);
-    return response.data.data || response.data;
+    return response.data;
   },
 
   async getUserByUsername(username: string) {
     const response = await client.get(`/users/profile/${username}`);
-    return response.data.data || response.data;
+    return response.data;
   },
 
   async mockOtpLogin(phone: string) {
@@ -88,6 +87,23 @@ export const authApi = {
             phone_no: phone,
             email: normalizedPhone + "@cricop.com",
             role: "user",
+            battingStyle: "right-handed",
+            stats: {
+              matches: 12,
+              runs: 345,
+              ballsFaced: 250,
+              wickets: 5,
+              ballsBowled: 120,
+              runsConceded: 180,
+              catches: 4,
+              highestScore: 56,
+              strikeRate: 138,
+              economy: 9.0,
+              average: 28.75,
+              fifties: 1,
+              sixes: 15,
+              fours: 25,
+            },
           },
           token: "mock-jwt-token-" + Date.now(),
         };
@@ -102,6 +118,26 @@ export const authApi = {
             phone_no: "+919876543210",
             email: "virat@cricket.com",
             role: "admin",
+            battingStyle: "right-handed",
+            stats: {
+              matches: 120,
+              runs: 4500,
+              ballsFaced: 3200,
+              wickets: 0,
+              ballsBowled: 0,
+              runsConceded: 0,
+              catches: 45,
+              stumpings: 0,
+              highestScore: 113,
+              bestBowling: "-",
+              strikeRate: 140.6,
+              economy: 0,
+              average: 45.0,
+              fifties: 35,
+              hundreds: 5,
+              sixes: 120,
+              fours: 380,
+            },
           } as any;
         }
 

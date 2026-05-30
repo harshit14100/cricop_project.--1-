@@ -14,6 +14,7 @@ export {
   useSetToss,
   useStartMatch,
 } from "./useMatches";
+export { useLiveMatches } from "./useLiveMatch";
 export {
   useScoreBall,
   useUndoBall,

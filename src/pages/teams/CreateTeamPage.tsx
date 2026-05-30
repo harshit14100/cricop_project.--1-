@@ -40,7 +40,6 @@ export default function CreateTeamPage() {
     if (!teamData.name || !teamData.shortName) return;
 
     createTeam.mutate({
-      team_id: "", // Server will generate this
       name: teamData.name,
       short_name: teamData.shortName,
       color: teamData.color,

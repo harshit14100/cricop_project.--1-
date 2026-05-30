@@ -1,15 +1,14 @@
-import { client } from "@/api";
-
 export interface User {
   id: string;
   name: string;
-  email: string;
-  phone: string;
+  email?: string;
+  phone_no: string;
   avatar?: string;
-  role: "user" | "host" | "admin";
-  createdAt: string;
-  isActive: boolean;
+  role?: "user" | "host" | "admin";
+  createdAt?: string;
+  isActive?: boolean;
   battingStyle?: "right-handed" | "left-handed";
+  stats?: PlayerStats;
 }
 
 export interface AuthState {
@@ -19,8 +18,8 @@ export interface AuthState {
   isLoading: boolean;
 }
 export interface Team {
-  team_id: string;
-  id?: string; // Alias for backward compatibility
+  id: string;
+  team_id?: string; // Alias for backward compatibility
   name: string;
 
   short_name?: string;
@@ -33,15 +32,17 @@ export interface Team {
   captain_id?: string;
   wicket_keeper_id?: string;
 
+  created_by?: string;
   created_at?: string;
+  updated_at?: string;
 }
 
 export interface Player {
   id: string;
   name: string;
-  phone?: string;
+  phone_no?: string;
   avatar?: string;
-  battingStyle: "right-handed" | "left-handed";
+  battingStyle?: "right-handed" | "left-handed";
   bowlingStyle?:
     | "right-arm-fast"
     | "right-arm-medium"
@@ -164,14 +165,6 @@ export interface SuperStartMatchPayload {
   current_bowler_id: string;
 }
 
-export const matchesApi = {
-  async setupMatch(payload: SuperStartMatchPayload) {
-    const response = await client.post("/users/matches/setup", payload);
-
-    return response.data;
-  },
-};
-
 export interface StartMatchPayload {
   team1_id: string;
   team2_id: string;
@@ -216,17 +209,18 @@ export interface CreateMatchPayload {
 
 export interface Innings {
   id: string;
+  inning_number?: number;
   battingTeam: string;
-  bowlingTeam: string;
+  bowlingTeam?: string;
   runs: number;
   wickets: number;
   balls: number;
-  extras: Extras;
+  extras?: Extras;
   batsmen: BatsmanInnings[];
   bowlers: BowlerInnings[];
-  partnerships: Partnership[];
-  fallOfWickets: FallOfWicket[];
-  isCompleted: boolean;
+  partnerships?: Partnership[];
+  fallOfWickets?: FallOfWicket[];
+  isCompleted?: boolean;
   target?: number;
 }
 
@@ -240,27 +234,27 @@ export interface Extras {
 
 export interface BatsmanInnings {
   playerId: string;
-  playerName: string;
+  playerName?: string;
   runs: number;
   balls: number;
-  fours: number;
-  sixes: number;
+  fours?: number;
+  sixes?: number;
   isOut: boolean;
   dismissal?: Dismissal;
-  strikeRate: number;
+  strikeRate?: number;
 }
 
 export interface BowlerInnings {
   playerId: string;
-  playerName: string;
+  playerName?: string;
   overs: number;
   balls: number;
   maidens: number;
   runs: number;
   wickets: number;
-  wides: number;
-  noBalls: number;
-  economy: number;
+  wides?: number;
+  noBalls?: number;
+  economy?: number;
 }
 
 export interface Partnership {

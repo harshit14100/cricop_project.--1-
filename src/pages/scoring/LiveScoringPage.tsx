@@ -19,8 +19,9 @@ import {
   useEndInnings,
   useEndMatch,
 } from "@/hooks";
-import { useMatchStore, useUIStore } from "@/store";
+import { useMatchStore, useUIStore, useAuthStore } from "@/store";
 import { cn } from "@/lib/utils";
+import { canEditMatch } from "@/utils/permissions";
 
 const runsButtons = [0, 1, 2, 3, 4, 6];
 const wicketTypes = [
@@ -41,15 +42,29 @@ const extraTypes = [
 export default function LiveScoringPage() {
   const { matchId } = useParams<{ matchId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const { data: match, isLoading: isMatchLoading } = useLiveMatch(
     matchId || "",
   );
+  const { addToast } = useUIStore();
+
+  // Check permissions
+  useEffect(() => {
+    if (match && user && !canEditMatch(match, user.id)) {
+      navigate(`/match/${match.id}/live`);
+      addToast({ 
+        title: "Access Denied", 
+        description: "Only the match host can access the scoring page.", 
+        variant: "error" 
+      });
+    }
+  }, [match, user, navigate, addToast]);
+
   const scoreBall = useScoreBall();
   const undoBall = useUndoBall();
   const endInnings = useEndInnings();
   const endMatch = useEndMatch();
   const { liveState } = useMatchStore();
-  const { addToast } = useUIStore();
 
   const [showWicketDialog, setShowWicketDialog] = useState(false);
   const [showOpenerDialog, setShowOpenerDialog] = useState(false);

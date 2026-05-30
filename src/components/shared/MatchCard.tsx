@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import type { Match } from "@/types";
 import { formatDate, formatOvers, calculateRunRate, cn } from "@/lib/utils";
+import { useAuthStore } from "@/store";
+import { canEditMatch } from "@/utils/permissions";
 
 interface MatchCardProps {
   match: Match;
@@ -12,12 +14,28 @@ interface MatchCardProps {
 }
 
 export function MatchCard({ match, index = 0 }: MatchCardProps) {
-  const currentInnings = match.innings && match.innings.length > 0 
-    ? match.innings[match.currentInnings - 1] 
-    : null;
+  const { user } = useAuthStore();
   const isLive = match.status === "live";
   const isCompleted = match.status === "completed";
   const isScheduled = match.status === "scheduled";
+
+  const isHost = canEditMatch(match, user?.id);
+  const matchLink = isLive 
+    ? (isHost ? `/live-scoring/${match.id}` : `/match/${match.id}/live`)
+    : `/match/${match.id}`;
+
+  // Use nested innings data if available, otherwise fallback to top-level live fields from backend
+  const currentInnings =
+    match.innings && match.innings.length > 0
+      ? match.innings[match.currentInnings - 1]
+      : null;
+
+  const liveRuns = currentInnings?.runs ?? match.total_runs ?? 0;
+  const liveWickets = currentInnings?.wickets ?? match.wickets ?? 0;
+  const liveBalls =
+    currentInnings?.balls ??
+    (match.completed_overs || 0) * 6 + (match.balls_in_current_over || 0);
+  const battingTeamName = match.batting_team_name;
 
   const teamA = match.teamA;
   const teamB = match.teamB;
@@ -25,13 +43,24 @@ export function MatchCard({ match, index = 0 }: MatchCardProps) {
   const team1Name = teamA?.name || match.team_1_name || "Team 1";
   const team2Name = teamB?.name || match.team_2_name || "Team 2";
 
+  // Determine which team is batting to show score under the correct team
+  const isTeam1Batting =
+    match.innings && match.innings.length > 0
+      ? currentInnings?.battingTeam === match.team1_id
+      : battingTeamName === team1Name;
+
+  const isTeam2Batting =
+    match.innings && match.innings.length > 0
+      ? currentInnings?.battingTeam === match.team2_id
+      : battingTeamName === team2Name;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
     >
-      <Link to={isLive ? `/live-scoring/${match.id}` : `/match/${match.id}`}>
+      <Link to={matchLink}>
         <Card className="glass-card-hover overflow-hidden cursor-pointer group">
           {/* Header */}
           <div className="px-3 py-2 sm:px-4 sm:py-3 border-b border-white/5 flex items-center justify-between">
@@ -74,29 +103,29 @@ export function MatchCard({ match, index = 0 }: MatchCardProps) {
                   className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl mx-auto mb-1.5 sm:mb-2 flex items-center justify-center text-base sm:text-lg font-bold text-white"
                   style={{ backgroundColor: teamA?.color || "#3b5bdb" }}
                 >
-                  {teamA?.shortName?.charAt(0) || team1Name.charAt(0)}
+                  {(teamA?.short_name || teamA?.shortName || team1Name)?.[0]?.toUpperCase() || "T"}
                 </div>
                 <p className="text-xs sm:text-sm font-semibold text-white truncate max-w-[80px] sm:max-w-[120px] mx-auto">
-                  {teamA?.shortName || team1Name}
+                  {teamA?.short_name || teamA?.shortName || team1Name}
                 </p>
-                {currentInnings &&
-                  match.innings.length > 0 &&
-                  currentInnings.battingTeam === match.team1_id && (
-                    <div className="mt-1">
-                      <p className="text-xl sm:text-2xl font-bold text-white score-display">
-                        {currentInnings.runs}/{currentInnings.wickets}
-                      </p>
-                      <p className="text-[10px] sm:text-xs text-white/50">
-                        {formatOvers(currentInnings.balls)} ov
-                      </p>
-                    </div>
-                  )}
+                {isLive && isTeam1Batting && (
+                  <div className="mt-1">
+                    <p className="text-xl sm:text-2xl font-bold text-white score-display">
+                      {liveRuns}/{liveWickets}
+                    </p>
+                    <p className="text-[10px] sm:text-xs text-white/50">
+                      {formatOvers(liveBalls)} ov
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* VS */}
               <div className="flex-shrink-0">
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/5 flex items-center justify-center">
-                  <span className="text-[10px] sm:text-xs font-bold text-white/40">VS</span>
+                  <span className="text-[10px] sm:text-xs font-bold text-white/40">
+                    VS
+                  </span>
                 </div>
               </div>
 
@@ -106,79 +135,85 @@ export function MatchCard({ match, index = 0 }: MatchCardProps) {
                   className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl mx-auto mb-1.5 sm:mb-2 flex items-center justify-center text-base sm:text-lg font-bold text-white"
                   style={{ backgroundColor: teamB?.color || "#4263eb" }}
                 >
-                  {teamB?.shortName?.charAt(0) || team2Name.charAt(0)}
+                  {(teamB?.short_name || teamB?.shortName || team2Name)?.[0]?.toUpperCase() || "T"}
                 </div>
                 <p className="text-xs sm:text-sm font-semibold text-white truncate max-w-[80px] sm:max-w-[120px] mx-auto">
-                  {teamB?.shortName || team2Name}
+                  {teamB?.short_name || teamB?.shortName || team2Name}
                 </p>
-                {currentInnings &&
-                  match.innings.length > 0 &&
-                  currentInnings.battingTeam === match.team2_id && (
-                    <div className="mt-1">
-                      <p className="text-xl sm:text-2xl font-bold text-white score-display">
-                        {currentInnings.runs}/{currentInnings.wickets}
-                      </p>
-                      <p className="text-[10px] sm:text-xs text-white/50">
-                        {formatOvers(currentInnings.balls)} ov
-                      </p>
-                    </div>
-                  )}
+                {isLive && isTeam2Batting && (
+                  <div className="mt-1">
+                    <p className="text-xl sm:text-2xl font-bold text-white score-display">
+                      {liveRuns}/{liveWickets}
+                    </p>
+                    <p className="text-[10px] sm:text-xs text-white/50">
+                      {formatOvers(liveBalls)} ov
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Match Info */}
-            {isLive && currentInnings && (
+            {isLive && (
               <div className="mt-4 pt-3 border-t border-white/5">
                 <div className="flex items-center justify-between text-xs text-white/50">
                   <div className="flex items-center gap-1">
                     <Zap className="h-3 w-3 text-electric" />
-                    <span>
-                      RR:{" "}
-                      {calculateRunRate(
-                        currentInnings.runs,
-                        currentInnings.balls,
-                      )}
-                    </span>
+                    <span>RR: {calculateRunRate(liveRuns, liveBalls)}</span>
                   </div>
-                  {currentInnings.target && (
+                  {(currentInnings?.target || match.total_runs) && (
                     <div className="flex items-center gap-1">
                       <Trophy className="h-3 w-3 text-amber-400" />
                       <span>
-                        Need {currentInnings.target - currentInnings.runs} from{" "}
-                        {(match.overs || 20) * 6 - currentInnings.balls} balls
+                        {currentInnings?.target
+                          ? `Need ${currentInnings.target - liveRuns} from ${(match.overs || 20) * 6 - liveBalls} balls`
+                          : `Total: ${match.total_runs}`}
                       </span>
                     </div>
                   )}
                 </div>
-                {currentInnings.batsmen
-                  .filter((b) => !b.isOut || b.balls > 0)
-                  .slice(0, 2)
-                  .map((batsman) => (
-                    <div
-                      key={batsman.playerId}
-                      className="flex items-center justify-between mt-2 text-xs"
-                    >
-                      <span
-                        className={cn(
-                          "text-white/70",
-                          batsman.playerId === match.striker_id &&
-                            "text-electric font-medium",
-                        )}
-                      >
-                        {batsman.playerName} {batsman.playerId === match.striker_id && "*"}
-                      </span>
-                      <span className="text-white font-medium">
-                        {batsman.runs} ({batsman.balls})
-                      </span>
-                    </div>
-                  ))}
+                {currentInnings?.batsmen
+                  ? currentInnings.batsmen
+                      .filter((b) => !b.isOut || b.balls > 0)
+                      .slice(0, 2)
+                      .map((batsman) => (
+                        <div
+                          key={batsman.playerId}
+                          className="flex items-center justify-between mt-2 text-xs"
+                        >
+                          <span
+                            className={cn(
+                              "text-white/70",
+                              batsman.playerId === match.striker_id &&
+                                "text-electric font-medium",
+                            )}
+                          >
+                            {batsman.playerName || batsman.playerId}{" "}
+                            {batsman.playerId === match.striker_id && "*"}
+                          </span>
+                          <span className="text-white font-medium">
+                            {batsman.runs} ({batsman.balls})
+                          </span>
+                        </div>
+                      ))
+                  : (match.striker_name || match.striker_id) && (
+                      <div className="flex items-center justify-between mt-2 text-xs">
+                        <span className="text-electric font-medium">
+                          {match.striker_name || match.striker_id} *
+                        </span>
+                        <span className="text-white/40">Batting</span>
+                      </div>
+                    )}
               </div>
             )}
 
             {isCompleted && (
               <div className="mt-4 pt-3 border-t border-white/5 text-center">
                 <p className="text-sm font-medium text-emerald-400">
-                  {match.winner_team_id === match.team1_id ? team1Name : team2Name} won
+                  {match.winner_team_id === match.team1_id
+                    ? team1Name
+                    : team2Name}{" "}
+                  won
                 </p>
                 {match.man_of_match_id && (
                   <p className="text-xs text-white/50 mt-1">
