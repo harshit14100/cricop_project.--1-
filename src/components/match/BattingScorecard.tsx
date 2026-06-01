@@ -18,16 +18,16 @@ export function BattingScorecard({ match }: BattingScorecardProps) {
       <div className="px-4 py-3 border-b border-white/5 bg-white/5">
         <h3 className="text-sm font-bold text-white uppercase tracking-wider">Batting Scorecard</h3>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+      <div className="overflow-x-auto scrollbar-hide">
+        <table className="w-full text-left border-collapse min-w-[450px]">
           <thead>
             <tr className="text-[10px] font-bold text-white/40 uppercase tracking-widest border-b border-white/5">
-              <th className="px-4 py-3">Batter</th>
-              <th className="px-4 py-3 text-right">R</th>
-              <th className="px-4 py-3 text-right">B</th>
-              <th className="px-4 py-3 text-right">4s</th>
-              <th className="px-4 py-3 text-right">6s</th>
-              <th className="px-4 py-3 text-right">SR</th>
+              <th className="px-2 sm:px-4 py-3">Batter</th>
+              <th className="px-2 sm:px-4 py-3 text-right">R</th>
+              <th className="px-2 sm:px-4 py-3 text-right">B</th>
+              <th className="px-2 sm:px-4 py-3 text-right">4s</th>
+              <th className="px-2 sm:px-4 py-3 text-right">6s</th>
+              <th className="px-2 sm:px-4 py-3 text-right">SR</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
@@ -41,24 +41,24 @@ export function BattingScorecard({ match }: BattingScorecardProps) {
                   "text-sm transition-colors",
                   (isStriker || isNonStriker) ? "bg-electric/5" : "hover:bg-white/5"
                 )}>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-col">
+                  <td className="px-2 sm:px-4 py-3">
+                    <div className="flex flex-col min-w-[120px]">
                       <span className={cn(
-                        "font-medium",
+                        "font-medium truncate",
                         isStriker ? "text-electric" : "text-white"
                       )}>
                         {batsman.playerName || batsman.playerId} {isStriker && "*"}
                       </span>
-                      <span className="text-[10px] text-white/40">
+                      <span className="text-[10px] text-white/40 truncate">
                         {batsman.isOut ? (batsman.outType || "Out") : "Batting"}
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-right font-bold text-white">{batsman.runs}</td>
-                  <td className="px-4 py-3 text-right text-white/60">{batsman.balls}</td>
-                  <td className="px-4 py-3 text-right text-white/60">{batsman.fours || 0}</td>
-                  <td className="px-4 py-3 text-right text-white/60">{batsman.sixes || 0}</td>
-                  <td className="px-4 py-3 text-right text-white/40">{sr}</td>
+                  <td className="px-2 sm:px-4 py-3 text-right font-bold text-white">{batsman.runs}</td>
+                  <td className="px-2 sm:px-4 py-3 text-right text-white/60">{batsman.balls}</td>
+                  <td className="px-2 sm:px-4 py-3 text-right text-white/60">{batsman.fours || 0}</td>
+                  <td className="px-2 sm:px-4 py-3 text-right text-white/60">{batsman.sixes || 0}</td>
+                  <td className="px-2 sm:px-4 py-3 text-right text-white/40">{sr}</td>
                 </tr>
               );
             })}

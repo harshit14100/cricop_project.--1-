@@ -15,31 +15,26 @@ export const matchApi = {
   }): Promise<{ matches: Match[]; total: number }> => {
     const response = await client.get<any>("/users/matches", { params });
     const data = response.data;
-    
+
     if (Array.isArray(data)) {
       return { matches: data, total: data.length };
     }
 
-    // Handle nested success/data wrapper from mock/some backends
     const mainData = data.data || data;
-    const matches = mainData.matches || (Array.isArray(mainData) ? mainData : []);
+    const matches =
+      mainData.matches || (Array.isArray(mainData) ? mainData : []);
     const total = mainData.total || matches.length;
-    
+
     return { matches, total };
   },
 
   getMatch: async (id: string): Promise<Match> => {
-    const { data } = await client.get<Match>(
-      `/users/matches/${id}`,
-    );
-    return data;
+    const { data } = await client.get(`/users/matches/${id}`);
+    return data.data ?? data;
   },
 
   createMatch: async (payload: CreateMatchPayload) => {
     const response = await client.post("/users/matches/setup", payload);
-
-    console.log("CREATE MATCH RESPONSE:", response.data);
-
     return response.data;
   },
 
@@ -47,11 +42,8 @@ export const matchApi = {
     id: string,
     matchData: Partial<Match>,
   ): Promise<Match> => {
-    const { data } = await client.put<Match>(
-      `/users/matches/${id}`,
-      matchData,
-    );
-    return data;
+    const { data } = await client.put(`/users/matches/${id}`, matchData);
+    return data.data ?? data;
   },
 
   deleteMatch: async (id: string): Promise<void> => {
@@ -70,22 +62,15 @@ export const matchApi = {
   },
 
   startMatch: async (matchId: string) => {
-    // The spec says /users/matches/start but usually it needs an ID. 
-    // If it's in the body or URL depends on the actual backend implementation.
-    // Keeping it as a POST but removing .data.data
-    const { data } = await client.post(`/users/matches/start`, { match_id: matchId });
-
-    console.log("START MATCH RESPONSE:", data);
-
+    const { data } = await client.post(`/users/matches/start`, {
+      match_id: matchId,
+    });
     return data;
   },
 
   getLiveMatch: async (matchId: string): Promise<Match> => {
     const response = await client.get(`/users/matches/${matchId}/live`);
-
-    console.log("LIVE API RESPONSE:", response.data);
-
-    return response.data.data;
+    return response.data.data ?? response.data;
   },
 
   getShareableLink: async (matchId: string): Promise<string> => {

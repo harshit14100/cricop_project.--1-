@@ -27,12 +27,12 @@ export default function LiveMatchPage() {
       <RecentOvers match={match} />
 
       <Tabs defaultValue="scorecard" className="w-full">
-        <TabsList className="w-full grid grid-cols-2 mb-6">
+        <TabsList className="w-full grid grid-cols-2 mb-4 sm:mb-6">
           <TabsTrigger value="scorecard">Scorecard</TabsTrigger>
           <TabsTrigger value="info">Match Info</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="scorecard" className="space-y-6">
+        <TabsContent value="scorecard" className="space-y-4 sm:space-y-6 outline-none">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -50,7 +50,7 @@ export default function LiveMatchPage() {
           </motion.div>
         </TabsContent>
 
-        <TabsContent value="info">
+        <TabsContent value="info" className="outline-none">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

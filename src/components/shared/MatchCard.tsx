@@ -96,24 +96,24 @@ export function MatchCard({ match, index = 0 }: MatchCardProps) {
 
           {/* Teams & Score */}
           <div className="p-3 sm:p-4">
-            <div className="flex items-center justify-between gap-2 sm:gap-4">
+            <div className="flex items-center justify-between gap-1 sm:gap-4">
               {/* Team A */}
-              <div className="flex-1 text-center">
+              <div className="flex-1 text-center min-w-0">
                 <div
-                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl mx-auto mb-1.5 sm:mb-2 flex items-center justify-center text-base sm:text-lg font-bold text-white"
+                  className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl mx-auto mb-1 flex items-center justify-center text-sm sm:text-lg font-bold text-white shadow-lg"
                   style={{ backgroundColor: teamA?.color || "#3b5bdb" }}
                 >
                   {(teamA?.short_name || teamA?.shortName || team1Name)?.[0]?.toUpperCase() || "T"}
                 </div>
-                <p className="text-xs sm:text-sm font-semibold text-white truncate max-w-[80px] sm:max-w-[120px] mx-auto">
+                <p className="text-[10px] sm:text-sm font-semibold text-white truncate px-1">
                   {teamA?.short_name || teamA?.shortName || team1Name}
                 </p>
                 {isLive && isTeam1Batting && (
                   <div className="mt-1">
-                    <p className="text-xl sm:text-2xl font-bold text-white score-display">
+                    <p className="text-lg sm:text-2xl font-bold text-white score-display leading-none">
                       {liveRuns}/{liveWickets}
                     </p>
-                    <p className="text-[10px] sm:text-xs text-white/50">
+                    <p className="text-[9px] sm:text-xs text-white/50 mt-0.5">
                       {formatOvers(liveBalls)} ov
                     </p>
                   </div>
@@ -121,31 +121,31 @@ export function MatchCard({ match, index = 0 }: MatchCardProps) {
               </div>
 
               {/* VS */}
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/5 flex items-center justify-center">
-                  <span className="text-[10px] sm:text-xs font-bold text-white/40">
+              <div className="flex-shrink-0 self-start mt-2 sm:mt-0 sm:self-center">
+                <div className="w-6 h-6 sm:w-10 sm:h-10 rounded-full bg-white/5 flex items-center justify-center">
+                  <span className="text-[8px] sm:text-xs font-bold text-white/20 uppercase tracking-tighter sm:tracking-normal">
                     VS
                   </span>
                 </div>
               </div>
 
               {/* Team B */}
-              <div className="flex-1 text-center">
+              <div className="flex-1 text-center min-w-0">
                 <div
-                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl mx-auto mb-1.5 sm:mb-2 flex items-center justify-center text-base sm:text-lg font-bold text-white"
+                  className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl mx-auto mb-1 flex items-center justify-center text-sm sm:text-lg font-bold text-white shadow-lg"
                   style={{ backgroundColor: teamB?.color || "#4263eb" }}
                 >
                   {(teamB?.short_name || teamB?.shortName || team2Name)?.[0]?.toUpperCase() || "T"}
                 </div>
-                <p className="text-xs sm:text-sm font-semibold text-white truncate max-w-[80px] sm:max-w-[120px] mx-auto">
+                <p className="text-[10px] sm:text-sm font-semibold text-white truncate px-1">
                   {teamB?.short_name || teamB?.shortName || team2Name}
                 </p>
                 {isLive && isTeam2Batting && (
                   <div className="mt-1">
-                    <p className="text-xl sm:text-2xl font-bold text-white score-display">
+                    <p className="text-lg sm:text-2xl font-bold text-white score-display leading-none">
                       {liveRuns}/{liveWickets}
                     </p>
-                    <p className="text-[10px] sm:text-xs text-white/50">
+                    <p className="text-[9px] sm:text-xs text-white/50 mt-0.5">
                       {formatOvers(liveBalls)} ov
                     </p>
                   </div>
@@ -156,54 +156,57 @@ export function MatchCard({ match, index = 0 }: MatchCardProps) {
             {/* Match Info */}
             {isLive && (
               <div className="mt-4 pt-3 border-t border-white/5">
-                <div className="flex items-center justify-between text-xs text-white/50">
-                  <div className="flex items-center gap-1">
-                    <Zap className="h-3 w-3 text-electric" />
+                <div className="flex flex-wrap items-center justify-between gap-y-2 text-[10px] sm:text-xs text-white/50">
+                  <div className="flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded-full">
+                    <Zap className="h-2.5 w-2.5 text-electric" />
                     <span>RR: {calculateRunRate(liveRuns, liveBalls)}</span>
                   </div>
                   {(currentInnings?.target || match.total_runs) && (
-                    <div className="flex items-center gap-1">
-                      <Trophy className="h-3 w-3 text-amber-400" />
+                    <div className="flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded-full">
+                      <Trophy className="h-2.5 w-2.5 text-amber-400" />
                       <span>
                         {currentInnings?.target
-                          ? `Need ${currentInnings.target - liveRuns} from ${(match.overs || 20) * 6 - liveBalls} balls`
+                          ? `${currentInnings.target - liveRuns} off ${(match.overs || 20) * 6 - liveBalls}`
                           : `Total: ${match.total_runs}`}
                       </span>
                     </div>
                   )}
                 </div>
-                {currentInnings?.batsmen
-                  ? currentInnings.batsmen
-                      .filter((b) => !b.isOut || b.balls > 0)
-                      .slice(0, 2)
-                      .map((batsman) => (
-                        <div
-                          key={batsman.playerId}
-                          className="flex items-center justify-between mt-2 text-xs"
-                        >
-                          <span
-                            className={cn(
-                              "text-white/70",
-                              batsman.playerId === match.striker_id &&
-                                "text-electric font-medium",
-                            )}
+                
+                <div className="mt-3 space-y-1.5">
+                  {currentInnings?.batsmen
+                    ? currentInnings.batsmen
+                        .filter((b) => !b.isOut || b.balls > 0)
+                        .slice(0, 2)
+                        .map((batsman) => (
+                          <div
+                            key={batsman.playerId}
+                            className="flex items-center justify-between text-[10px] sm:text-xs"
                           >
-                            {batsman.playerName || batsman.playerId}{" "}
-                            {batsman.playerId === match.striker_id && "*"}
+                            <span
+                              className={cn(
+                                "text-white/70 truncate max-w-[120px]",
+                                batsman.playerId === match.striker_id &&
+                                  "text-electric font-medium",
+                              )}
+                            >
+                              {batsman.playerName || batsman.playerId}{" "}
+                              {batsman.playerId === match.striker_id && "*"}
+                            </span>
+                            <span className="text-white font-medium shrink-0 ml-2">
+                              {batsman.runs} ({batsman.balls})
+                            </span>
+                          </div>
+                        ))
+                    : (match.striker_name || match.striker_id) && (
+                        <div className="flex items-center justify-between text-[10px] sm:text-xs">
+                          <span className="text-electric font-medium truncate max-w-[150px]">
+                            {match.striker_name || match.striker_id} *
                           </span>
-                          <span className="text-white font-medium">
-                            {batsman.runs} ({batsman.balls})
-                          </span>
+                          <span className="text-white/40 shrink-0 ml-2">Batting</span>
                         </div>
-                      ))
-                  : (match.striker_name || match.striker_id) && (
-                      <div className="flex items-center justify-between mt-2 text-xs">
-                        <span className="text-electric font-medium">
-                          {match.striker_name || match.striker_id} *
-                        </span>
-                        <span className="text-white/40">Batting</span>
-                      </div>
-                    )}
+                      )}
+                </div>
               </div>
             )}
 

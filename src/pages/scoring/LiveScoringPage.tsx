@@ -50,7 +50,7 @@ export default function LiveScoringPage() {
 
   // Check permissions
   useEffect(() => {
-    if (match && user && !canEditMatch(match, user.id)) {
+    if (!isMatchLoading && match && user && !canEditMatch(match, user.id)) {
       navigate(`/match/${match.id}/live`);
       addToast({ 
         title: "Access Denied", 
@@ -58,7 +58,7 @@ export default function LiveScoringPage() {
         variant: "error" 
       });
     }
-  }, [match, user, navigate, addToast]);
+  }, [match, user, navigate, addToast, isMatchLoading]);
 
   const scoreBall = useScoreBall();
   const undoBall = useUndoBall();

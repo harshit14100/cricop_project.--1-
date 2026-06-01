@@ -82,39 +82,39 @@ function InningsCard({ innings, inningsNumber, isExpanded, onToggle, match }: In
           className="border-t border-white/10"
         >
           {/* Batting Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+          <div className="overflow-x-auto scrollbar-hide">
+            <table className="w-full text-left text-xs min-w-[450px]">
               <thead>
                 <tr className="bg-white/5 text-white/40 border-b border-white/5">
-                  <th className="p-3 font-medium">Batter</th>
-                  <th className="p-3 font-medium text-right">R</th>
-                  <th className="p-3 font-medium text-right">B</th>
-                  <th className="p-3 font-medium text-right">4s</th>
-                  <th className="p-3 font-medium text-right">6s</th>
-                  <th className="p-3 font-medium text-right">SR</th>
+                  <th className="px-2 sm:p-3 font-medium">Batter</th>
+                  <th className="px-2 sm:p-3 font-medium text-right">R</th>
+                  <th className="px-2 sm:p-3 font-medium text-right">B</th>
+                  <th className="px-2 sm:p-3 font-medium text-right">4s</th>
+                  <th className="px-2 sm:p-3 font-medium text-right">6s</th>
+                  <th className="px-2 sm:p-3 font-medium text-right">SR</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {innings.batsmen.map((batsman) => (
-                  <tr key={batsman.playerId} className="text-white/80">
-                    <td className="p-3">
-                      <p className="font-semibold text-white">{batsman.playerName}</p>
-                      <p className="text-[10px] text-white/40 mt-0.5">
-                        {batsman.isOut ? batsman.dismissal?.type : 'not out'}
+                  <tr key={batsman.playerId} className="text-white/80 transition-colors hover:bg-white/5">
+                    <td className="px-2 sm:p-3">
+                      <p className="font-semibold text-white truncate max-w-[120px]">{batsman.playerName}</p>
+                      <p className="text-[10px] text-white/40 mt-0.5 truncate">
+                        {batsman.isOut ? (batsman.dismissal?.type || 'Out') : 'not out'}
                       </p>
                     </td>
-                    <td className="p-3 text-right font-bold text-white">{batsman.runs}</td>
-                    <td className="p-3 text-right text-white/60">{batsman.balls}</td>
-                    <td className="p-3 text-right text-white/60">{batsman.fours}</td>
-                    <td className="p-3 text-right text-white/60">{batsman.sixes}</td>
-                    <td className="p-3 text-right text-white/60">{(batsman.strikeRate || 0).toFixed(1)}</td>
+                    <td className="px-2 sm:p-3 text-right font-bold text-white">{batsman.runs}</td>
+                    <td className="px-2 sm:p-3 text-right text-white/60">{batsman.balls}</td>
+                    <td className="px-2 sm:p-3 text-right text-white/60">{batsman.fours}</td>
+                    <td className="px-2 sm:p-3 text-right text-white/60">{batsman.sixes}</td>
+                    <td className="px-2 sm:p-3 text-right text-white/60">{(batsman.strikeRate || 0).toFixed(1)}</td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
                 <tr className="bg-white/5">
-                  <td className="p-3 font-bold text-white">Extras</td>
-                  <td colSpan={5} className="p-3 text-right text-white/60">
+                  <td className="px-2 sm:p-3 font-bold text-white whitespace-nowrap">Extras</td>
+                  <td colSpan={5} className="px-2 sm:p-3 text-right text-white/60">
                     {(innings.extras?.wides || 0) + (innings.extras?.noBalls || 0) + (innings.extras?.byes || 0) + (innings.extras?.legByes || 0)} 
                     <span className="ml-2 text-[10px]">
                       (w {innings.extras?.wides || 0}, nb {innings.extras?.noBalls || 0}, b {innings.extras?.byes || 0}, lb {innings.extras?.legByes || 0})
@@ -122,10 +122,10 @@ function InningsCard({ innings, inningsNumber, isExpanded, onToggle, match }: In
                   </td>
                 </tr>
                 <tr className="border-t border-white/10">
-                  <td className="p-3 font-bold text-white">Total</td>
-                  <td colSpan={5} className="p-3 text-right">
+                  <td className="px-2 sm:p-3 font-bold text-white">Total</td>
+                  <td colSpan={5} className="px-2 sm:p-3 text-right">
                     <span className="text-lg font-bold text-white">{innings.runs}/{innings.wickets}</span>
-                    <span className="ml-2 text-xs text-white/40">({formatOvers(innings.balls)} overs)</span>
+                    <span className="ml-2 text-xs text-white/40">({formatOvers(innings.balls)} ov)</span>
                   </td>
                 </tr>
               </tfoot>
@@ -133,27 +133,27 @@ function InningsCard({ innings, inningsNumber, isExpanded, onToggle, match }: In
           </div>
 
           {/* Bowling Table */}
-          <div className="mt-4 border-t border-white/10 overflow-x-auto">
-            <table className="w-full text-left text-xs">
+          <div className="mt-4 border-t border-white/10 overflow-x-auto scrollbar-hide">
+            <table className="w-full text-left text-xs min-w-[450px]">
               <thead>
                 <tr className="bg-white/5 text-white/40 border-b border-white/5">
-                  <th className="p-3 font-medium">Bowler</th>
-                  <th className="p-3 font-medium text-right">O</th>
-                  <th className="p-3 font-medium text-right">M</th>
-                  <th className="p-3 font-medium text-right">R</th>
-                  <th className="p-3 font-medium text-right">W</th>
-                  <th className="p-3 font-medium text-right">Econ</th>
+                  <th className="px-2 sm:p-3 font-medium">Bowler</th>
+                  <th className="px-2 sm:p-3 font-medium text-right">O</th>
+                  <th className="px-2 sm:p-3 font-medium text-right">M</th>
+                  <th className="px-2 sm:p-3 font-medium text-right">R</th>
+                  <th className="px-2 sm:p-3 font-medium text-right">W</th>
+                  <th className="px-2 sm:p-3 font-medium text-right">Econ</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {innings.bowlers.map((bowler) => (
-                  <tr key={bowler.playerId} className="text-white/80">
-                    <td className="p-3 font-semibold text-white">{bowler.playerName}</td>
-                    <td className="p-3 text-right text-white/60">{bowler.overs}.{bowler.balls}</td>
-                    <td className="p-3 text-right text-white/60">{bowler.maidens}</td>
-                    <td className="p-3 text-right text-white/60">{bowler.runs}</td>
-                    <td className="p-3 text-right font-bold text-white">{bowler.wickets}</td>
-                    <td className="p-3 text-right text-white/60">{(bowler.economy || 0).toFixed(2)}</td>
+                  <tr key={bowler.playerId} className="text-white/80 transition-colors hover:bg-white/5">
+                    <td className="px-2 sm:p-3 font-semibold text-white truncate max-w-[120px]">{bowler.playerName}</td>
+                    <td className="px-2 sm:p-3 text-right text-white/60 font-medium">{formatOvers(bowler.balls)}</td>
+                    <td className="px-2 sm:p-3 text-right text-white/60">{bowler.maidens}</td>
+                    <td className="px-2 sm:p-3 text-right text-white/60">{bowler.runs}</td>
+                    <td className="px-2 sm:p-3 text-right font-bold text-white">{bowler.wickets}</td>
+                    <td className="px-2 sm:p-3 text-right text-white/60">{(bowler.economy || 0).toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
