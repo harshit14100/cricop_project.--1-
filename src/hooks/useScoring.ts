@@ -1,22 +1,20 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { scoringService } from '@/services'
-import { useUIStore, useMatchStore } from '@/store'
+import { useUIStore } from '@/store'
 
 export function useScoreBall() {
   const queryClient = useQueryClient()
   const { addToast } = useUIStore()
-  const { addBall } = useMatchStore()
 
   return useMutation({
-    mutationFn: ({ inningId, ballData }: { inningId: string; ballData: any }) => 
+    mutationFn: ({ inningId, ballData }: { inningId: string; ballData: any }) =>
       scoringService.scoreBall(inningId, ballData),
-    onSuccess: (data) => {
-      addBall(data)
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['live-match'] })
-      queryClient.invalidateQueries({ queryKey: ['match'] })
+      queryClient.invalidateQueries({ queryKey: ['match-scorecard'] })
     },
     onError: (error: any) => {
-      addToast({ title: 'Scoring error', description: error.response?.data?.message, variant: 'error' })
+      addToast({ title: 'Error', description: error.response?.data?.message, variant: 'error' })
     },
   })
 }
@@ -24,17 +22,16 @@ export function useScoreBall() {
 export function useUndoBall() {
   const queryClient = useQueryClient()
   const { addToast } = useUIStore()
-  const { undoLastBall } = useMatchStore()
 
   return useMutation({
-    mutationFn: scoringService.undoLastBall,
+    mutationFn: (matchId: string) => scoringService.undoLastBall(matchId),
     onSuccess: () => {
-      undoLastBall()
       queryClient.invalidateQueries({ queryKey: ['live-match'] })
-      addToast({ title: 'Last ball undone', variant: 'default' })
+      queryClient.invalidateQueries({ queryKey: ['match-scorecard'] })
+      addToast({ title: 'Ball undone', variant: 'success' })
     },
     onError: (error: any) => {
-      addToast({ title: 'Undo failed', description: error.response?.data?.message, variant: 'error' })
+      addToast({ title: 'Error', description: error.response?.data?.message, variant: 'error' })
     },
   })
 }
@@ -44,9 +41,10 @@ export function useEndInnings() {
   const { addToast } = useUIStore()
 
   return useMutation({
-    mutationFn: scoringService.endInnings,
+    mutationFn: (matchId: string) => scoringService.endInnings(matchId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['live-match'] })
+      queryClient.invalidateQueries({ queryKey: ['match-scorecard'] })
       addToast({ title: 'Innings ended', variant: 'success' })
     },
     onError: (error: any) => {
@@ -60,8 +58,9 @@ export function useEndMatch() {
   const { addToast } = useUIStore()
 
   return useMutation({
-    mutationFn: scoringService.endMatch,
+    mutationFn: (matchId: string) => scoringService.endMatch(matchId),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['live-match'] })
       queryClient.invalidateQueries({ queryKey: ['matches'] })
       addToast({ title: 'Match completed!', variant: 'success' })
     },

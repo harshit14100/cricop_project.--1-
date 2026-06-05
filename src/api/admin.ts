@@ -2,44 +2,18 @@ import client from "./client";
 import type { User, Match, PaginatedResponse } from "@/types";
 
 export const adminApi = {
+  // All admin routes are currently not implemented in the backend
+  /*
   getUsers: async (
     page = 1,
     limit = 50,
   ): Promise<PaginatedResponse<User>> => {
-    const response = await client.get("/admin/users", { params: { page, limit } });
-    return response.data;
+    const response = await client.get<any>("/admin/users", { params: { page, limit } });
+    return response.data?.data || response.data;
   },
-
-  updateUserRole: async (
-    userId: string,
-    role: string,
-  ): Promise<User> => {
-    const response = await client.patch(`/admin/users/${userId}/role`, { role });
-    return response.data;
-  },
-
-  getReportedMatches: async (): Promise<Match[]> => {
-    const response = await client.get("/admin/matches/reported");
-    return response.data;
-  },
-
-  getSystemStats: async (): Promise<{
-    totalUsers: number;
-    totalMatches: number;
-    liveMatches: number;
-    totalPlayers: number;
-    activeToday: number;
-  }> => {
-    const response = await client.get("/admin/stats");
-    return response.data;
-  },
-
-  featureMatch: async (matchId: string): Promise<Match> => {
-    const response = await client.post(`/admin/matches/${matchId}/feature`);
-    return response.data;
-  },
-
+...
   deleteMatch: async (matchId: string): Promise<void> => {
     await client.delete(`/admin/matches/${matchId}`);
   },
+  */
 };

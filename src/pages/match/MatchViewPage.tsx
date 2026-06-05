@@ -1,10 +1,9 @@
 import { useParams, Navigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { Activity, FileText, MessageSquare, Star, BarChart3 } from 'lucide-react'
+import { Activity, FileText, MessageSquare, BarChart3 } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card } from '@/components/ui/card'
 import { ScoreBoard } from '@/components/shared/ScoreBoard'
-import { useMatch } from '@/hooks'
+import { useMatch, useMatchScorecard } from '@/hooks'
 import { calculateRunRate } from '@/lib/utils'
 import { MatchHeader } from '@/components/match/MatchHeader'
 import { BattingScorecard } from '@/components/match/BattingScorecard'
@@ -16,24 +15,21 @@ import { ErrorState } from '@/components/shared/ErrorState'
 export default function MatchViewPage() {
   const { matchId } = useParams<{ matchId: string }>()
   const { data: match, isLoading, error } = useMatch(matchId || '')
+  const { data: scorecard, isLoading: isScorecardLoading } = useMatchScorecard(matchId || '')
 
-  if (isLoading) return <LoadingScreen />
-  if (error || !match) return <ErrorState message="Could not load match details." />
+  if (isLoading || isScorecardLoading) return <LoadingScreen />
+  if (error || !match) return <ErrorState title="Error" description="Could not load match details." />
 
   // If the match is live, we should redirect to the specialized live view
   if (match.status === 'live') {
     return <Navigate to={`/match/${match.id}/live`} replace />
   }
 
-  const currentInnings = match.innings && match.innings.length > 0 
-    ? match.innings[match.currentInnings - 1] 
-    : (match.innings && match.innings.length > 0 ? match.innings[0] : null);
-
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-20">
       <MatchHeader match={match} />
 
-      {currentInnings && <ScoreBoard match={match} currentInnings={currentInnings} />}
+      <ScoreBoard match={match} />
 
       <Tabs defaultValue="scorecard">
         <TabsList className="w-full grid grid-cols-4">
@@ -44,8 +40,8 @@ export default function MatchViewPage() {
         </TabsList>
 
         <TabsContent value="scorecard" className="mt-6 space-y-6">
-          <BattingScorecard match={match} />
-          <BowlingScorecard match={match} />
+          <BattingScorecard scorecard={scorecard} matchId={match.id} />
+          <BowlingScorecard scorecard={scorecard} />
         </TabsContent>
 
         <TabsContent value="info" className="mt-6">
@@ -61,12 +57,12 @@ export default function MatchViewPage() {
         <TabsContent value="stats" className="mt-6">
           <div className="grid grid-cols-2 gap-4">
             <Card className="glass-card p-4 text-center">
-              <p className="text-2xl font-bold text-white">{currentInnings?.partnerships?.[0]?.runs || 0}</p>
+              <p className="text-2xl font-bold text-white">0</p>
               <p className="text-xs text-white/50">Highest Partnership</p>
             </Card>
             <Card className="glass-card p-4 text-center">
               <p className="text-2xl font-bold text-white">
-                {calculateRunRate(currentInnings?.runs || 0, currentInnings?.balls || 0)}
+                {calculateRunRate(match.total_runs || 0, (match.completed_overs || 0) * 6 + (match.balls_in_current_over || 0))}
               </p>
               <p className="text-xs text-white/50">Match Run Rate</p>
             </Card>

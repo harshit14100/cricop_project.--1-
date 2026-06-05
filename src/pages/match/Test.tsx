@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useCreateMatch, useTeams, usePlayers } from "@/hooks";
+import { useSuperSetupMatch, useTeams, usePlayers } from "@/hooks";
 import { useUIStore } from "@/store";
 
 const steps = [
@@ -73,7 +73,7 @@ export default function StartMatchPage() {
 
   const [copied, setCopied] = useState(false);
 
-  const createMatch = useCreateMatch();
+  const createMatch = useSuperSetupMatch();
   const { data: teamsData } = useTeams();
   const { data: playersData } = usePlayers();
 
@@ -208,28 +208,29 @@ export default function StartMatchPage() {
 
   const copyLink = () => {
     navigator.clipboard.writeText(
-      `https://cricop.com/match/${createMatch.data?.id}`,
+      `https://cricop.com/match/${createMatch.data?.match_id}`,
     );
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const shareWhatsApp = () => {
-    const text = `Join me on CricOP for live cricket scoring! https://cricop.com/match/${createMatch.data?.id}`;
+    const text = `Join me on CricOP for live cricket scoring! https://cricop.com/match/${createMatch.data?.match_id}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 
   const players = Array.isArray(playersData)
     ? playersData
     : (playersData as any)?.players || [];
-  const filteredPlayers = players.filter((p: any) =>
+  const filteredPlayers = (players || []).filter((p: any) =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const getTeamName = (teamId: string, defaultName: string) => {
     if (teamId === "new") return defaultName || "New Team";
+    const teams = Array.isArray(teamsData) ? teamsData : [];
     return (
-      (teamsData as any)?.teams?.find((t: any) => (t.team_id || t.id) === teamId)?.name || "Select Team"
+      teams.find((t: any) => (t.team_id || t.id) === teamId)?.name || "Select Team"
     );
   };
 
@@ -368,7 +369,7 @@ export default function StartMatchPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="new">+ Create New Series</SelectItem>
-                      {teamsData?.teams?.length === 0 ? (
+                      {Array.isArray(teamsData) && teamsData.length === 0 ? (
                         <SelectItem value="none" disabled>
                           No series available
                         </SelectItem>
@@ -404,10 +405,10 @@ export default function StartMatchPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="new">+ Create New Team</SelectItem>
-                        {((teamsData as any)?.teams || [])
+                        {(Array.isArray(teamsData) ? teamsData : [])
                           ?.filter((t: any) => (t.team_id || t.id) !== matchData.teamBId)
                           .map((t: any) => (
-                            <SelectItem key={t.team_id || t.id} value={t.team_id || t.id}>
+                            <SelectItem key={t.id} value={t.id}>
                               {t.name}
                             </SelectItem>
                           ))}
@@ -436,10 +437,10 @@ export default function StartMatchPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="new">+ Create New Team</SelectItem>
-                        {((teamsData as any)?.teams || [])
-                          ?.filter((t: any) => (t.team_id || t.id) !== matchData.teamAId)
+                        {(Array.isArray(teamsData) ? teamsData : [])
+                          ?.filter((t: any) => (t.id) !== matchData.teamAId)
                           .map((t: any) => (
-                            <SelectItem key={t.team_id || t.id} value={t.team_id || t.id}>
+                            <SelectItem key={t.id} value={t.id}>
                               {t.name}
                             </SelectItem>
                           ))}
@@ -634,7 +635,7 @@ export default function StartMatchPage() {
                       </h3>
                       <div className="flex flex-wrap gap-1">
                         {teamAPlayerIds.map((id) => {
-                          const p = (playersData as any)?.players.find(
+                          const p = (Array.isArray(playersData) ? playersData : []).find(
                             (pl: any) => pl.id === id,                          );
                           return (
                             <Badge
@@ -669,7 +670,7 @@ export default function StartMatchPage() {
                       </h3>
                       <div className="flex flex-wrap gap-1">
                         {teamBPlayerIds.map((id) => {
-                          const p = (playersData as any)?.players.find(
+                          const p = (Array.isArray(playersData) ? playersData : []).find(
                             (pl: any) => pl.id === id,                          );
                           return (
                             <Badge
@@ -713,7 +714,7 @@ export default function StartMatchPage() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="none">None</SelectItem>
-                          {(playersData as any)?.players.map((p: any) => (
+                          {(Array.isArray(playersData) ? playersData : []).map((p: any) => (
                             <SelectItem key={p.id} value={p.id}>
                               {p.name}
                             </SelectItem>
@@ -851,7 +852,7 @@ export default function StartMatchPage() {
                 <div className="flex items-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10">
                   <Input
                     readOnly
-                    value={`https://cricop.com/match/${createMatch.data?.id || "abc123"}`}
+                    value={`https://cricop.com/match/${createMatch.data?.match_id || "abc123"}`}
                     className="border-0 bg-transparent"
                   />
                   <Button
@@ -880,7 +881,7 @@ export default function StartMatchPage() {
                   <Button
                     onClick={() =>
                       navigate(
-                        `/live-scoring/${(createMatch.data as any)?.data?.id || createMatch.data?.id || "abc123"}`,
+                        `/live-scoring/${createMatch.data?.match_id || "abc123"}`,
                       )
                     }
                   >

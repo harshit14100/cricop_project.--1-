@@ -115,3 +115,17 @@ export function useUpdateProfile() {
     },
   })
 }
+
+export function useResetPassword() {
+  const { addToast } = useUIStore()
+
+  return useMutation({
+    mutationFn: authService.resetPassword,
+    onSuccess: (data: any) => {
+      addToast({ title: 'Success', description: data.message || 'Password updated successfully', variant: 'success' })
+    },
+    onError: (error: any) => {
+      addToast({ title: 'Error', description: error.response?.data?.message || 'Failed to update password', variant: 'error' })
+    },
+  })
+}

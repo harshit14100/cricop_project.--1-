@@ -2,14 +2,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { teamService } from "@/services";
 import { useUIStore } from "@/store";
 
-export function useTeams(params?: {
-  search?: string;
-  page?: number;
-  limit?: number;
-}) {
+export function useTeams() {
   return useQuery({
-    queryKey: ["teams", params],
-    queryFn: () => teamService.getTeams(params),
+    queryKey: ["teams"],
+    queryFn: () => teamService.getTeams(),
   });
 }
 

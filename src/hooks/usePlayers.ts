@@ -3,32 +3,46 @@ import { playerService } from "@/services";
 import { useUIStore } from "@/store";
 import type { Player } from "@/types";
 
-export function usePlayers(_params?: any) {
+import { playerApi } from "../api/player";
+
+export const usePlayers = () => {
   return useQuery({
     queryKey: ["players"],
-    queryFn: async () => {
-      const response = await playerService.getPlayers();
-      return response || { players: [], total: 0 };
-    },
-    staleTime: 60000,
+    queryFn: () => playerApi.getPlayers(),
   });
-}
+};
 
-export function usePlayer(id: string) {
+export const usePlayer = (playerId: string) => {
   return useQuery({
-    queryKey: ["player", id],
-    queryFn: () => playerService.getPlayer(id),
-    enabled: !!id,
+    queryKey: ["player", playerId],
+    queryFn: () => playerApi.getPlayer(playerId),
+    enabled: !!playerId,
   });
-}
+};
 
-export function usePlayerStats(id: string) {
+export const usePlayerStats = (playerId: string) => {
   return useQuery({
-    queryKey: ["player-stats", id],
-    queryFn: () => playerService.getStats(id),
-    enabled: !!id,
+    queryKey: ["player-stats", playerId],
+    queryFn: () => playerApi.getStats(playerId),
+    enabled: !!playerId,
   });
-}
+};
+
+export const usePlayerCareerStats = (playerId: string) => {
+  return useQuery({
+    queryKey: ["player-career-stats", playerId],
+    queryFn: () => playerApi.getPlayerCareerStats(playerId),
+    enabled: !!playerId,
+  });
+};
+
+export const usePlayerMatchStats = (playerId: string, matchId: string) => {
+  return useQuery({
+    queryKey: ["player-match-stats", playerId, matchId],
+    queryFn: () => playerApi.getPlayerMatchStats(playerId, matchId),
+    enabled: !!playerId && !!matchId,
+  });
+};
 
 export function useCreatePlayer() {
   const queryClient = useQueryClient();
@@ -43,7 +57,8 @@ export function useCreatePlayer() {
     onError: (error: any) => {
       addToast({
         title: "Failed to add player",
-        description: error.response?.data?.message || "Check your backend connection",
+        description:
+          error.response?.data?.message || "Check your backend connection",
         variant: "error",
       });
     },

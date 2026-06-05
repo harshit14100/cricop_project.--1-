@@ -5,14 +5,18 @@ export {
   useLogout,
   useProfile,
   useUpdateProfile,
+  useResetPassword,
 } from "./useAuth";
 export {
   useMatches,
   useMatch,
+  useMatchScorecard,
   useLiveMatch,
   useCreateMatch,
+  useSuperSetupMatch,
   useSetToss,
   useStartMatch,
+  useUpdateMatchState,
 } from "./useMatches";
 export { useLiveMatches } from "./useLiveMatch";
 export {
@@ -30,6 +34,8 @@ export {
   usePlayers,
   usePlayer,
   usePlayerStats,
+  usePlayerCareerStats,
+  usePlayerMatchStats,
   useCreatePlayer,
 } from "./usePlayers";
 export {

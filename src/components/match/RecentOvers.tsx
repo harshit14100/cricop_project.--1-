@@ -7,10 +7,7 @@ interface RecentOversProps {
 }
 
 export function RecentOvers({ match }: RecentOversProps) {
-  const currentInnings = match.innings && match.innings.length > 0
-    ? match.innings[match.currentInnings - 1]
-    : null;
-
+  const totalBalls = (match.completed_overs || 0) * 6 + (match.balls_in_current_over || 0);
   const ballsInCurrentOver = match.balls_in_current_over || 0;
   
   // Mock recent balls
@@ -21,7 +18,7 @@ export function RecentOvers({ match }: RecentOversProps) {
       <div className="flex items-center justify-between">
         <h3 className="text-[9px] sm:text-[10px] font-bold text-white/30 uppercase tracking-widest">Recent Balls</h3>
         <span className="text-[9px] sm:text-[10px] font-bold text-electric uppercase tracking-widest bg-electric/5 px-2 py-0.5 rounded-full">
-          Over {Math.floor((currentInnings?.balls || 0) / 6)}
+          Over {Math.floor(totalBalls / 6)}
         </span>
       </div>
       

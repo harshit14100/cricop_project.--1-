@@ -39,7 +39,7 @@ export const useScoringStore = create<ScoringStore>()((set) => ({
   ...initialState,
 
   setMatch: (match) => {
-    const innings = match.innings[match.currentInnings - 1];
+    const innings = match.innings?.[match.currentInnings - 1];
     set({
       currentMatch: match,
       isScoring: match.status === "live",

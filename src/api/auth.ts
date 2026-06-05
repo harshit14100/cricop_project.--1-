@@ -50,19 +50,18 @@ export const authApi = {
   },
 
   async logout() {
-    await client.post("/auth/logout");
     useAuthStore.getState().logout();
     return true;
   },
 
   async getProfile() {
-    const response = await client.get("/users/me");
-    return response.data;
+    const response = await client.get<any>("/users/me");
+    return response.data?.data || response.data;
   },
 
   async updateProfile(data: any) {
-    const response = await client.put("/users/me", data);
-    return response.data;
+    const response = await client.put<any>("/users/me", data);
+    return response.data?.data || response.data;
   },
 
   async resetPassword(data: any) {

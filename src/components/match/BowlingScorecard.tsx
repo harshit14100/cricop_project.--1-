@@ -1,17 +1,12 @@
-import { Match } from "@/types";
+import { Scorecard } from "@/types";
 import { Card } from "@/components/ui/card";
-import { formatOvers, calculateEconomy, cn } from "@/lib/utils";
 
 interface BowlingScorecardProps {
-  match: Match;
+  scorecard?: Scorecard;
 }
 
-export function BowlingScorecard({ match }: BowlingScorecardProps) {
-  const currentInnings = match.innings && match.innings.length > 0
-    ? match.innings[match.currentInnings - 1]
-    : null;
-
-  const bowlers = currentInnings?.bowlers || [];
+export function BowlingScorecard({ scorecard }: BowlingScorecardProps) {
+  const bowlers = scorecard?.bowling || [];
 
   return (
     <Card className="glass-card overflow-hidden">
@@ -24,40 +19,30 @@ export function BowlingScorecard({ match }: BowlingScorecardProps) {
             <tr className="text-[10px] font-bold text-white/40 uppercase tracking-widest border-b border-white/5">
               <th className="px-2 sm:px-4 py-3">Bowler</th>
               <th className="px-2 sm:px-4 py-3 text-right">O</th>
-              <th className="px-2 sm:px-4 py-3 text-right">M</th>
               <th className="px-2 sm:px-4 py-3 text-right">R</th>
               <th className="px-2 sm:px-4 py-3 text-right">W</th>
-              <th className="px-2 sm:px-4 py-3 text-right">ECON</th>
+              <th className="px-2 sm:px-4 py-3 text-right">Econ</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
             {bowlers.map((bowler) => {
-              const isCurrent = bowler.playerId === match.current_bowler_id;
+              const econ = bowler.overs_bowled > 0 ? (bowler.runs_conceded / bowler.overs_bowled).toFixed(2) : "0.00";
               
               return (
-                <tr key={bowler.playerId} className={cn(
-                  "text-sm transition-colors",
-                  isCurrent ? "bg-electric/5" : "hover:bg-white/5"
-                )}>
+                <tr key={bowler.player_id} className="text-sm transition-colors hover:bg-white/5">
                   <td className="px-2 sm:px-4 py-3">
-                    <span className={cn(
-                      "font-medium truncate block min-w-[120px]",
-                      isCurrent ? "text-electric" : "text-white"
-                    )}>
-                      {bowler.playerName || bowler.playerId} {isCurrent && "●"}
-                    </span>
+                    <span className="font-medium text-white">{bowler.player_name}</span>
                   </td>
-                  <td className="px-2 sm:px-4 py-3 text-right text-white font-medium">{formatOvers(bowler.balls)}</td>
-                  <td className="px-2 sm:px-4 py-3 text-right text-white/60">{bowler.maidens || 0}</td>
-                  <td className="px-2 sm:px-4 py-3 text-right text-white/60">{bowler.runs}</td>
+                  <td className="px-2 sm:px-4 py-3 text-right text-white/60">{bowler.overs_bowled}</td>
+                  <td className="px-2 sm:px-4 py-3 text-right text-white/60">{bowler.runs_conceded}</td>
                   <td className="px-2 sm:px-4 py-3 text-right font-bold text-white">{bowler.wickets}</td>
-                  <td className="px-2 sm:px-4 py-3 text-right text-white/40">{calculateEconomy(bowler.runs, bowler.balls)}</td>
+                  <td className="px-2 sm:px-4 py-3 text-right text-white/40">{econ}</td>
                 </tr>
               );
             })}
             {bowlers.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-white/40 italic">
+                <td colSpan={5} className="px-4 py-8 text-center text-white/40 italic">
                   No bowling data available yet
                 </td>
               </tr>

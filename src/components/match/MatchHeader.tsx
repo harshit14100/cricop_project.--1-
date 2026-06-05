@@ -46,13 +46,13 @@ export function MatchHeader({ match }: MatchHeaderProps) {
             className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-lg sm:text-xl font-bold text-white shadow-lg shrink-0"
             style={{ backgroundColor: match.teamA?.color || "#3b5bdb" }}
           >
-            {(match.teamA?.short_name || match.team_1_name || "T1")?.[0]?.toUpperCase() || "T"}
+            {(match.team_1_name || "T1")?.[0]?.toUpperCase() || "T"}
           </div>
           <div className="text-center sm:text-left min-w-0">
             <h1 className="text-sm sm:text-xl font-bold text-white truncate px-1">
-              {match.teamA?.name || match.team_1_name || "Team 1"}
+              {match.team_1_name || "Team 1"}
             </h1>
-            <p className="text-[10px] sm:text-sm text-white/40 uppercase tracking-tighter">Team A</p>
+            <p className="text-[10px] sm:text-sm text-white/40 uppercase tracking-tighter">Team 1</p>
           </div>
         </div>
 
@@ -64,15 +64,15 @@ export function MatchHeader({ match }: MatchHeaderProps) {
         <div className="flex flex-col-reverse items-center sm:flex-row sm:text-right gap-2 sm:gap-4 flex-1 min-w-0">
           <div className="text-center sm:text-right min-w-0">
             <h1 className="text-sm sm:text-xl font-bold text-white truncate px-1">
-              {match.teamB?.name || match.team_2_name || "Team 2"}
+              {match.team_2_name || "Team 2"}
             </h1>
-            <p className="text-[10px] sm:text-sm text-white/40 uppercase tracking-tighter">Team B</p>
+            <p className="text-[10px] sm:text-sm text-white/40 uppercase tracking-tighter">Team 2</p>
           </div>
           <div 
             className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-lg sm:text-xl font-bold text-white shadow-lg shrink-0"
             style={{ backgroundColor: match.teamB?.color || "#4263eb" }}
           >
-            {(match.teamB?.short_name || match.team_2_name || "T2")?.[0]?.toUpperCase() || "T"}
+            {(match.team_2_name || "T2")?.[0]?.toUpperCase() || "T"}
           </div>
         </div>
       </div>

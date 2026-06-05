@@ -6,14 +6,32 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { usePlayer, usePlayerStatistics } from '@/hooks'
+import { usePlayer, usePlayerCareerStats } from '@/hooks'
+import { LoadingScreen } from '@/components/shared/LoadingScreen'
+import { ErrorState } from '@/components/shared/ErrorState'
 
 export default function PlayerProfilePage() {
-  const { playerId } = useParams<{ playerId: string }>()
-  const { data: player } = usePlayer(playerId || '')
-  const { data: stats } = usePlayerStatistics(playerId || '')
+  const { playerId } = useParams<{ playerId: string }>();
+  
+  const { data: player, isLoading: playerLoading, error: playerError } = usePlayer(playerId || '')
+  const { data: stats } = usePlayerCareerStats(playerId || '')
 
-  if (!player) return null
+  if (playerLoading) return <LoadingScreen />
+
+  if (playerError || !player) {
+    return (
+      <div className="p-8">
+        <ErrorState 
+          title="Player Not Found"
+          description="We couldn't find the player you're looking for. They might have been deleted or the ID is incorrect."
+        />
+
+        <div className="mt-4 text-center">
+          <Button onClick={() => window.history.back()}>Go Back</Button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">

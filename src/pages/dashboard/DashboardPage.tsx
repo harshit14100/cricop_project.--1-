@@ -40,18 +40,13 @@ export default function DashboardPage() {
     navigate("/start-match");
   };
 
-  const { data: matchesData, isLoading: matchesLoading } = useMatches({
-    limit: 10,
-  });
+  const { data: matchesData, isLoading: matchesLoading } = useMatches();
   const { data: statsData, isLoading: statsLoading } = useDashboardStats();
-  const { data: playersData, isLoading: playersLoading } = usePlayers({
-    limit: 5,
-  });
+  const { data: playersData, isLoading: playersLoading } = usePlayers();
 
-  const matchesRaw = Array.isArray(matchesData)
-    ? matchesData
-    : (matchesData as any)?.matches || [];
-  const matches = Array.isArray(matchesRaw) ? matchesRaw : [];
+  const matches = Array.isArray(matchesData) ? matchesData : [];
+  const players = Array.isArray(playersData) ? playersData : [];
+  const topPlayers = players.slice(0, 5);
 
   const liveMatches = matches.filter((m: any) => m.status === "live");
   const liveMatchQueries = useLiveMatches(liveMatches.map((m: any) => m.id));
@@ -70,12 +65,6 @@ export default function DashboardPage() {
   );
 
   const upcomingMatches = matches.filter((m) => m.status === "scheduled");
-
-  const playersRaw = Array.isArray(playersData)
-    ? playersData
-    : (playersData as any)?.players || [];
-  const players = Array.isArray(playersRaw) ? playersRaw : [];
-  const topPlayers = players.slice(0, 5);
 
   return (
     <div className="space-y-8">

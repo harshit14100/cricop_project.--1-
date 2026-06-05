@@ -23,13 +23,15 @@ export function PlayerCard({
   trend,
   index = 0,
 }: PlayerCardProps) {
+  const playerId = player?.id || (player as any)?.playerId || (player as any)?._id;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
     >
-      <Link to={`/player/${player.id}`} className="block w-full">
+      <Link to={`/player/${playerId}`} className="block w-full">
         <Card className="glass-card-hover p-4 cursor-pointer group">
           <div className="flex items-center gap-4">
             {rank && (

@@ -11,12 +11,14 @@ interface MatchScorecardProps {
 export function MatchScorecard({ match }: MatchScorecardProps) {
   const [expandedInnings, setExpandedInnings] = useState<number>(match.currentInnings)
 
+  const innings = match.innings || [];
+
   return (
     <div className="space-y-4">
-      {match.innings.map((innings, idx) => (
+      {innings.map((inn, idx) => (
         <InningsCard 
           key={idx}
-          innings={innings}
+          innings={inn}
           inningsNumber={idx + 1}
           isExpanded={expandedInnings === idx + 1}
           onToggle={() => setExpandedInnings(expandedInnings === idx + 1 ? 0 : idx + 1)}
@@ -24,7 +26,7 @@ export function MatchScorecard({ match }: MatchScorecardProps) {
         />
       ))}
       
-      {match.innings.length === 0 && (
+      {innings.length === 0 && (
         <div className="glass-card p-8 text-center">
           <p className="text-white/40">No innings data available yet.</p>
         </div>

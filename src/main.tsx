@@ -7,9 +7,11 @@ import router from '@/routes'
 import './index.css'
 
 // Enable mock API for development/demo
-// Remove this when connecting to a real backend
+// Set VITE_USE_MOCK_API=true in .env to use mock data
 import { setupMockAPI } from '@/services/mockApi'
-setupMockAPI()
+if (import.meta.env.VITE_USE_MOCK_API === 'true') {
+  setupMockAPI()
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {

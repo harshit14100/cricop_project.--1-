@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { useCreateMatch, useTeams, usePlayers } from "@/hooks";
+import { useSuperSetupMatch, useTeams, usePlayers } from "@/hooks";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/store";
 
@@ -70,7 +70,7 @@ export default function StartMatchPage() {
 
   const [copied, setCopied] = useState(false);
 
-  const createMatch = useCreateMatch();
+  const createMatch = useSuperSetupMatch();
   const { data: teamsData } = useTeams();
   const { data: playersData } = usePlayers();
   const { addToast } = useUIStore();
@@ -78,8 +78,8 @@ export default function StartMatchPage() {
   // Pre-fill players when team is selected
   useEffect(() => {
     if (matchData.teamAId && matchData.teamAId !== "new") {
-      const teamA = (teamsData as any)?.teams?.find(
-        (t: any) => (t.team_id || t.id) === matchData.teamAId,
+      const teamA = (teamsData as any)?.find(
+        (t: any) => t.id === matchData.teamAId,
       );
       if (teamA?.players) {
         setTeamAPlayerIds(
@@ -91,8 +91,8 @@ export default function StartMatchPage() {
 
   useEffect(() => {
     if (matchData.teamBId && matchData.teamBId !== "new") {
-      const teamB = (teamsData as any)?.teams?.find(
-        (t: any) => (t.team_id || t.id) === matchData.teamBId,
+      const teamB = (teamsData as any)?.find(
+        (t: any) => t.id === matchData.teamBId,
       );
       if (teamB?.players) {
         setTeamBPlayerIds(
@@ -242,14 +242,14 @@ export default function StartMatchPage() {
 
   const copyLink = () => {
     navigator.clipboard.writeText(
-      `https://cricop.com/match/${createMatch.data?.id}`,
+      `https://cricop.com/match/${createMatch.data?.match_id}`,
     );
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const shareWhatsApp = () => {
-    const text = `Join me on CricOP for live cricket scoring! https://cricop.com/match/${createMatch.data?.id}`;
+    const text = `Join me on CricOP for live cricket scoring! https://cricop.com/match/${createMatch.data?.match_id}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   };
 
@@ -276,14 +276,14 @@ export default function StartMatchPage() {
   };
 
   const teamAName =
-    (teamsData as any)?.teams?.find(
-      (t: any) => (t.team_id || t.id) === matchData.teamAId,
+    (teamsData as any)?.find(
+      (t: any) => t.id === matchData.teamAId,
     )?.name ||
     newTeamA ||
     "Team A";
   const teamBName =
-    (teamsData as any)?.teams?.find(
-      (t: any) => (t.team_id || t.id) === matchData.teamBId,
+    (teamsData as any)?.find(
+      (t: any) => t.id === matchData.teamBId,
     )?.name ||
     newTeamB ||
     "Team B";
@@ -451,7 +451,7 @@ export default function StartMatchPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="new">Custom Team Name</SelectItem>
-                        {((teamsData as any)?.teams || [])
+                        {((teamsData as any) || [])
                           ?.filter(
                             (t: any) =>
                               (t.team_id || t.id) !== matchData.teamBId,
@@ -490,7 +490,7 @@ export default function StartMatchPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="new">Custom Team Name</SelectItem>
-                        {((teamsData as any)?.teams || [])
+                        {((teamsData as any) || [])
                           ?.filter(
                             (t: any) =>
                               (t.team_id || t.id) !== matchData.teamAId,
@@ -929,8 +929,8 @@ export default function StartMatchPage() {
                   <Input
                     readOnly
                     value={
-                      createMatch.data?.id
-                        ? `https://cricop.com/match/${createMatch.data.id}`
+                      createMatch.data?.match_id
+                        ? `https://cricop.com/match/${createMatch.data.match_id}`
                         : "Generating link..."
                     }
                     className="border-0 bg-transparent"

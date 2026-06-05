@@ -10,6 +10,7 @@ const SplashScreen = lazy(() => import("@/pages/SplashScreen"));
 const LoginPage = lazy(() => import("@/pages/auth/LoginPage"));
 const SignupPage = lazy(() => import("@/pages/auth/SignupPage"));
 const ForgotPasswordPage = lazy(() => import("@/pages/auth/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("@/pages/auth/ResetPasswordPage"));
 const DashboardPage = lazy(() => import("@/pages/dashboard/DashboardPage"));
 const StartMatchPage = lazy(() => import("@/pages/match/StartMatchPage"));
 const LiveScoringPage = lazy(() => import("@/pages/scoring/LiveScoringPage"));
@@ -58,6 +59,16 @@ const router = createBrowserRouter([
       <AuthLayout>
         <Suspense fallback={<LoadingScreen />}>
           <ForgotPasswordPage />
+        </Suspense>
+      </AuthLayout>
+    ),
+  },
+  {
+    path: "/reset-password",
+    element: (
+      <AuthLayout>
+        <Suspense fallback={<LoadingScreen />}>
+          <ResetPasswordPage />
         </Suspense>
       </AuthLayout>
     ),

@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useLiveMatch } from "@/hooks";
+import { useLiveMatch, useMatchScorecard } from "@/hooks";
 import { LoadingScreen } from "@/components/shared/LoadingScreen";
 import { ErrorState } from "@/components/shared/ErrorState";
 import { MatchHeader } from "@/components/match/MatchHeader";
@@ -14,9 +14,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export default function LiveMatchPage() {
   const { matchId } = useParams<{ matchId: string }>();
   const { data: match, isLoading, error } = useLiveMatch(matchId || "");
+  const { data: scorecard } = useMatchScorecard(matchId || "");
 
   if (isLoading) return <LoadingScreen />;
-  if (error || !match) return <ErrorState message="Could not load live match details." />;
+  if (error || !match) return <ErrorState title="Error" description="Could not load live match details." />;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-20">
@@ -38,7 +39,7 @@ export default function LiveMatchPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <BattingScorecard match={match} />
+            <BattingScorecard scorecard={scorecard} matchId={match.id} />
           </motion.div>
           
           <motion.div
@@ -46,7 +47,7 @@ export default function LiveMatchPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <BowlingScorecard match={match} />
+            <BowlingScorecard scorecard={scorecard} />
           </motion.div>
         </TabsContent>
 

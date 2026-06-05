@@ -1,82 +1,90 @@
 import client from "./client";
-import type { Match, CreateMatchPayload } from "@/types";
+import type { Match, Scorecard } from "@/types";
+
+export interface CreateMatchPayload {
+  team1_id: string;
+  team2_id: string;
+  venue: string;
+  overs: number;
+  players_per_team: number;
+}
+
+export interface SuperSetupPayload extends CreateMatchPayload {
+  team1_players: string[];
+  team2_players: string[];
+  toss_winner_id: string;
+  toss_decision: "bat" | "bowl";
+  batting_team_id: string;
+  bowling_team_id: string;
+  striker_id: string;
+  non_striker_id: string;
+  current_bowler_id: string;
+}
 
 interface TossData {
   matchId: string;
-  winner_team_id: string;
-  choice: "bat" | "bowl";
+  toss_winner_id: string;
+  toss_decision: "bat" | "bowl";
 }
 
 export const matchApi = {
-  getMatches: async (params?: {
-    status?: string;
-    page?: number;
-    limit?: number;
-  }): Promise<{ matches: Match[]; total: number }> => {
-    const response = await client.get<any>("/users/matches", { params });
+  getMatches: async (): Promise<Match[]> => {
+    const response = await client.get<any>("/users/matches");
     const data = response.data;
-
-    if (Array.isArray(data)) {
-      return { matches: data, total: data.length };
-    }
-
-    const mainData = data.data || data;
-    const matches =
-      mainData.matches || (Array.isArray(mainData) ? mainData : []);
-    const total = mainData.total || matches.length;
-
-    return { matches, total };
+    if (Array.isArray(data)) return data;
+    return data?.data || [];
   },
 
   getMatch: async (id: string): Promise<Match> => {
     const { data } = await client.get(`/users/matches/${id}`);
-    return data.data ?? data;
+    const match = data.data ?? data;
+    // Handle inconsistent naming from backend MatchDetailsResponse
+    if (match.match_id && !match.id) match.id = match.match_id;
+    if (match.team1_name && !match.team_1_name) match.team_1_name = match.team1_name;
+    if (match.team2_name && !match.team_2_name) match.team_2_name = match.team2_name;
+    return match;
   },
 
-  createMatch: async (payload: CreateMatchPayload) => {
+  createMatch: async (payload: CreateMatchPayload): Promise<{ message: string; id: string }> => {
+    const response = await client.post("/users/matches", payload);
+    return response.data;
+  },
+
+  superSetupMatch: async (payload: SuperSetupPayload): Promise<{ message: string; match_id: string }> => {
     const response = await client.post("/users/matches/setup", payload);
     return response.data;
   },
 
-  updateMatch: async (
-    id: string,
-    matchData: Partial<Match>,
-  ): Promise<Match> => {
-    const { data } = await client.put(`/users/matches/${id}`, matchData);
-    return data.data ?? data;
-  },
-
-  deleteMatch: async (id: string): Promise<void> => {
-    await client.delete(`/users/matches/${id}`);
-  },
-
-  setToss: async (tossData: TossData): Promise<any> => {
+  setToss: async (tossData: TossData): Promise<{ message: string }> => {
+    // Backend route uses :matchid but handler uses c.Param("id") which is a mismatch.
+    // We'll use matchid to match the route, but this might still fail in the backend.
     const { data } = await client.post(
       `/users/matches/${tossData.matchId}/toss`,
       {
-        toss_winner_id: tossData.winner_team_id,
-        toss_decision: tossData.choice,
+        toss_winner_id: tossData.toss_winner_id,
+        toss_decision: tossData.toss_decision,
       },
     );
     return data;
   },
 
-  startMatch: async (matchId: string) => {
-    const { data } = await client.post(`/users/matches/start`, {
-      match_id: matchId,
-    });
-    return data;
-  },
-
   getLiveMatch: async (matchId: string): Promise<Match> => {
-    const response = await client.get(`/users/matches/${matchId}/live`);
-    return response.data.data ?? response.data;
+    const response = await client.get<any>(`/users/matches/${matchId}/live`);
+    const match = response.data?.data || response.data;
+    // Handle inconsistent naming from backend LiveMatchStateResponse
+    if (match.match_id && !match.id) match.id = match.match_id;
+    if (match.team_1_name && !match.team_1_name) match.team_1_name = match.team_1_name; // redundancy for clarity
+    if (match.team_2_name && !match.team_2_name) match.team_2_name = match.team_2_name;
+    return match;
   },
 
-  getShareableLink: async (matchId: string): Promise<string> => {
-    const { data } = await client.get<{ link: string }>(
-      `/users/matches/${matchId}/share`,
-    );
-    return data.link;
+  getMatchScorecard: async (matchId: string): Promise<Scorecard> => {
+    const response = await client.get<any>(`/users/matches/${matchId}/scorecard`);
+    return response.data?.data || response.data;
+  },
+
+  updateMatchState: async (matchId: string, payload: { striker_id?: string; non_striker_id?: string; current_bowler_id?: string }): Promise<{ message: string }> => {
+    const response = await client.patch(`/users/matches/${matchId}/state`, payload);
+    return response.data;
   },
 };

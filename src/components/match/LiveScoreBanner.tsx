@@ -8,15 +8,18 @@ interface LiveScoreBannerProps {
 }
 
 export function LiveScoreBanner({ match }: LiveScoreBannerProps) {
-  const currentInnings = match.innings && match.innings.length > 0
-    ? match.innings[match.currentInnings - 1]
+  const currentInningIndex = (match.inning_number || match.currentInnings || 1) - 1;
+  const currentInnings = match.innings && match.innings.length > currentInningIndex
+    ? match.innings[currentInningIndex]
     : null;
 
-  const runs = currentInnings?.runs ?? match.total_runs ?? 0;
-  const wickets = currentInnings?.wickets ?? match.wickets ?? 0;
-  const balls = currentInnings?.balls ?? ((match.completed_overs || 0) * 6 + (match.balls_in_current_over || 0));
+  const runs = match.total_runs ?? currentInnings?.runs ?? 0;
+  const wickets = match.wickets ?? currentInnings?.wickets ?? 0;
+  const balls = (match.completed_overs || 0) * 6 + (match.balls_in_current_over || 0);
   
-  const battingTeamName = match.batting_team_name || (currentInnings?.battingTeam === match.team1_id ? match.team_1_name : match.team_2_name) || "Batting Team";
+  const battingTeamName = match.batting_team_name || 
+    (currentInnings?.battingTeam === match.team1_id ? match.team_1_name : match.team_2_name) || 
+    "Batting Team";
 
   return (
     <motion.div

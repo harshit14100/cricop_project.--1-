@@ -17,58 +17,6 @@ export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
 }
-export interface Team {
-  id: string;
-  team_id?: string; // Alias for backward compatibility
-  name: string;
-
-  short_name?: string;
-  shortName?: string; // Alias for backward compatibility
-  logo?: string;
-  color?: string;
-
-  players?: Player[];
-
-  captain_id?: string;
-  wicket_keeper_id?: string;
-
-  created_by?: string;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export interface Player {
-  id: string;
-  name: string;
-  phone_no?: string;
-  avatar?: string;
-  battingStyle?: "right-handed" | "left-handed";
-  bowlingStyle?:
-    | "right-arm-fast"
-    | "right-arm-medium"
-    | "right-arm-spin"
-    | "left-arm-fast"
-    | "left-arm-spin"
-    | "right-arm-offbreak"
-    | "right-arm-legbreak"
-    | "left-arm-orthodox"
-    | "left-arm-chinaman";
-  isCaptain?: boolean;
-  isWicketKeeper?: boolean;
-  stats?: PlayerStats;
-}
-
-export interface Series {
-  id: string;
-  name: string;
-  description?: string;
-  type?: string;
-  teams?: string[];
-  matches?: string[];
-  status?: string;
-  startDate?: string;
-  endDate?: string;
-}
 
 export interface PlayerStats {
   matches?: number;
@@ -90,121 +38,128 @@ export interface PlayerStats {
   fours?: number;
 }
 
-export type MatchStatus =
-  | "scheduled"
-  | "live"
-  | "completed"
-  | "cancelled"
-  | "upcoming";
-export type TossDecision = "bat" | "bowl";
+export interface Team {
+  id: string;
+  team_id?: string; // Compatibility
+  name: string;
+  short_name?: string;
+  shortName?: string; // Compatibility
+  logo?: string;
+  color?: string;
+  players?: Player[];
+  captain_id?: string;
+  wicket_keeper_id?: string;
+  created_by?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Player {
+  id: string;
+  name: string;
+  phone_no?: string;
+  avatar?: string;
+  battingStyle?: "right-handed" | "left-handed";
+  bowlingStyle?: string;
+  isCaptain?: boolean;
+  isWicketKeeper?: boolean;
+  stats?: PlayerStats;
+}
+
+export interface Series {
+  id: string;
+  name: string;
+  description?: string;
+  type?: string;
+  teams?: string[];
+  matches?: string[];
+  status?: string;
+  startDate?: string;
+  endDate?: string;
+}
 
 export interface Match {
   id: string;
-  host_user_id: string | null;
+  status: "scheduled" | "live" | "completed" | "upcoming";
   team1_id: string;
-  team_1_name: string;
   team2_id: string;
+  team_1_name: string;
   team_2_name: string;
-  venue: string | null;
+  venue: string;
   overs: number;
-  players_per_team: number;
-  status: MatchStatus;
-  toss_winner_id: string | null;
-  toss_decision: TossDecision | null;
-  winner_team_id: string | null;
-  man_of_match_id: string | null;
-  worst_player_id: string | null;
-  started_at: string | null; // ISO Date String
-  ended_at: string | null; // ISO Date String
-  created_at: string; // ISO Date String
-  updated_at: string; // ISO Date String
-
-  // Frontend-specific extensions (often joined by backend)
-  teamA?: Team;
-  teamB?: Team;
-  innings: Innings[];
   currentInnings: number;
-  seriesName?: string;
-  matchType?: "t20" | "odi" | "test" | "custom";
-  shareableLink?: string;
-
-  // Live scoring fields
-  batting_team_name?: string;
-  bowling_team_name?: string;
   total_runs?: number;
   wickets?: number;
-  completed_overs?: number;
-  balls_in_current_over?: number;
+  batting_team_id?: string;
+  batting_team_name?: string;
+  players_per_team?: number;
+  host_user_id?: string | null;
+  
+  // Fields for backward compatibility
+  seriesName?: string;
+  matchType?: string;
+  started_at?: string;
+  ended_at?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  toss_winner_id?: string | null;
+  toss_decision?: string | null;
+  winner_team_id?: string | null;
+  man_of_match_id?: string | null;
+  worst_player_id?: string | null;
+
+  // Extended fields for live view
+  bowling_team_name?: string;
   striker_name?: string;
   non_striker_name?: string;
+  current_bowler_name?: string;
+  inning_number?: number;
+  inning_id?: string;
+  completed_overs?: number;
+  balls_in_current_over?: number;
+  display_overs?: number;
 
   striker_id?: string;
   non_striker_id?: string;
   current_bowler_id?: string;
+
+  teamA?: Team;
+  teamB?: Team;
+  innings?: Innings[];
 }
 
-export interface SuperStartMatchPayload {
-  team1_id: string;
-  team2_id: string;
-
-  venue: string;
-  overs: number;
-
-  team1_players: string[];
-  team2_players: string[];
-
-  toss_winner_id: string;
-  toss_decision: "bat" | "bowl";
-
-  batting_team_id: string;
-  bowling_team_id: string;
-
+export interface DeliveryPayload {
   striker_id: string;
   non_striker_id: string;
-
-  current_bowler_id: string;
+  bowler_id: string;
+  runs_bat: number;
+  extras: number;
+  extra_type: "wide" | "no-ball" | "bye" | "leg-bye" | null;
+  wicket: boolean;
+  wicket_type: "bowled" | "caught" | "run-out" | "lbw" | "stumped" | "hit-wicket" | "retired" | null;
+  fielder_id: string | null;
+  player_out_id: string | null;
+  is_free_hit: boolean;
 }
 
-export interface StartMatchPayload {
-  team1_id: string;
-  team2_id: string;
-
-  venue: string;
-  overs: number;
-
-  toss_winner_id: string;
-  toss_decision: "bat" | "bowl";
-
-  batting_team_id: string;
-  bowling_team_id: string;
-
-  striker_id: string;
-  non_striker_id: string;
-
-  current_bowler_id: string;
-}
-
-export interface CreateMatchPayload {
-  team1_id: string;
-  team2_id: string;
-
-  venue: string;
-  overs: number;
-  players_per_team: number;
-
-  team1_players: string[];
-  team2_players: string[];
-
-  toss_winner_id: string;
-  toss_decision: "bat" | "bowl";
-
-  batting_team_id: string;
-  bowling_team_id: string;
-
-  striker_id: string;
-  non_striker_id: string;
-
-  current_bowler_id: string;
+export interface Scorecard {
+  match_id: string;
+  batting: {
+    player_id: string;
+    player_name: string;
+    runs: number;
+    balls_faced: number;
+    fours: number;
+    sixes: number;
+    is_out: boolean;
+  }[];
+  bowling: {
+    player_id: string;
+    player_name: string;
+    overs_bowled: number;
+    runs_conceded: number;
+    wickets: number;
+  }[];
 }
 
 export interface Innings {

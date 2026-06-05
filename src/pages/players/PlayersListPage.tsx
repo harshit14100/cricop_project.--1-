@@ -65,12 +65,9 @@ export default function PlayersListPage() {
     );
   };
 
-  const { data, isLoading, error: fetchError } = usePlayers({
-    search,
-    limit: 100,
-  });
+  const { data, isLoading, error: fetchError } = usePlayers();
 
-  const players = Array.isArray(data) ? data : data?.players || [];
+  const players = Array.isArray(data) ? data : [];
   const filteredPlayers = players.filter((p: any) => 
     p?.name?.toLowerCase().includes(search.toLowerCase())
   );

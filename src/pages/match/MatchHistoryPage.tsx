@@ -26,14 +26,13 @@ export default function MatchHistoryPage() {
   const [filter, setFilter] = useState('all')
   const { data, isLoading } = useMatches()
 
-  const matchesRaw = Array.isArray(data) ? data : (data as any)?.matches || [];
-  const matches = Array.isArray(matchesRaw) ? matchesRaw : [];
+  const matches = Array.isArray(data) ? data : [];
   
   const filtered = matches.filter(m => {
     if (filter !== 'all' && m.status !== filter) return false
-    const teamAName = m.teamA?.name.toLowerCase() || "";
-    const teamBName = m.teamB?.name.toLowerCase() || "";
-    if (search && !teamAName.includes(search.toLowerCase()) && !teamBName.includes(search.toLowerCase())) return false
+    const team1Name = m.team_1_name?.toLowerCase() || "";
+    const team2Name = m.team_2_name?.toLowerCase() || "";
+    if (search && !team1Name.includes(search.toLowerCase()) && !team2Name.includes(search.toLowerCase())) return false
     return true
   })
 
