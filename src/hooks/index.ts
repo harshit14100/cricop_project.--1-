@@ -11,11 +11,13 @@ export {
   useMatches,
   useMatch,
   useMatchScorecard,
+  useMatchPlayers,
   useLiveMatch,
   useCreateMatch,
   useSuperSetupMatch,
   useSetToss,
   useStartMatch,
+  useStartInning,
   useUpdateMatchState,
 } from "./useMatches";
 export { useLiveMatches } from "./useLiveMatch";

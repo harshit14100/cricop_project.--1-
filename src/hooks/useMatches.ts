@@ -112,6 +112,15 @@ export function useMatchScorecard(id: string) {
   })
 }
 
+export function useMatchPlayers(id: string) {
+  return useQuery({
+    queryKey: ['match-players', id],
+    queryFn: () => matchService.getMatchPlayers(id),
+    enabled: !!id,
+    staleTime: 60000,
+  })
+}
+
 export function useUpdateMatchState() {
   const queryClient = useQueryClient()
   const { addToast } = useUIStore()
@@ -125,6 +134,26 @@ export function useUpdateMatchState() {
     },
     onError: (error: any) => {
       addToast({ title: 'Error', description: error.response?.data?.message, variant: 'error' })
+    },
+  })
+}
+
+export function useStartInning() {
+  const queryClient = useQueryClient()
+  const { addToast } = useUIStore()
+
+  return useMutation({
+    mutationFn: ({ matchId, payload }: { matchId: string; payload: any }) => 
+      matchService.startInning(matchId, payload),
+    onSuccess: (data: any, variables) => {
+      const matchId = variables.matchId;
+      queryClient.invalidateQueries({ queryKey: ['match', matchId] })
+      queryClient.invalidateQueries({ queryKey: ['live-match', matchId] })
+      addToast({ title: 'Inning started!', variant: 'success' })
+      return data
+    },
+    onError: (error: any) => {
+      addToast({ title: 'Failed to start inning', description: error.response?.data?.message, variant: 'error' })
     },
   })
 }

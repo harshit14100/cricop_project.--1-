@@ -10,6 +10,14 @@ export const playerApi = {
     return response.data?.data || [];
   },
 
+  getPlayer: async (playerId: string): Promise<Player | null> => {
+    // Temporary workaround: fetch all players and find the match
+    // Ideal fix: Backend should add a `GET /users/players/:id` endpoint
+    const response = await client.get<{ data: Player[] }>("/users/players");
+    const players = response.data?.data || [];
+    return players.find((p) => p.id === playerId) || null;
+  },
+
 
 
   getPlayerCareerStats: async (playerId: string): Promise<PlayerStats> => {

@@ -83,8 +83,18 @@ export const matchApi = {
     return response.data?.data || response.data;
   },
 
+  getMatchPlayers: async (matchId: string): Promise<any[]> => {
+    const response = await client.get<any>(`/users/matches/${matchId}/players`);
+    return response.data?.data || response.data || [];
+  },
+
   updateMatchState: async (matchId: string, payload: { striker_id?: string; non_striker_id?: string; current_bowler_id?: string }): Promise<{ message: string }> => {
     const response = await client.patch(`/users/matches/${matchId}/state`, payload);
+    return response.data;
+  },
+
+  startInning: async (matchId: string, payload: { inning_number: number; batting_team_id: string; bowling_team_id: string }): Promise<{ message: string; inning_id: string }> => {
+    const response = await client.post(`/users/matches/${matchId}/innings`, payload);
     return response.data;
   },
 };

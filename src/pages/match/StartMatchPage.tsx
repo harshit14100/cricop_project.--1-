@@ -212,8 +212,9 @@ export default function StartMatchPage() {
   };
 
   const togglePlayer = (playerId: string, team: "A" | "B") => {
+    const isCommon = playerId === commonPlayerId;
     if (team === "A") {
-      if (teamBPlayerIds.includes(playerId)) return; // Already in Team B
+      if (teamBPlayerIds.includes(playerId) && !isCommon) return; // Already in Team B and NOT common
       setTeamAPlayerIds((prev) =>
         prev.includes(playerId)
           ? prev.filter((id) => id !== playerId)
@@ -222,7 +223,7 @@ export default function StartMatchPage() {
             : prev,
       );
     } else {
-      if (teamAPlayerIds.includes(playerId)) return; // Already in Team A
+      if (teamAPlayerIds.includes(playerId) && !isCommon) return; // Already in Team A and NOT common
       setTeamBPlayerIds((prev) =>
         prev.includes(playerId)
           ? prev.filter((id) => id !== playerId)
@@ -564,9 +565,12 @@ export default function StartMatchPage() {
                       </div>
                       <div className="p-3 rounded-xl bg-white/5 border border-white/10 min-h-[200px] max-h-[300px] overflow-y-auto space-y-1">
                         {filteredPlayers?.map((p: any) => {
+                          const isCommon = p.id === commonPlayerId;
                           const isSelectedInOtherTeam = teamBPlayerIds.includes(
                             p.id,
                           );
+                          const isDisabled = isSelectedInOtherTeam && !isCommon;
+                          
                           return (
                             <div
                               key={p.id}
@@ -574,22 +578,30 @@ export default function StartMatchPage() {
                                 "flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors",
                                 teamAPlayerIds.includes(p.id)
                                   ? "bg-blue-500/20 border border-blue-500/30"
-                                  : isSelectedInOtherTeam
+                                  : isDisabled
                                     ? "opacity-40 cursor-not-allowed"
                                     : "hover:bg-white/5 border border-transparent",
                               )}
                               onClick={() =>
-                                !isSelectedInOtherTeam &&
+                                !isDisabled &&
                                 togglePlayer(p.id, "A")
                               }
                             >
                               <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-white">
+                                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-white relative">
                                   {p?.name?.charAt(0) || "?"}
+                                  {isCommon && (
+                                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-electric rounded-full border-2 border-[#0a1628]" />
+                                  )}
                                 </div>
-                                <span className="text-sm text-white">
-                                  {p?.name || "Unknown"}
-                                </span>
+                                <div className="flex flex-col">
+                                  <span className="text-sm text-white">
+                                    {p?.name || "Unknown"}
+                                  </span>
+                                  {isCommon && (
+                                    <span className="text-[10px] text-electric font-bold uppercase">Common</span>
+                                  )}
+                                </div>
                               </div>
                               {teamAPlayerIds.includes(p.id) && (
                                 <CheckCircle className="h-4 w-4 text-blue-400" />
@@ -610,9 +622,12 @@ export default function StartMatchPage() {
                       </div>
                       <div className="p-3 rounded-xl bg-white/5 border border-white/10 min-h-[200px] max-h-[300px] overflow-y-auto space-y-1">
                         {filteredPlayers?.map((p: any) => {
+                          const isCommon = p.id === commonPlayerId;
                           const isSelectedInOtherTeam = teamAPlayerIds.includes(
                             p.id,
                           );
+                          const isDisabled = isSelectedInOtherTeam && !isCommon;
+
                           return (
                             <div
                               key={p.id}
@@ -620,22 +635,30 @@ export default function StartMatchPage() {
                                 "flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors",
                                 teamBPlayerIds.includes(p.id)
                                   ? "bg-orange-500/20 border border-orange-500/30"
-                                  : isSelectedInOtherTeam
+                                  : isDisabled
                                     ? "opacity-40 cursor-not-allowed"
                                     : "hover:bg-white/5 border border-transparent",
                               )}
                               onClick={() =>
-                                !isSelectedInOtherTeam &&
+                                !isDisabled &&
                                 togglePlayer(p.id, "B")
                               }
                             >
                               <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-white">
+                                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-white relative">
                                   {p?.name?.charAt(0) || "?"}
+                                  {isCommon && (
+                                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-electric rounded-full border-2 border-[#0a1628]" />
+                                  )}
                                 </div>
-                                <span className="text-sm text-white">
-                                  {p?.name || "Unknown"}
-                                </span>
+                                <div className="flex flex-col">
+                                  <span className="text-sm text-white">
+                                    {p?.name || "Unknown"}
+                                  </span>
+                                  {isCommon && (
+                                    <span className="text-[10px] text-electric font-bold uppercase">Common</span>
+                                  )}
+                                </div>
                               </div>
                               {teamBPlayerIds.includes(p.id) && (
                                 <CheckCircle className="h-4 w-4 text-orange-400" />

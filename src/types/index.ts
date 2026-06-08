@@ -90,6 +90,7 @@ export interface Match {
   currentInnings: number;
   total_runs?: number;
   wickets?: number;
+  target?: number;
   batting_team_id?: string;
   batting_team_name?: string;
   players_per_team?: number;
