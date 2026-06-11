@@ -92,6 +92,7 @@ export interface Match {
   wickets?: number;
   target?: number;
   batting_team_id?: string;
+  bowling_team_id?: string;
   batting_team_name?: string;
   players_per_team?: number;
   host_user_id?: string | null;
@@ -135,9 +136,9 @@ export interface DeliveryPayload {
   bowler_id: string;
   runs_bat: number;
   extras: number;
-  extra_type: "wide" | "no-ball" | "bye" | "leg-bye" | null;
+  extra_type: "wide" | "no_ball" | "bye" | "leg_bye" | null;
   wicket: boolean;
-  wicket_type: "bowled" | "caught" | "run-out" | "lbw" | "stumped" | "hit-wicket" | "retired" | null;
+  wicket_type: "bowled" | "caught" | "run_out" | "lbw" | "stumped" | "hit_wicket" | "retired_out" | "retired_hurt" | "obstructing_the_field" | "timed_out" | null;
   fielder_id: string | null;
   player_out_id: string | null;
   is_free_hit: boolean;
@@ -234,10 +235,10 @@ export interface Dismissal {
   type:
     | "bowled"
     | "caught"
-    | "run-out"
+    | "run_out"
     | "lbw"
     | "stumped"
-    | "hit-wicket"
+    | "hit_wicket"
     | "retired";
   bowlerId?: string;
   bowlerName?: string;

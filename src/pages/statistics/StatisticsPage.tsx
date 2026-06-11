@@ -109,7 +109,7 @@ export default function StatisticsPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {tab.data.map((player, i) => (
+                {tab.data.map((player: any, i: number) => (
                   <PlayerCard
                     key={player.playerId}
                     player={{

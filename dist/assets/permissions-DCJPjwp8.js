@@ -1,0 +1,1 @@
+const o=(r,e)=>{var t;if(!r||!e)return!1;const i=r.host_user_id||r.hostId||r.host_id||r.userId||r.creator_id;return!!(i&&String(i)===String(e)||r.userRole==="admin"||r.role==="admin"||((t=r.teamA)==null?void 0:t.host_id)===e)};export{o as c};

@@ -9,7 +9,6 @@ import { Switch } from "@/components/ui/switch";
 import { useLogin } from "@/hooks";
 import { z } from "zod";
 
-// Regex patterns & Zod schemas
 const phoneSchema = z.string().regex(/^\d{10}$/, "Please enter exactly 10 digits.");
 
 export default function LoginPage() {
@@ -50,12 +49,20 @@ export default function LoginPage() {
         transition={{ duration: 0.5 }}
         className="flex flex-col items-center mb-8"
       >
-        <div className="relative mb-4">
+        <motion.div
+          animate={{ rotate: [0, 5, -5, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          className="relative mb-4"
+        >
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-electric flex items-center justify-center shadow-lg shadow-blue-500/30">
             <Zap className="h-8 w-8 text-white" />
           </div>
-          <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-[#0a1628] animate-pulse" />
-        </div>
+          <motion.div
+            animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-[#0a1628]"
+          />
+        </motion.div>
         <h1 className="text-2xl font-bold text-white">
           Cric<span className="text-electric">OP</span>
         </h1>
@@ -68,7 +75,7 @@ export default function LoginPage() {
       <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.2 }}
+        transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
         className="glass-card p-6 md:p-8 relative z-10"
       >
         <div className="text-center mb-6">
@@ -77,10 +84,15 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
+          <motion.div
+            initial={{ x: -10, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="space-y-2"
+          >
             <Label htmlFor="phone">Phone Number</Label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+            <div className="relative group">
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40 group-focus-within:text-electric transition-colors duration-200" />
               <Input
                 id="phone"
                 type="tel"
@@ -95,13 +107,26 @@ export default function LoginPage() {
                 required
               />
             </div>
-            {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone}</p>}
-          </div>
+            {errors.phone && (
+              <motion.p
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-xs text-red-500 mt-1"
+              >
+                {errors.phone}
+              </motion.p>
+            )}
+          </motion.div>
 
-          <div className="space-y-2">
+          <motion.div
+            initial={{ x: -10, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.35 }}
+            className="space-y-2"
+          >
             <Label htmlFor="password">Password</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+            <div className="relative group">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40 group-focus-within:text-electric transition-colors duration-200" />
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
@@ -114,9 +139,10 @@ export default function LoginPage() {
                 }}
                 required
               />
-              <button
+              <motion.button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
+                whileTap={{ scale: 0.9 }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/60 z-20"
               >
                 {showPassword ? (
@@ -124,12 +150,25 @@ export default function LoginPage() {
                 ) : (
                   <Eye className="h-4 w-4" />
                 )}
-              </button>
+              </motion.button>
             </div>
-            {errors.password && <p className="text-xs text-red-500 mt-1">{errors.password}</p>}
-          </div>
+            {errors.password && (
+              <motion.p
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-xs text-red-500 mt-1"
+              >
+                {errors.password}
+              </motion.p>
+            )}
+          </motion.div>
 
-          <div className="flex items-center justify-between">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="flex items-center justify-between"
+          >
             <div className="flex items-center gap-2">
               <Switch
                 id="remember"
@@ -150,19 +189,30 @@ export default function LoginPage() {
             >
               Forgot password?
             </button>
-          </div>
+          </motion.div>
 
-          <Button
-            type="submit"
-            className="w-full h-12 text-base font-semibold"
-            isLoading={login.isPending}
+          <motion.div
+            initial={{ y: 10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.45 }}
           >
-            Sign In
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
+            <Button
+              type="submit"
+              className="w-full h-12 text-base font-semibold"
+              isLoading={login.isPending}
+            >
+              Sign In
+              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          </motion.div>
         </form>
 
-        <div className="mt-6 text-center">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mt-6 text-center"
+        >
           <p className="text-sm text-white/50">
             Don't have an account?{" "}
             <Link
@@ -172,12 +222,20 @@ export default function LoginPage() {
               Sign up
             </Link>
           </p>
-        </div>
+        </motion.div>
       </motion.div>
 
       {/* Decorative elements */}
-      <div className="absolute top-20 left-10 w-20 h-20 bg-blue-500/10 rounded-full blur-2xl animate-pulse pointer-events-none" />
-      <div className="absolute bottom-20 right-10 w-32 h-32 bg-electric/10 rounded-full blur-3xl animate-pulse pointer-events-none" />
+      <motion.div
+        animate={{ y: [0, -10, 0] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-20 left-10 w-20 h-20 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"
+      />
+      <motion.div
+        animate={{ y: [0, 10, 0] }}
+        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute bottom-20 right-10 w-32 h-32 bg-electric/10 rounded-full blur-3xl pointer-events-none"
+      />
     </div>
   );
 }

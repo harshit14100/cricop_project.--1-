@@ -54,7 +54,15 @@ export function MatchInfoCard({ match }: MatchInfoCardProps) {
             <Info className="h-4 w-4 text-emerald-400 mt-0.5 shrink-0" />
             <div>
               <p className="text-[10px] font-bold text-white/20 uppercase">Match Status</p>
-              <p className="text-sm text-white font-medium capitalize">{match.status}</p>
+              <p className="text-sm text-white font-medium capitalize">
+                {match.status === 'completed' && match.winner_team_id ? (
+                  <span className="text-emerald-400 font-bold">
+                    {match.winner_team_id === match.team1_id ? match.team_1_name : match.team_2_name} Won
+                  </span>
+                ) : (
+                  match.status
+                )}
+              </p>
             </div>
           </div>
         </div>

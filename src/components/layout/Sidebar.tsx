@@ -69,12 +69,17 @@ export function Sidebar() {
                     : "text-white/60 hover:text-white hover:bg-white/5",
                 )}
               >
-                <item.icon
-                  className={cn(
-                    "h-5 w-5 flex-shrink-0",
-                    isActive && "text-electric",
-                  )}
-                />
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <item.icon
+                    className={cn(
+                      "h-5 w-5 flex-shrink-0",
+                      isActive && "text-electric",
+                    )}
+                  />
+                </motion.div>
                 <AnimatePresence>
                   {sidebarOpen && (
                     <motion.span

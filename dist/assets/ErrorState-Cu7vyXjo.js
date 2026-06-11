@@ -1,0 +1,6 @@
+import{c as i,j as e,m as n,J as r,B as c}from"./index-CR7T208w.js";/**
+ * @license lucide-react v0.344.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const l=i("RefreshCw",[["path",{d:"M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8",key:"v9h5vc"}],["path",{d:"M21 3v5h-5",key:"1q7to0"}],["path",{d:"M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16",key:"3uifl3"}],["path",{d:"M8 16H3v5",key:"1cv678"}]]);function m({title:s="Something went wrong",description:a="We encountered an error while loading this content.",onRetry:t}){return e.jsxs(n.div,{initial:{opacity:0,y:20},animate:{opacity:1,y:0},className:"flex flex-col items-center justify-center py-16 px-4 text-center",children:[e.jsx("div",{className:"w-20 h-20 rounded-2xl bg-red-500/10 flex items-center justify-center mb-6",children:e.jsx(r,{className:"h-10 w-10 text-red-400"})}),e.jsx("h3",{className:"text-lg font-semibold text-white mb-2",children:s}),e.jsx("p",{className:"text-sm text-white/50 max-w-sm mb-6",children:a}),t&&e.jsxs(c,{onClick:t,variant:"outline",className:"gap-2",children:[e.jsx(l,{className:"h-4 w-4"}),"Try Again"]})]})}export{m as E};

@@ -21,14 +21,14 @@ export function MatchCard({ match, index = 0 }: MatchCardProps) {
   const isScheduled = match.status === "scheduled";
 
   const isHost = canEditMatch(match, user?.id);
-  const matchLink = isCompleted 
-    ? `/match/${match.id}` 
+  const matchLink = isCompleted
+    ? `/match/${match.id}`
     : (isHost ? `/live-scoring/${match.id}` : (isLive ? `/match/${match.id}/live` : `/match/${match.id}`));
 
   const liveRuns = match.total_runs ?? 0;
   const liveWickets = match.wickets ?? 0;
   const liveBalls = (match.completed_overs || 0) * 6 + (match.balls_in_current_over || 0);
-  
+
   const team1Name = match.team_1_name || "Team 1";
   const team2Name = match.team_2_name || "Team 2";
 
@@ -39,10 +39,17 @@ export function MatchCard({ match, index = 0 }: MatchCardProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1 }}
+      transition={{ delay: index * 0.1, type: "spring", stiffness: 200 }}
+      whileHover={{ y: -4, scale: 1.01 }}
+      className="relative"
     >
-      <Link to={matchLink}>
-        <Card className="glass-card-hover overflow-hidden cursor-pointer group">
+      <Link to={matchLink} className="block">
+        <Card className="glass-card-hover overflow-hidden cursor-pointer group relative">
+          {/* Shimmer border on hover */}
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+            <div className="absolute inset-[-1px] rounded-xl bg-gradient-to-r from-transparent via-electric/20 to-transparent shimmer-enhanced" />
+          </div>
+
           {/* Header */}
           <div className="px-3 py-2 sm:px-4 sm:py-3 border-b border-white/5 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -52,8 +59,11 @@ export function MatchCard({ match, index = 0 }: MatchCardProps) {
                 }
               >
                 {isLive ? (
-                  <span className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                  <span className="flex items-center gap-1.5">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping-slow absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                    </span>
                     LIVE
                   </span>
                 ) : isCompleted ? (
@@ -75,19 +85,25 @@ export function MatchCard({ match, index = 0 }: MatchCardProps) {
             <div className="flex items-center justify-between gap-1 sm:gap-4">
               {/* Team 1 */}
               <div className="flex-1 text-center min-w-0">
-                <div
-                  className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl mx-auto mb-1 flex items-center justify-center text-sm sm:text-lg font-bold text-white shadow-lg bg-blue-600"
+                <motion.div
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl mx-auto mb-1 flex items-center justify-center text-sm sm:text-lg font-bold text-white shadow-lg bg-gradient-to-br from-blue-600 to-blue-500"
                 >
                   {team1Name?.[0]?.toUpperCase() || "T"}
-                </div>
+                </motion.div>
                 <p className="text-[10px] sm:text-sm font-semibold text-white truncate px-1">
                   {team1Name}
                 </p>
                 {isLive && isTeam1Batting && (
                   <div className="mt-1">
-                    <p className="text-lg sm:text-2xl font-bold text-white score-display leading-none">
+                    <motion.p
+                      key={`runs-${liveRuns}-${match.id}`}
+                      initial={{ scale: 1.3, color: "#60a5fa" }}
+                      animate={{ scale: 1, color: "#ffffff" }}
+                      className="text-lg sm:text-2xl font-bold text-white score-display leading-none"
+                    >
                       {liveRuns}/{liveWickets}
-                    </p>
+                    </motion.p>
                     <p className="text-[9px] sm:text-xs text-white/50 mt-0.5">
                       {formatOvers(liveBalls)} ov
                     </p>
@@ -97,28 +113,38 @@ export function MatchCard({ match, index = 0 }: MatchCardProps) {
 
               {/* VS */}
               <div className="flex-shrink-0 self-start mt-2 sm:mt-0 sm:self-center">
-                <div className="w-6 h-6 sm:w-10 sm:h-10 rounded-full bg-white/5 flex items-center justify-center">
+                <motion.div
+                  animate={{ rotate: [0, 5, -5, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  className="w-6 h-6 sm:w-10 sm:h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10"
+                >
                   <span className="text-[8px] sm:text-xs font-bold text-white/20 uppercase tracking-tighter sm:tracking-normal">
                     VS
                   </span>
-                </div>
+                </motion.div>
               </div>
 
               {/* Team 2 */}
               <div className="flex-1 text-center min-w-0">
-                <div
-                  className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl mx-auto mb-1 flex items-center justify-center text-sm sm:text-lg font-bold text-white shadow-lg bg-indigo-600"
+                <motion.div
+                  whileHover={{ scale: 1.1, rotate: -5 }}
+                  className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl mx-auto mb-1 flex items-center justify-center text-sm sm:text-lg font-bold text-white shadow-lg bg-gradient-to-br from-indigo-600 to-indigo-500"
                 >
                   {team2Name?.[0]?.toUpperCase() || "T"}
-                </div>
+                </motion.div>
                 <p className="text-[10px] sm:text-sm font-semibold text-white truncate px-1">
                   {team2Name}
                 </p>
                 {isLive && isTeam2Batting && (
                   <div className="mt-1">
-                    <p className="text-lg sm:text-2xl font-bold text-white score-display leading-none">
+                    <motion.p
+                      key={`runs-${liveRuns}-${match.id}`}
+                      initial={{ scale: 1.3, color: "#60a5fa" }}
+                      animate={{ scale: 1, color: "#ffffff" }}
+                      className="text-lg sm:text-2xl font-bold text-white score-display leading-none"
+                    >
                       {liveRuns}/{liveWickets}
-                    </p>
+                    </motion.p>
                     <p className="text-[9px] sm:text-xs text-white/50 mt-0.5">
                       {formatOvers(liveBalls)} ov
                     </p>
@@ -136,15 +162,19 @@ export function MatchCard({ match, index = 0 }: MatchCardProps) {
                     <span>RR: {calculateRunRate(liveRuns, liveBalls)}</span>
                   </div>
                 </div>
-                
+
                 <div className="mt-3 space-y-1.5">
                   {(match.striker_name) && (
-                    <div className="flex items-center justify-between text-[10px] sm:text-xs">
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="flex items-center justify-between text-[10px] sm:text-xs"
+                    >
                       <span className="text-electric font-medium truncate max-w-[150px]">
                         {match.striker_name} *
                       </span>
                       <span className="text-white/40 shrink-0 ml-2">Batting</span>
-                    </div>
+                    </motion.div>
                   )}
                 </div>
               </div>
@@ -153,7 +183,9 @@ export function MatchCard({ match, index = 0 }: MatchCardProps) {
             {isCompleted && (
               <div className="mt-4 pt-3 border-t border-white/5 text-center">
                 <p className="text-sm font-medium text-emerald-400">
-                  Match Completed
+                  {match.winner_team_id
+                    ? `${match.winner_team_id === match.team1_id ? team1Name : team2Name} Won`
+                    : "Match Completed"}
                 </p>
               </div>
             )}
@@ -169,10 +201,15 @@ export function MatchCard({ match, index = 0 }: MatchCardProps) {
 
             {isHost && !isCompleted && (
               <div className="mt-4 pt-3 border-t border-white/10">
-                <Button className="w-full h-8 text-xs gap-1.5 bg-electric hover:bg-electric/90 text-white border-0">
-                  <Zap className="h-3.5 w-3.5 fill-current" />
-                  {isLive ? "Continue Scoring" : "Start Scoring"}
-                </Button>
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Button className="w-full h-8 text-xs gap-1.5 bg-electric hover:bg-electric/90 text-white border-0">
+                    <Zap className="h-3.5 w-3.5 fill-current" />
+                    {isLive ? "Continue Scoring" : "Start Scoring"}
+                  </Button>
+                </motion.div>
               </div>
             )}
           </div>

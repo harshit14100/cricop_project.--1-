@@ -16,9 +16,18 @@ export function LoadingScreen() {
             transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
             className="w-16 h-16 rounded-full border-2 border-blue-500/20 border-t-blue-500"
           />
-          <div className="absolute inset-0 flex items-center justify-center">
+          <motion.div
+            animate={{ rotate: -360 }}
+            transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+            className="absolute inset-0 w-16 h-16 rounded-full border-2 border-electric/20 border-b-electric opacity-50"
+          />
+          <motion.div
+            animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="absolute inset-0 flex items-center justify-center"
+          >
             <Zap className="h-6 w-6 text-electric" />
-          </div>
+          </motion.div>
         </div>
         <motion.p
           animate={{ opacity: [0.5, 1, 0.5] }}

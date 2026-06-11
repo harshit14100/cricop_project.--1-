@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Bell, Search, Zap, ChevronLeft } from "lucide-react";
@@ -18,6 +19,13 @@ export function Navbar() {
   const location = useLocation();
   const isMobile = useIsMobile();
   const { user } = useAuthStore();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const isHome = location.pathname === "/dashboard" || location.pathname === "/";
 
@@ -25,7 +33,12 @@ export function Navbar() {
     <motion.header
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className="fixed top-0 left-0 right-0 z-50 h-16 bg-[#0a1628]/80 backdrop-blur-xl border-b border-white/5 transition-all duration-300"
+      className={cn(
+        "fixed top-0 left-0 right-0 z-50 h-16 transition-all duration-300",
+        scrolled
+          ? "bg-[#0a1628]/95 backdrop-blur-xl border-b border-white/5 shadow-lg shadow-black/20"
+          : "bg-[#0a1628]/60 backdrop-blur-md"
+      )}
     >
       <div className="flex items-center justify-between h-full px-4 md:px-6 w-full">
         <div className="flex items-center gap-2 md:gap-4">
@@ -39,10 +52,13 @@ export function Navbar() {
               <ChevronLeft className="h-5 w-5" />
             </Button>
           )}
-          <Link to="/dashboard" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-electric flex items-center justify-center">
+          <Link to="/dashboard" className="flex items-center gap-2 group">
+            <motion.div
+              whileHover={{ rotate: 15, scale: 1.1 }}
+              className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-electric flex items-center justify-center"
+            >
               <Zap className="h-4 w-4 text-white" />
-            </div>
+            </motion.div>
             <span className="text-xl font-bold text-white tracking-tight">
               Cric<span className="text-electric">OP</span>
             </span>
@@ -61,14 +77,18 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center relative mr-2">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+          <motion.div
+            initial={false}
+            whileFocus={{ scale: 1.02 }}
+            className="hidden sm:flex items-center relative mr-2"
+          >
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40 group-focus-within:text-electric transition-colors" />
             <input
               type="text"
               placeholder="Search matches..."
-              className="bg-white/5 border border-white/10 rounded-full py-1.5 pl-10 pr-4 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-48 lg:w-64 transition-all"
+              className="bg-white/5 border border-white/10 rounded-full py-1.5 pl-10 pr-4 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-48 lg:w-64 transition-all focus:w-72"
             />
-          </div>
+          </motion.div>
 
           <Button
             variant="ghost"
@@ -81,19 +101,26 @@ export function Navbar() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-white/70 relative"
-              >
-                <Bell className="h-5 w-5" />
-                <Badge
-                  variant="live"
-                  className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[10px]"
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-white/70 relative"
                 >
-                  3
-                </Badge>
-              </Button>
+                  <Bell className="h-5 w-5" />
+                  <Badge
+                    variant="live"
+                    className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[10px]"
+                  >
+                    <motion.span
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      3
+                    </motion.span>
+                  </Badge>
+                </Button>
+              </motion.div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-64">
               <div className="p-3 pb-2 border-b border-white/10">
@@ -107,13 +134,20 @@ export function Navbar() {
           <div className="flex items-center gap-2 pl-2 border-l border-white/10">
             {user ? (
               <>
-                <Avatar
-                  className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all"
-                  onClick={() => navigate("/settings")}
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <AvatarImage src={user?.avatar} />
-                  <AvatarFallback>{user?.name?.charAt(0) || "U"}</AvatarFallback>
-                </Avatar>
+                  <Avatar
+                    className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all"
+                    onClick={() => navigate("/settings")}
+                  >
+                    <AvatarImage src={user?.avatar} />
+                    <AvatarFallback className="bg-gradient-to-br from-blue-600 to-electric">
+                      {user?.name?.charAt(0) || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                </motion.div>
                 {!isMobile && (
                   <div className="hidden lg:block">
                     <p className="text-sm font-medium text-white line-clamp-1">
@@ -126,18 +160,24 @@ export function Navbar() {
                 )}
               </>
             ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-white border-white/20 hover:bg-white/10"
-                onClick={() => navigate("/login")}
-              >
-                Login
-              </Button>
+              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-white border-white/20 hover:bg-white/10"
+                  onClick={() => navigate("/login")}
+                >
+                  Login
+                </Button>
+              </motion.div>
             )}
           </div>
         </div>
       </div>
     </motion.header>
   );
+}
+
+function cn(...classes: (string | boolean | undefined | null)[]): string {
+  return classes.filter(Boolean).join(" ");
 }

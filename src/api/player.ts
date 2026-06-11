@@ -10,6 +10,11 @@ export const playerApi = {
     return response.data?.data || [];
   },
 
+  createPlayer: async (playerData: Partial<Player>): Promise<{ message: string }> => {
+    const { data } = await client.post<{ message: string }>("/users/players", playerData);
+    return data;
+  },
+
   getPlayer: async (playerId: string): Promise<Player | null> => {
     // Temporary workaround: fetch all players and find the match
     // Ideal fix: Backend should add a `GET /users/players/:id` endpoint

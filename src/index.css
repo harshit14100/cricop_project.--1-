@@ -134,6 +134,44 @@
   .touch-target {
     @apply min-h-[48px] min-w-[48px];
   }
+
+  .animated-gradient-bg {
+    background: linear-gradient(-45deg, #0a1628, #0f2342, #0a1628, #0d1e36);
+    background-size: 400% 400%;
+    animation: gradient-shift 15s ease infinite;
+  }
+
+  .glow-blue {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.15), 0 0 40px rgba(59, 130, 246, 0.05);
+  }
+
+  .glow-electric {
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.2), 0 0 40px rgba(0, 212, 255, 0.05);
+  }
+
+  .pulse-ring {
+    position: relative;
+  }
+
+  .pulse-ring::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: inherit;
+    border: 2px solid rgba(0, 212, 255, 0.3);
+    animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes ripple-effect {
+  from { transform: scale(0); opacity: 1; }
+  to { transform: scale(4); opacity: 0; }
 }
 
 @layer utilities {

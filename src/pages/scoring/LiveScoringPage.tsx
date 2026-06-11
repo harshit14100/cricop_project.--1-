@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Undo2, RotateCcw, Lock, Users, Play, Zap, Coins } from "lucide-react";
+import { Users, Zap, Coins, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -14,14 +14,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScoreBoard } from "@/components/shared/ScoreBoard";
 import { BattingScorecard } from "@/components/match/BattingScorecard";
 import { BowlingScorecard } from "@/components/match/BowlingScorecard";
+import { CelebrationOverlay, type CelebrationType } from "@/components/shared/CelebrationOverlay";
 import {
   useLiveMatch,
   useMatchScorecard,
   useMatchPlayers,
   useScoreBall,
   useUndoBall,
-  useEndInnings,
-  useStartMatch,
   useStartInning,
   useUpdateMatchState,
   useSetToss,
@@ -30,7 +29,7 @@ import { teamService } from "@/services";
 import { useQuery } from "@tanstack/react-query";
 import { LoadingScreen } from "@/components/shared/LoadingScreen";
 import { ErrorState } from "@/components/shared/ErrorState";
-import { useMatchStore, useUIStore, useAuthStore } from "@/store";
+import { useUIStore, useAuthStore } from "@/store";
 import { cn } from "@/lib/utils";
 import { canEditMatch } from "@/utils/permissions";
 import { Label } from "@/components/ui/label";
@@ -43,12 +42,16 @@ const wicketTypes = [
   "LBW",
   "Stumped",
   "Hit Wicket",
+  "Retired Out",
+  "Retired Hurt",
+  "Obstructing Field",
+  "Timed Out",
 ];
 const extraTypes = [
   { label: "Wide", value: "wide", runs: 1 },
-  { label: "No Ball", value: "noBall", runs: 1 },
+  { label: "No Ball", value: "no_ball", runs: 1 },
   { label: "Bye", value: "bye", runs: 0 },
-  { label: "Leg Bye", value: "legBye", runs: 0 },
+  { label: "Leg Bye", value: "leg_bye", runs: 0 },
 ];
 
 export default function LiveScoringPage() {
@@ -61,23 +64,18 @@ export default function LiveScoringPage() {
   const { data: matchPlayers } = useMatchPlayers(matchId || "");
   const { addToast } = useUIStore();
 
-  const startMatch = useStartMatch();
   const setToss = useSetToss();
   const scoreBall = useScoreBall();
   const undoBall = useUndoBall();
-  const endInnings = useEndInnings();
   const startInning = useStartInning();
   const updateMatchState = useUpdateMatchState();
-  const { liveState } = useMatchStore();
 
   const [showWicketDialog, setShowWicketDialog] = useState(false);
   const [showOpenerDialog, setShowOpenerDialog] = useState(false);
   const [showTossDialog, setShowTossDialog] = useState(false);
   const [selectedExtra, setSelectedExtra] = useState("");
   const [activeTab, setActiveTab] = useState("score");
-  const [celebration, setCelebration] = useState<
-    "four" | "six" | "wicket" | null
-  >(null);
+  const [celebration, setCelebration] = useState<CelebrationType | null>(null);
 
   const [strikerId, setStrikerId] = useState("");
   const [nonStrikerId, setNonStrikerId] = useState("");
@@ -85,8 +83,9 @@ export default function LiveScoringPage() {
   const [lastProcessedOver, setLastProcessedOver] = useState(0);
 
   const isInningsOver = match && (
-    (match.wickets || 0) >= ((match.players_per_team || 11) - 1) || 
-    (match.completed_overs || 0) >= (match.overs || 20)
+    (match.wickets || 0) >= (match.players_per_team || 11) || 
+    (match.completed_overs || 0) >= (match.overs || 20) ||
+    (match.inning_number === 2 && match.target && (match.total_runs || 0) >= match.target)
   );
 
   const handleStartNextInnings = () => {
@@ -154,7 +153,7 @@ export default function LiveScoringPage() {
     setBowlerId(match.current_bowler_id || "");
 
     // If we don't have players, show the dialog
-    if (!match.striker_id || !match.non_striker_id || !match.current_bowler_id) {
+    if (!match.striker_id || (!match.non_striker_id && availablePlayers.length > 1) || !match.current_bowler_id) {
       if (match.status === "live") {
         setShowOpenerDialog(true);
       }
@@ -188,19 +187,36 @@ export default function LiveScoringPage() {
   
   const getBattingPlayers = () => {
     const fromMatch = allInMatchPlayers.filter(p => p.team_id === match?.batting_team_id);
+    
+    // Log for debugging (per STEP 5 of instructions)
+    if (match) {
+      console.log(`Match: ${match.id}`);
+      console.log(`Batting Team ID: ${match.batting_team_id}`);
+      console.log(`Players in Match Squad: ${allInMatchPlayers.length}`);
+      console.log(`Filtered Batting Players: ${fromMatch.length}`);
+    }
+
     // Only return match-specific players if that list was actually populated
     if (fromMatch.length > 0) return fromMatch;
     
     // Fallback to the full team roster ONLY if the match-specific list is empty 
     // (handles basic matches and matches started before the backend fix)
-    return match?.batting_team_id === match?.team1_id ? (teamAPlayers || []) : (teamBPlayers || []);
+    const teamPlayers = match?.batting_team_id === match?.team1_id ? (teamAPlayers || []) : (teamBPlayers || []);
+    return teamPlayers;
   };
 
   const getBowlingPlayers = () => {
     const fromMatch = allInMatchPlayers.filter(p => p.team_id === match?.bowling_team_id);
+    
+    if (match) {
+      console.log(`Bowling Team ID: ${match.bowling_team_id}`);
+      console.log(`Filtered Bowling Players: ${fromMatch.length}`);
+    }
+
     if (fromMatch.length > 0) return fromMatch;
     
-    return match?.bowling_team_id === match?.team1_id ? (teamAPlayers || []) : (teamBPlayers || []);
+    const teamPlayers = match?.bowling_team_id === match?.team1_id ? (teamAPlayers || []) : (teamBPlayers || []);
+    return teamPlayers;
   };
 
   const battingTeamPlayers = getBattingPlayers();
@@ -266,7 +282,7 @@ export default function LiveScoringPage() {
     if (!matchId || !match) return;
 
     const isWide = selectedExtra === "wide";
-    const isNoBall = selectedExtra === "noBall";
+    const isNoBall = selectedExtra === "no_ball";
 
     if (runs === 4) {
       setCelebration("four");
@@ -319,7 +335,7 @@ export default function LiveScoringPage() {
           extras: 0,
           extra_type: null,
           wicket: true,
-          wicket_type: type.toLowerCase().replace(" ", "-") as any,
+          wicket_type: type.toLowerCase().replace(" ", "_") as any,
           fielder_id: null,
           player_out_id: strikerId,
           is_free_hit: false,
@@ -464,13 +480,13 @@ export default function LiveScoringPage() {
             </button>
           </div>
 
-          {!strikerId || !nonStrikerId || !bowlerId ? (
+          {isInningsOver || !strikerId || (!nonStrikerId && availablePlayers.length > 1) || !bowlerId ? (
             <div className="glass-card p-8 text-center bg-blue-500/5 border-dashed border-blue-500/20">
               {isInningsOver && match.inning_number === 1 ? (
                 <div className="space-y-4">
                   <p className="text-lg font-bold text-white">1st Innings Completed!</p>
                   <p className="text-sm text-white/60 mb-4">
-                    Target: {match.total_runs + 1} runs
+                    Target: {(match.total_runs || 0) + 1} runs
                   </p>
                   <Button 
                     size="lg" 
@@ -505,19 +521,6 @@ export default function LiveScoringPage() {
             </div>
           ) : (
             <>
-              {isInningsOver && match.inning_number === 1 && (
-                <div className="mb-4 p-4 glass-card bg-electric/10 border-electric/20 text-center">
-                  <p className="text-sm font-bold text-white mb-2">Innings Over!</p>
-                  <Button 
-                    variant="default"
-                    className="bg-electric hover:bg-electric/90"
-                    onClick={handleStartNextInnings}
-                    isLoading={startInning.isPending}
-                  >
-                    Start 2nd Innings
-                  </Button>
-                </div>
-              )}
               <div className="grid grid-cols-3 gap-3">
                 {runsButtons.map((runs) => (
                   <motion.button
@@ -554,6 +557,16 @@ export default function LiveScoringPage() {
                   Wicket
                 </motion.button>
               </div>
+
+              <Button
+                variant="outline"
+                className="w-full mt-3 h-12 gap-2 border-white/10 text-white/60 hover:text-white hover:bg-white/5"
+                onClick={() => matchId && undoBall.mutate(matchId)}
+                disabled={undoBall.isPending || isInningsOver}
+              >
+                <Undo2 className="h-4 w-4" />
+                Undo Last Ball
+              </Button>
             </>
           )}
         </TabsContent>
@@ -622,7 +635,7 @@ export default function LiveScoringPage() {
 
         <TabsContent value="card" className="mt-4 space-y-4">
           <BattingScorecard scorecard={scorecard} matchId={matchId || ""} />
-          <BowlingScorecard scorecard={scorecard} matchId={matchId || ""} />
+          <BowlingScorecard scorecard={scorecard} />
         </TabsContent>
       </Tabs>
 
@@ -651,8 +664,11 @@ export default function LiveScoringPage() {
                           "justify-start truncate",
                           isOut && "opacity-50 line-through",
                         )}
-                        onClick={() => setStrikerId(p.id)}
-                        disabled={nonStrikerId === p.id || bowlerId === p.id || isOut}
+                        onClick={() => {
+                          if (nonStrikerId === p.id) setNonStrikerId("");
+                          setStrikerId(p.id);
+                        }}
+                        disabled={bowlerId === p.id || isOut}
                       >
                         {p.name}
                         {isOut && " (Out)"}
@@ -683,8 +699,11 @@ export default function LiveScoringPage() {
                           "justify-start truncate",
                           isOut && "opacity-50 line-through",
                         )}
-                        onClick={() => setNonStrikerId(p.id)}
-                        disabled={strikerId === p.id || bowlerId === p.id || isOut}
+                        onClick={() => {
+                          if (strikerId === p.id) setStrikerId("");
+                          setNonStrikerId(p.id);
+                        }}
+                        disabled={bowlerId === p.id || isOut}
                       >
                         {p.name}
                         {isOut && " (Out)"}
@@ -775,91 +794,6 @@ export default function LiveScoringPage() {
         isPending={setToss.isPending}
       />
     </div>
-  );
-}
-
-function CelebrationOverlay({ type }: { type: "four" | "six" | "wicket" }) {
-  const configs = {
-    four: {
-      text: "FOUR!",
-      color: "from-blue-600 to-cyan-500",
-      shadow: "shadow-blue-500/50",
-    },
-    six: {
-      text: "SIXER!",
-      color: "from-purple-600 to-pink-500",
-      shadow: "shadow-purple-500/50",
-    },
-    wicket: {
-      text: "OUT!",
-      color: "from-red-600 to-orange-500",
-      shadow: "shadow-red-500/50",
-    },
-  };
-
-  const config = configs[type];
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center pointer-events-none px-4"
-    >
-      <motion.div
-        initial={{ scale: 0.5, rotate: -10, y: 50 }}
-        animate={{ scale: 1.1, rotate: 0, y: 0 }}
-        exit={{ scale: 2, opacity: 0, rotate: 10 }}
-        transition={{
-          type: "spring",
-          damping: 12,
-          stiffness: 200,
-          duration: 0.5,
-        }}
-        className={cn(
-          "relative p-8 rounded-3xl bg-gradient-to-br shadow-2xl border-2 border-white/20",
-          config.color,
-          config.shadow,
-        )}
-      >
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-          className="absolute inset-0 opacity-20"
-        >
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full border-4 border-dashed border-white rounded-full scale-150" />
-        </motion.div>
-
-        <div className="relative z-10 text-center">
-          <motion.h2
-            initial={{ letterSpacing: "0.2em" }}
-            animate={{ letterSpacing: "0.05em" }}
-            className="text-6xl md:text-8xl font-black text-white italic tracking-tighter drop-shadow-lg"
-          >
-            {config.text}
-          </motion.h2>
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: "100%" }}
-            className="h-1 bg-white/40 mt-2 rounded-full"
-          />
-        </div>
-
-        {Array.from({ length: 12 }).map((_, i) => (
-          <motion.div
-            key={i}
-            initial={{ scale: 0, x: 0, y: 0 }}
-            animate={{
-              scale: [0, 1, 0],
-              x: Math.cos(i * 30) * 150,
-              y: Math.sin(i * 30) * 150,
-            }}
-            transition={{ duration: 1, delay: i * 0.05 }}
-            className="absolute top-1/2 left-1/2 w-2 h-2 rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]"
-          />
-        ))}
-      </motion.div>
-    </motion.div>
   );
 }
 

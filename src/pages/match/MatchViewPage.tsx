@@ -3,7 +3,7 @@ import { Activity, FileText, MessageSquare, BarChart3 } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card } from '@/components/ui/card'
 import { ScoreBoard } from '@/components/shared/ScoreBoard'
-import { useMatch, useMatchScorecard } from '@/hooks'
+import { useMatch, useMatchScorecard, useLiveMatch } from '@/hooks'
 import { calculateRunRate } from '@/lib/utils'
 import { MatchHeader } from '@/components/match/MatchHeader'
 import { BattingScorecard } from '@/components/match/BattingScorecard'
@@ -15,6 +15,7 @@ import { ErrorState } from '@/components/shared/ErrorState'
 export default function MatchViewPage() {
   const { matchId } = useParams<{ matchId: string }>()
   const { data: match, isLoading, error } = useMatch(matchId || '')
+  const { data: liveMatchData } = useLiveMatch(matchId || '')
   const { data: scorecard, isLoading: isScorecardLoading } = useMatchScorecard(matchId || '')
 
   if (isLoading || isScorecardLoading) return <LoadingScreen />
@@ -25,11 +26,17 @@ export default function MatchViewPage() {
     return <Navigate to={`/match/${match.id}/live`} replace />
   }
 
+  // The /users/matches/:matchId endpoint returns MatchDetailsResponse which has no
+  // total_runs/wickets/completed_overs. Merge live match data for ScoreBoard display.
+  const displayMatch = match.status === 'completed' && liveMatchData
+    ? { ...match, ...liveMatchData }
+    : match
+
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-20">
       <MatchHeader match={match} />
 
-      <ScoreBoard match={match} />
+      <ScoreBoard match={displayMatch} />
 
       <Tabs defaultValue="scorecard">
         <TabsList className="w-full grid grid-cols-4">
@@ -45,7 +52,7 @@ export default function MatchViewPage() {
         </TabsContent>
 
         <TabsContent value="info" className="mt-6">
-          <MatchInfoCard match={match} />
+          <MatchInfoCard match={displayMatch} />
         </TabsContent>
 
         <TabsContent value="commentary" className="mt-6">
@@ -62,7 +69,7 @@ export default function MatchViewPage() {
             </Card>
             <Card className="glass-card p-4 text-center">
               <p className="text-2xl font-bold text-white">
-                {calculateRunRate(match.total_runs || 0, (match.completed_overs || 0) * 6 + (match.balls_in_current_over || 0))}
+                {calculateRunRate(displayMatch.total_runs || 0, (displayMatch.completed_overs || 0) * 6 + (displayMatch.balls_in_current_over || 0))}
               </p>
               <p className="text-xs text-white/50">Match Run Rate</p>
             </Card>

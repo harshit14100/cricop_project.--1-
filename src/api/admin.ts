@@ -1,6 +1,3 @@
-import client from "./client";
-import type { User, Match, PaginatedResponse } from "@/types";
-
 export const adminApi = {
   // All admin routes are currently not implemented in the backend
   /*

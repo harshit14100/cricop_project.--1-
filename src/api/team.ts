@@ -7,6 +7,11 @@ export const teamApi = {
     return data;
   },
 
+  getTeam: async (id: string): Promise<Team | null> => {
+    const { data } = await client.get<Team>(`/users/teams/${id}`);
+    return data;
+  },
+
   createTeam: async (teamData: Omit<Team, "id">): Promise<{ message: string }> => {
     const { data } = await client.post<{ message: string }>("/users/teams", teamData);
     return data;

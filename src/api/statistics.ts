@@ -11,4 +11,9 @@ export const statisticsApi = {
     const { data } = await client.get<PlayerStats>(`/users/players/${playerId}/stats`)
     return data;
   },
+
+  getStatistics: async (params?: { timeRange?: string }): Promise<any> => {
+    const { data } = await client.get('/users/statistics', { params })
+    return data;
+  },
 }

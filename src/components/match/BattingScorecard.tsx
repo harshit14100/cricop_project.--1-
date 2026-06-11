@@ -19,16 +19,16 @@ export function BattingScorecard({ scorecard, matchId }: BattingScorecardProps) 
         <div className="px-4 py-3 border-b border-white/5 bg-white/5">
           <h3 className="text-sm font-bold text-white uppercase tracking-wider">Batting Scorecard</h3>
         </div>
-        <div className="overflow-x-auto scrollbar-hide">
-          <table className="w-full text-left border-collapse min-w-[450px]">
+        <div className="w-full overflow-x-auto scrollbar-hide max-w-[calc(100vw-24px)] sm:max-w-full">
+          <table className="w-full text-left border-collapse min-w-[500px]">
             <thead>
               <tr className="text-[10px] font-bold text-white/40 uppercase tracking-widest border-b border-white/5">
-                <th className="px-2 sm:px-4 py-3">Batter</th>
-                <th className="px-2 sm:px-4 py-3 text-right">R</th>
-                <th className="px-2 sm:px-4 py-3 text-right">B</th>
-                <th className="px-2 sm:px-4 py-3 text-right">4s</th>
-                <th className="px-2 sm:px-4 py-3 text-right">6s</th>
-                <th className="px-2 sm:px-4 py-3 text-right">SR</th>
+                <th className="px-4 py-3">Batter</th>
+                <th className="px-4 py-3 text-right">R</th>
+                <th className="px-4 py-3 text-right">B</th>
+                <th className="px-4 py-3 text-right">4s</th>
+                <th className="px-4 py-3 text-right">6s</th>
+                <th className="px-4 py-3 text-right">SR</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
@@ -41,18 +41,18 @@ export function BattingScorecard({ scorecard, matchId }: BattingScorecardProps) 
                     className="text-sm transition-colors cursor-pointer group hover:bg-white/5"
                     onClick={() => setSelectedPlayerId(batsman.player_id)}
                   >
-                    <td className="px-2 sm:px-4 py-3">
-                      <div className="flex flex-col min-w-[120px]">
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col min-w-[150px]">
                         <span className="font-medium truncate group-hover:text-electric transition-colors text-white">
                           {batsman.player_name}
                         </span>
                       </div>
                     </td>
-                    <td className="px-2 sm:px-4 py-3 text-right font-bold text-white">{batsman.runs}</td>
-                    <td className="px-2 sm:px-4 py-3 text-right text-white/60">{batsman.balls_faced}</td>
-                    <td className="px-2 sm:px-4 py-3 text-right text-white/60">{batsman.fours || 0}</td>
-                    <td className="px-2 sm:px-4 py-3 text-right text-white/60">{batsman.sixes || 0}</td>
-                    <td className="px-2 sm:px-4 py-3 text-right text-white/40">{sr}</td>
+                    <td className="px-4 py-3 text-right font-bold text-white">{batsman.runs}</td>
+                    <td className="px-4 py-3 text-right text-white/60">{batsman.balls_faced}</td>
+                    <td className="px-4 py-3 text-right text-white/60">{batsman.fours || 0}</td>
+                    <td className="px-4 py-3 text-right text-white/60">{batsman.sixes || 0}</td>
+                    <td className="px-4 py-3 text-right text-white/40">{sr}</td>
                   </tr>
                 );
               })}

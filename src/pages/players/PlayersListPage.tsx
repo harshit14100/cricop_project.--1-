@@ -35,6 +35,7 @@ export default function PlayersListPage() {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState("");
   const [newPlayerPhone, setNewPlayerPhone] = useState("");
+  const [newPlayerPassword, setNewPlayerPassword] = useState("");
   const [battingStyle, setBattingStyle] = useState("right-handed");
 
   const createPlayer = useCreatePlayer();
@@ -48,11 +49,12 @@ export default function PlayersListPage() {
   };
 
   const handleAddPlayer = () => {
-    if (!newPlayerName.trim()) return;
+    if (!newPlayerName.trim() || !newPlayerPassword.trim()) return;
     createPlayer.mutate(
       { 
         name: newPlayerName, 
         phone_no: newPlayerPhone,
+        password: newPlayerPassword,
         battingStyle: battingStyle as any 
       },
       {
@@ -60,6 +62,7 @@ export default function PlayersListPage() {
           setIsAddOpen(false);
           setNewPlayerName("");
           setNewPlayerPhone("");
+          setNewPlayerPassword("");
         },
       },
     );
@@ -154,6 +157,15 @@ export default function PlayersListPage() {
                 type="tel"
                 value={newPlayerPhone}
                 onChange={(e) => setNewPlayerPhone(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Password</Label>
+              <Input
+                placeholder="Enter password"
+                type="password"
+                value={newPlayerPassword}
+                onChange={(e) => setNewPlayerPassword(e.target.value)}
               />
             </div>
             <div className="space-y-2">

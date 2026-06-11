@@ -13,19 +13,19 @@ export const scoringApi = {
     return data;
   },
 
-  // These routes are not implemented in the backend
-  /*
   undoLastBall: async (matchId: string): Promise<void> => {
-    await client.post(`/users/matches/${matchId}/undo`);
+    const { data } = await client.post(`/users/matches/${matchId}/undo`);
+    return data;
   },
 
   endInnings: async (matchId: string): Promise<void> => {
-    await client.post(`/users/matches/${matchId}/end-innings`);
+    const { data } = await client.post(`/users/matches/${matchId}/end-innings`);
+    return data;
   },
 
   endMatch: async (matchId: string): Promise<void> => {
-    await client.post(`/users/matches/${matchId}/end`);
+    const { data } = await client.post(`/users/matches/${matchId}/end`);
+    return data;
   },
-  */
 };
 

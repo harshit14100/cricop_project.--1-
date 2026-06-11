@@ -1,4 +1,5 @@
-import { Outlet } from 'react-router-dom'
+import { useLocation, Outlet } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Navbar } from '@/components/layout/Navbar'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { MobileNav } from '@/components/layout/MobileNav'
@@ -7,7 +8,14 @@ import { useIsMobile } from '@/hooks'
 import { useUIStore } from '@/store'
 import { cn } from '@/lib/utils'
 
+const pageVariants = {
+  initial: { opacity: 0, y: 12 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.25, 0.1, 0.25, 1] } },
+  exit: { opacity: 0, y: -8, transition: { duration: 0.2 } },
+}
+
 export function MainLayout() {
+  const location = useLocation()
   const isMobile = useIsMobile()
   const { sidebarOpen } = useUIStore()
 
@@ -25,8 +33,18 @@ export function MainLayout() {
             "pb-20 md:pb-0"
           )}
         >
-          <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
-            <Outlet />
+          <div className="p-3 xs:p-4 md:p-6 lg:p-8 max-w-7xl mx-auto overflow-x-hidden">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={location.pathname}
+                variants={pageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                <Outlet />
+              </motion.div>
+            </AnimatePresence>
           </div>
         </main>
       </div>

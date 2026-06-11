@@ -30,11 +30,14 @@
     @apply border-border;
   }
 
-  body {
-    @apply bg-cricket-dark text-foreground antialiased;
+  html, body {
+    @apply bg-cricket-dark text-foreground antialiased min-h-screen;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
+    padding-bottom: env(safe-area-inset-bottom);
+    overflow-x: hidden;
+    max-width: 100vw;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -127,6 +130,19 @@
 
   .touch-target {
     @apply min-h-[48px] min-w-[48px];
+  }
+
+  .safe-area-pt {
+    padding-top: env(safe-area-inset-top);
+  }
+  .safe-area-pb {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .safe-area-mt {
+    margin-top: env(safe-area-inset-top);
+  }
+  .safe-area-mb {
+    margin-bottom: env(safe-area-inset-bottom);
   }
 }
 
