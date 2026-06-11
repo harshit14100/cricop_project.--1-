@@ -46,6 +46,11 @@ export function BattingScorecard({ scorecard, matchId }: BattingScorecardProps) 
                         <span className="font-medium truncate group-hover:text-electric transition-colors text-white">
                           {batsman.player_name}
                         </span>
+                        {batsman.is_out && (
+                          <span className="text-[10px] text-white/40 italic">
+                            {batsman.dismissal_type?.replace("_", " ")}
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td className="px-4 py-3 text-right font-bold text-white">{batsman.runs}</td>

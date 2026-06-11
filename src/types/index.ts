@@ -154,6 +154,7 @@ export interface Scorecard {
     fours: number;
     sixes: number;
     is_out: boolean;
+    dismissal_type: string | null;
   }[];
   bowling: {
     player_id: string;
@@ -239,7 +240,10 @@ export interface Dismissal {
     | "lbw"
     | "stumped"
     | "hit_wicket"
-    | "retired";
+    | "retired_out"
+    | "retired_hurt"
+    | "obstructing_the_field"
+    | "timed_out";
   bowlerId?: string;
   bowlerName?: string;
   fielderId?: string;

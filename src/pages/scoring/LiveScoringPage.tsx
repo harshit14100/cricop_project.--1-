@@ -43,9 +43,6 @@ const wicketTypes = [
   "Stumped",
   "Hit Wicket",
   "Retired Out",
-  "Retired Hurt",
-  "Obstructing Field",
-  "Timed Out",
 ];
 const extraTypes = [
   { label: "Wide", value: "wide", runs: 1 },

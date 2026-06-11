@@ -78,6 +78,16 @@ export default function StartMatchPage() {
   const { data: playersData } = usePlayers();
 
   const handleNext = () => {
+    if (currentStep === 1) {
+      if (matchData.totalOvers < 1 || matchData.totalOvers > 50) {
+        addToast({
+          title: "Invalid Overs",
+          description: "Match overs must be between 1 and 50.",
+          variant: "warning",
+        });
+        return;
+      }
+    }
     if (currentStep < 6) setCurrentStep(currentStep + 1);
   };
 
@@ -327,9 +337,18 @@ export default function StartMatchPage() {
                   <Label>Match Type</Label>
                   <Select
                     value={matchData.matchType}
-                    onValueChange={(v) =>
-                      setMatchData((prev) => ({ ...prev, matchType: v as any }))
-                    }
+                    onValueChange={(v) => {
+                      const type = v as "t20" | "odi" | "test" | "custom";
+                      let overs = matchData.totalOvers;
+                      if (type === "t20") overs = 20;
+                      if (type === "odi") overs = 50;
+                      if (type === "test") overs = 50; // Max 50
+                      setMatchData((prev) => ({ 
+                        ...prev, 
+                        matchType: type,
+                        totalOvers: overs > 50 ? 50 : (overs < 1 ? 1 : overs)
+                      }));
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -337,7 +356,7 @@ export default function StartMatchPage() {
                     <SelectContent>
                       <SelectItem value="t20">T20 (20 overs)</SelectItem>
                       <SelectItem value="odi">ODI (50 overs)</SelectItem>
-                      <SelectItem value="test">Test Match</SelectItem>
+                      <SelectItem value="test">Test Match (Max 50 overs)</SelectItem>
                       <SelectItem value="custom">Custom</SelectItem>
                     </SelectContent>
                   </Select>
@@ -349,15 +368,19 @@ export default function StartMatchPage() {
                     <Input
                       type="number"
                       value={matchData.totalOvers}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        let val = parseInt(e.target.value) || 1;
+                        if (val > 50) val = 50;
+                        if (val < 1) val = 1;
                         setMatchData((prev) => ({
                           ...prev,
-                          totalOvers: parseInt(e.target.value) || 20,
+                          totalOvers: val,
                         }))
-                      }
+                      }}
                       min={1}
                       max={50}
                     />
+                    <p className="text-[10px] text-white/40">Enter between 1 and 50 overs</p>
                   </div>
                 )}
 
