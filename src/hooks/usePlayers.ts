@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { playerService } from "@/services";
 import { useUIStore } from "@/store";
-import type { Player } from "@/types";
 
 import { playerApi } from "../api/player";
 
@@ -49,7 +48,7 @@ export function useCreatePlayer() {
   const { addToast } = useUIStore();
 
   return useMutation({
-    mutationFn: (data: Partial<Player>) => playerService.createPlayer(data),
+    mutationFn: (data: any) => playerService.createPlayer(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["players"] });
       addToast({ title: "Player added!", variant: "success" });

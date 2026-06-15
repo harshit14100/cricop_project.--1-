@@ -68,21 +68,29 @@ export default function LiveMatchPage() {
         </TabsList>
 
         <TabsContent value="scorecard" className="space-y-4 sm:space-y-6 outline-none">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <BattingScorecard scorecard={scorecard} matchId={match.id} />
-          </motion.div>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <BowlingScorecard scorecard={scorecard} />
-          </motion.div>
+          {scorecard?.innings && scorecard.innings.length > 0 ? (
+            scorecard.innings.map((inning, idx) => (
+              <div key={idx} className="space-y-4 sm:space-y-6">
+                <div className="flex items-center gap-2 px-1">
+                  <div className="h-6 w-1 bg-electric rounded-full" />
+                  <h2 className="text-lg font-bold text-white">{inning.team_name}'s Innings</h2>
+                </div>
+                <BattingScorecard 
+                  batting={inning.batting} 
+                  matchId={match.id} 
+                  title={`${inning.team_name} Batting`}
+                />
+                <BowlingScorecard 
+                  bowling={inning.bowling} 
+                  title={`${idx === 0 ? (scorecard.innings[1]?.team_name || 'Opponent') : scorecard.innings[0].team_name} Bowling`}
+                />
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-10 glass-card">
+              <p className="text-white/50">No scorecard data available yet</p>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="info" className="outline-none">

@@ -10,7 +10,7 @@ export const playerApi = {
     return response.data?.data || [];
   },
 
-  createPlayer: async (playerData: Partial<Player>): Promise<{ message: string }> => {
+  createPlayer: async (playerData: any): Promise<{ message: string }> => {
     const { data } = await client.post<{ message: string }>("/users/players", playerData);
     return data;
   },

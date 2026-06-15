@@ -1,23 +1,32 @@
 import { useState } from "react";
-import { Scorecard } from "@/types";
 import { Card } from "@/components/ui/card";
 import { PlayerStatsDialog } from "./PlayerStatsDialog";
 
 interface BattingScorecardProps {
-  scorecard?: Scorecard;
+  batting?: {
+    player_id: string;
+    player_name: string;
+    runs: number;
+    balls_faced: number;
+    fours: number;
+    sixes: number;
+    is_out: boolean;
+    dismissal_type: string | null;
+  }[];
   matchId: string;
+  title?: string;
 }
 
-export function BattingScorecard({ scorecard, matchId }: BattingScorecardProps) {
+export function BattingScorecard({ batting, matchId, title = "Batting Scorecard" }: BattingScorecardProps) {
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
 
-  const batsmen = scorecard?.batting || [];
+  const batsmen = batting || [];
 
   return (
     <>
       <Card className="glass-card overflow-hidden">
         <div className="px-4 py-3 border-b border-white/5 bg-white/5">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider">Batting Scorecard</h3>
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider">{title}</h3>
         </div>
         <div className="w-full overflow-x-auto scrollbar-hide max-w-[calc(100vw-24px)] sm:max-w-full">
           <table className="w-full text-left border-collapse min-w-[500px]">

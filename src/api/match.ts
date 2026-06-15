@@ -71,10 +71,21 @@ export const matchApi = {
   getLiveMatch: async (matchId: string): Promise<Match> => {
     const response = await client.get<any>(`/users/matches/${matchId}/live`);
     const match = response.data?.data || response.data;
+    
     // Handle inconsistent naming from backend LiveMatchStateResponse
     if (match.match_id && !match.id) match.id = match.match_id;
-    if (match.team_1_name && !match.team_1_name) match.team_1_name = match.team_1_name; // redundancy for clarity
+    if (match.team_1_name && !match.team_1_name) match.team_1_name = match.team_1_name;
     if (match.team_2_name && !match.team_2_name) match.team_2_name = match.team_2_name;
+
+    // Ensure inning_id is populated
+    if (!match.inning_id && match.innings && match.innings.length > 0) {
+      // Find the most recent innings
+      const currentInning = match.innings.reduce((prev: any, current: any) => 
+        (prev.inning_number > current.inning_number) ? prev : current
+      );
+      match.inning_id = currentInning.id;
+    }
+
     return match;
   },
 

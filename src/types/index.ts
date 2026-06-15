@@ -144,8 +144,9 @@ export interface DeliveryPayload {
   is_free_hit: boolean;
 }
 
-export interface Scorecard {
-  match_id: string;
+export interface TeamScorecard {
+  team_id: string;
+  team_name: string;
   batting: {
     player_id: string;
     player_name: string;
@@ -163,6 +164,11 @@ export interface Scorecard {
     runs_conceded: number;
     wickets: number;
   }[];
+}
+
+export interface Scorecard {
+  match_id: string;
+  innings: TeamScorecard[];
 }
 
 export interface Innings {
